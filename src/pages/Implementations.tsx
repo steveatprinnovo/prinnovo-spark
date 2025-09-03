@@ -66,7 +66,7 @@ const Implementations = () => {
     });
   }, [companies]);
 
-  // Filter companies by selected milestones
+  // Filter companies by selected milestones (show companies WITHOUT these milestones)
   const filteredCompanies = useMemo(() => {
     if (milestoneFilters.length === 0) return sortedCompanies;
     
@@ -74,13 +74,13 @@ const Implementations = () => {
       return milestoneFilters.some(filter => {
         switch (filter) {
           case "term-sheet":
-            return !!company["Term Sheet Signature Date"];
+            return !company["Term Sheet Signature Date"];
           case "ipa":
-            return !!company["IPA Signature Date"];
+            return !company["IPA Signature Date"];
           case "implementation":
-            return !!company["Implementation Completion Date"];
+            return !company["Implementation Completion Date"];
           case "pilot":
-            return !!company["Final Portfolio Decision Date"];
+            return !company["Final Portfolio Decision Date"];
           default:
             return false;
         }
@@ -211,7 +211,7 @@ const Implementations = () => {
         {/* Filter Panel */}
         {showFilters && (
           <Card className="p-4 bg-card border">
-            <h3 className="font-semibold mb-3">Show companies with these milestones completed:</h3>
+            <h3 className="font-semibold mb-3">Show companies missing these milestones:</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {availableMilestones.map((milestone) => (
                 <div key={milestone.id} className="flex items-center space-x-2">
@@ -291,40 +291,39 @@ function CompanyImplementationItem({
 
   return (
     <div className="space-y-4">
-      {/* Company Name and Status Update */}
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold text-foreground">{company["Company Name"]}</h2>
+      {/* Company Name and Status Update - Side by side */}
+      <div className="flex items-start justify-between gap-6">
+        <h2 className="text-xl font-semibold text-foreground flex-shrink-0">{company["Company Name"]}</h2>
         
-        {/* Status Update Box */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Status Update:</label>
+        {/* Status Update Box - More subtle */}
+        <div className="flex-1 max-w-md">
           {isEditingStatus ? (
             <div className="flex gap-2">
               <Textarea
                 value={statusValue}
                 onChange={(e) => onStatusChange(e.target.value)}
                 placeholder="Enter status update..."
-                className="flex-1 min-h-[80px]"
+                className="flex-1 min-h-[60px] text-sm"
                 autoFocus
               />
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
                 <Button size="sm" onClick={onStatusEditSave}>
-                  <Check className="h-4 w-4" />
+                  <Check className="h-3 w-3" />
                 </Button>
                 <Button size="sm" variant="outline" onClick={onStatusEditCancel}>
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
             </div>
           ) : (
             <div 
-              className="min-h-[80px] p-3 border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors flex items-start justify-between"
+              className="min-h-[60px] p-2 border border-dashed border-gray-300 rounded-md bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors flex items-start justify-between text-sm"
               onClick={onStatusEditStart}
             >
-              <p className="text-sm text-muted-foreground">
-                {statusValue || "Click to add status update..."}
+              <p className="text-xs text-gray-500 italic">
+                {statusValue || "Add status note..."}
               </p>
-              <Pencil className="h-4 w-4 text-muted-foreground" />
+              <Pencil className="h-3 w-3 text-gray-400 flex-shrink-0 ml-2" />
             </div>
           )}
         </div>
@@ -332,7 +331,7 @@ function CompanyImplementationItem({
 
       {/* Number, Logo, and Arrow Diagram */}
       <div className="flex items-center space-x-6">
-        {/* Number Circle - Smaller with robust outline */}
+        {/* Number Circle - Bold font */}
         <div className={`
           w-10 h-10 rounded-full border-4 flex items-center justify-center font-bold text-base
           ${isPortfolio 
@@ -340,7 +339,7 @@ function CompanyImplementationItem({
             : 'bg-background text-foreground border-gray-400'
           }
         `}>
-          {index}
+          <span className="font-bold">{index}</span>
         </div>
 
         {/* Company Logo */}
