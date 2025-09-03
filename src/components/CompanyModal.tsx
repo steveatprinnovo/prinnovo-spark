@@ -193,12 +193,12 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
           <Separator />
 
           {/* Contacts & Management */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg flex items-center">
-                <Users className="w-5 h-5 mr-2 text-primary" />
-                Contacts & Management
-              </h3>
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg flex items-center">
+              <Users className="w-5 h-5 mr-2 text-primary" />
+              Contacts & Management
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">EVP Owner</p>
@@ -208,6 +208,8 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                   <p className="text-sm font-medium text-muted-foreground">Company Contact</p>
                   <p>{company["Company Contact"] || "N/A"}</p>
                 </div>
+              </div>
+              <div className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Champions</p>
                   <p>{company["Champions"] || "N/A"}</p>
@@ -218,46 +220,49 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                Progress Timeline
-              </h3>
-              <div className="relative">
-                {/* Progress Arrow Container */}
-                <div className="flex items-center justify-between relative">
-                  {/* Arrow Background */}
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
-                    <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
-                  </div>
-                  
-                  {/* Stage Labels */}
-                  <div className="relative z-10 flex justify-between w-full px-2">
-                    {getProgressStages().map((stage, index) => (
-                      <div key={stage.name} className="flex flex-col items-center space-y-1">
-                        <div className={`w-3 h-3 rounded-full border-2 ${
-                          stage.completed 
-                            ? 'bg-primary border-primary' 
-                            : 'bg-background border-muted-foreground'
-                        }`}></div>
-                        <div className="text-center">
-                          <p className="text-xs font-medium text-foreground">{stage.name}</p>
-                          {stage.date && (
-                            <p className="text-xs text-muted-foreground">
-                              {formatDate(stage.date)}
-                            </p>
-                          )}
-                          {stage.daysToNext && (
-                            <p className="text-xs text-primary font-medium">
-                              {stage.daysToNext} days
-                            </p>
-                          )}
-                        </div>
+          <Separator />
+
+          {/* Progress Timeline - Full Width */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg flex items-center">
+              <TrendingUp className="w-5 h-5 mr-2 text-primary" />
+              Progress Timeline
+            </h3>
+            <div className="relative py-4">
+              {/* Progress Arrow Container */}
+              <div className="flex items-center justify-between relative">
+                {/* Arrow Background */}
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
+                  <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
+                </div>
+                
+                {/* Stage Labels */}
+                <div className="relative z-10 flex justify-between w-full px-4">
+                  {getProgressStages().map((stage, index) => (
+                    <div key={stage.name} className="flex flex-col items-center space-y-1">
+                      <div className={`w-3 h-3 rounded-full border-2 ${
+                        stage.completed 
+                          ? 'bg-primary border-primary' 
+                          : 'bg-background border-muted-foreground'
+                      }`}></div>
+                      <div className="text-center">
+                        <p className="text-xs font-medium text-foreground">{stage.name}</p>
+                        {stage.date && (
+                          <p className="text-xs text-muted-foreground">
+                            {formatDate(stage.date)}
+                          </p>
+                        )}
+                        {stage.daysToNext && (
+                          <p className="text-xs text-primary font-medium">
+                            {stage.daysToNext} days
+                          </p>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
