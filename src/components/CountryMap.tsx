@@ -136,6 +136,18 @@ export const CountryMap: React.FC<CountryMapProps> = ({
           map.current.getCanvas().style.cursor = '';
         }
       });
+
+      // Add Tanner Health marker in Carrollton, GA
+      const tannerHealthMarker = new mapboxgl.Marker({
+        color: '#ef4444', // Red color to make it stand out
+        scale: 1.2
+      })
+        .setLngLat([-85.0766, 33.5801]) // Coordinates for Carrollton, GA
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 })
+            .setHTML('<div class="font-semibold">Tanner Health</div><div class="text-sm text-gray-600">Carrollton, GA</div>')
+        )
+        .addTo(map.current);
     });
 
     return () => {
