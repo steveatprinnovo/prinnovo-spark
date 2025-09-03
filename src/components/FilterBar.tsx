@@ -73,7 +73,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
 
   return (
-    <div className="bg-card p-4 rounded-lg border space-y-4">
+    <div className="bg-card p-4 rounded-lg space-y-4">
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 items-center">
