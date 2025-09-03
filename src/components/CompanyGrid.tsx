@@ -95,8 +95,9 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
           {company["Country of Origin"] && (
             <p>{company["Country of Origin"]}</p>
           )}
-          <p className="font-medium text-foreground">
-            {formatValuation(company["Current Company Valuation"])}
+          <p>
+            <span className="italic text-muted-foreground">Current Company Valuation:</span>{" "}
+            <span className="font-medium text-foreground">{formatValuation(company["Current Company Valuation"])}</span>
           </p>
         </div>
       </CardContent>
