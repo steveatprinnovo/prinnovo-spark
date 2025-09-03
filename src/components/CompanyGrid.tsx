@@ -57,9 +57,22 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
     }
   };
 
+  const getFocusAreaColor = (focusArea: string | null) => {
+    switch (focusArea?.toLowerCase()) {
+      case 'operational':
+        return 'border-l-blue-500';
+      case 'clinical':
+        return 'border-l-green-500';
+      case 'financial':
+        return 'border-l-orange-500';
+      default:
+        return 'border-l-blue-500'; // Default to blue
+    }
+  };
+
   return (
     <Card 
-      className="cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-primary"
+      className={`cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 ${getFocusAreaColor(company["High-Level Focus Area"])}`}
       onClick={onClick}
       style={{ boxShadow: "var(--shadow-card)" }}
     >

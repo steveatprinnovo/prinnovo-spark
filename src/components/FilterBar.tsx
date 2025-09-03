@@ -50,6 +50,19 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
       .filter((owner): owner is string => owner !== null)
   )).sort();
 
+  const getFocusAreaColor = (focusArea: string) => {
+    switch (focusArea.toLowerCase()) {
+      case 'operational':
+        return 'bg-blue-500';
+      case 'clinical':
+        return 'bg-green-500';
+      case 'financial':
+        return 'bg-orange-500';
+      default:
+        return 'bg-blue-500';
+    }
+  };
+
   const updateFilter = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     onFiltersChange(newFilters);
@@ -173,7 +186,10 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
             <SelectContent>
               {focusAreas.map((area) => (
                 <SelectItem key={area} value={area}>
-                  {area}
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-sm ${getFocusAreaColor(area)}`}></div>
+                    {area}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
