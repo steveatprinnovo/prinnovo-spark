@@ -26,6 +26,7 @@ export type Database = {
           "Final Portfolio Decision Date": string | null
           "High-Level Focus Area": string | null
           "HLV Ownership Percentage": string | null
+          imgurl: string | null
           "Implementation Completion Date": string | null
           "Intro Origin": string | null
           "IPA Signature Date": string | null
@@ -45,6 +46,7 @@ export type Database = {
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
           "HLV Ownership Percentage"?: string | null
+          imgurl?: string | null
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
           "IPA Signature Date"?: string | null
@@ -64,6 +66,7 @@ export type Database = {
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
           "HLV Ownership Percentage"?: string | null
+          imgurl?: string | null
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
           "IPA Signature Date"?: string | null
