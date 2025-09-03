@@ -246,15 +246,27 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
                 <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
                 
-                {/* Stage Dots Aligned to Middle */}
-                <div className="absolute inset-0 flex justify-between items-center px-4">
-                  {getProgressStages().map((stage) => (
-                    <div key={`dot-${stage.name}`} className={`w-4 h-4 rounded-full border-2 ${
-                      stage.completed 
-                        ? 'bg-primary border-primary' 
-                        : 'bg-background border-muted-foreground'
-                    }`}></div>
-                  ))}
+                {/* Stage Dots Aligned to Center of Text Boxes */}
+                <div className="absolute inset-0 flex items-center px-4">
+                  {getProgressStages().map((stage, index) => {
+                    const totalStages = getProgressStages().length;
+                    const leftPosition = `${(100 / totalStages) * index + (100 / totalStages / 2)}%`;
+                    
+                    return (
+                      <div 
+                        key={`dot-${stage.name}`} 
+                        className={`absolute w-4 h-4 rounded-full border-2 ${
+                          stage.completed 
+                            ? 'bg-primary border-primary' 
+                            : 'bg-background border-muted-foreground'
+                        }`}
+                        style={{
+                          left: leftPosition,
+                          transform: 'translateX(-50%)'
+                        }}
+                      />
+                    );
+                  })}
                 </div>
 
                 {/* Days Between Stages with Arrows */}
