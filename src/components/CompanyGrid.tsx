@@ -96,7 +96,9 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
             />
           </div>
           {company["Pipeline Stage"] && (
-            <Badge className={getStageColor(company["Pipeline Stage"])}>
+            <Badge className={`${getStageColor(company["Pipeline Stage"])} ${
+              company["Pipeline Stage"] === "Portfolio Company" ? "!text-green-600" : ""
+            }`}>
               {company["Pipeline Stage"]}
             </Badge>
           )}

@@ -42,8 +42,14 @@ export function PipelineStages({ companies, filters }: PipelineStagesProps) {
           <div key={stage.name} className="flex items-center gap-4">
             {/* Stage Circle */}
             <div className="flex flex-col items-center gap-2 min-w-[120px]">
-              <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <span className="text-xl font-bold text-primary">{stage.count}</span>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                stage.name === "Portfolio Company" 
+                  ? "bg-green-500/10 border-2 border-green-500" 
+                  : "bg-primary/10 border-2 border-primary"
+              }`}>
+                <span className={`text-xl font-bold ${
+                  stage.name === "Portfolio Company" ? "text-green-600" : "text-primary"
+                }`}>{stage.count}</span>
               </div>
               <span className="text-sm text-muted-foreground text-center leading-tight">
                 {stage.name}
