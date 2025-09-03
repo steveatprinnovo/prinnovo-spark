@@ -230,9 +230,9 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               <TrendingUp className="w-5 h-5 mr-2 text-primary" />
               Progress Timeline
             </h3>
-            <div className="relative py-8 px-8">
+            <div className="relative py-4 px-8">
               {/* Stage Names Above Arrow - Positioned Above Each Dot */}
-              <div className="absolute top-0 left-8 right-8 flex justify-between items-center mb-4">
+              <div className="absolute top-0 left-8 right-8 flex justify-between items-center">
                 {getProgressStages().map((stage) => (
                   <div key={stage.name} className="text-center">
                     <p className="text-sm font-medium text-foreground">{stage.name}</p>
@@ -241,7 +241,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               </div>
 
               {/* Progress Arrow Container */}
-              <div className="relative flex items-center mt-8 mb-8">
+              <div className="relative flex items-center mt-6 mb-6">
                 {/* Arrow Background */}
                 <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
                 <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
@@ -287,7 +287,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               </div>
 
               {/* Dates Below Arrow - Positioned Below Each Dot */}
-              <div className="absolute bottom-0 left-8 right-8 flex justify-between items-center mt-4">
+              <div className="absolute bottom-0 left-8 right-8 flex justify-between items-center">
                 {getProgressStages().map((stage) => (
                   <div key={`date-${stage.name}`} className="text-center">
                     {stage.date && (
