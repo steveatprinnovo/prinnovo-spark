@@ -111,7 +111,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center space-x-4">
             <div className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg overflow-hidden">
