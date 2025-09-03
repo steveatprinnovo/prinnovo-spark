@@ -342,8 +342,8 @@ function CompanyImplementationItem({
           <span className="font-bold">{index}</span>
         </div>
 
-        {/* Company Logo */}
-        <div className="w-16 h-16 rounded-lg border border-border overflow-hidden bg-background flex items-center justify-center">
+        {/* Company Logo - No border, 20% wider */}
+        <div className="w-20 h-16 rounded-lg overflow-hidden bg-background flex items-center justify-center">
           {logoUrl ? (
             <img 
               src={logoUrl} 
