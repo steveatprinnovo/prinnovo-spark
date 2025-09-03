@@ -230,9 +230,9 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               <TrendingUp className="w-5 h-5 mr-2 text-primary" />
               Progress Timeline
             </h3>
-            <div className="relative py-4 px-8">
-              {/* Stage Names Above Arrow - Positioned Above Each Dot */}
-              <div className="absolute top-0 left-8 right-8 flex justify-between items-center">
+            <div className="space-y-4">
+              {/* Stage Names - Independent from arrow */}
+              <div className="grid grid-cols-4 gap-4">
                 {getProgressStages().map((stage) => (
                   <div key={stage.name} className="text-center">
                     <p className="text-sm font-medium text-foreground">{stage.name}</p>
@@ -240,8 +240,8 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 ))}
               </div>
 
-              {/* Progress Arrow Container */}
-              <div className="relative flex items-center mt-6 mb-6">
+              {/* Progress Arrow Container - Independent positioning */}
+              <div className="relative flex items-center px-4">
                 {/* Arrow Background */}
                 <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
                 <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
@@ -263,7 +263,6 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                     const nextStage = getProgressStages()[index + 1];
                     const days = calculateDaysBetween(stage.date, nextStage.date);
                     const totalStages = getProgressStages().length;
-                    const segmentWidth = `${100 / (totalStages - 1)}%`;
                     const leftOffset = `${(100 / (totalStages - 1)) * index + (50 / (totalStages - 1))}%`;
                     
                     return (
@@ -286,8 +285,8 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 </div>
               </div>
 
-              {/* Dates Below Arrow - Positioned Below Each Dot */}
-              <div className="absolute bottom-0 left-8 right-8 flex justify-between items-center">
+              {/* Dates - Independent from arrow */}
+              <div className="grid grid-cols-4 gap-4">
                 {getProgressStages().map((stage) => (
                   <div key={`date-${stage.name}`} className="text-center">
                     {stage.date && (
