@@ -21,6 +21,7 @@ interface Company {
   "Term Sheet Signature Date": string | null;
   "Final Portfolio Decision Date": string | null;
   "Implementation Completion Date": string | null;
+  imgurl: string | null;
 }
 
 interface CompanyGridProps {
@@ -29,7 +30,7 @@ interface CompanyGridProps {
 }
 
 function CompanyCard({ company, onClick }: { company: Company; onClick: () => void }) {
-  const { logoUrl, loading } = useCompanyLogo(company["Company Name"]);
+  const { logoUrl, loading } = useCompanyLogo(company.imgurl);
 
   const formatValuation = (value: number | null) => {
     if (!value) return "N/A";

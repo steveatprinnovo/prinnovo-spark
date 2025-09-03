@@ -22,6 +22,7 @@ interface Company {
   "Term Sheet Signature Date": string | null;
   "Final Portfolio Decision Date": string | null;
   "Implementation Completion Date": string | null;
+  imgurl: string | null;
 }
 
 interface CompanyModalProps {
@@ -31,7 +32,7 @@ interface CompanyModalProps {
 }
 
 export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
-  const { logoUrl, loading } = useCompanyLogo(company?.["Company Name"] || "");
+  const { logoUrl, loading } = useCompanyLogo(company?.imgurl || null);
   
   if (!company) return null;
 

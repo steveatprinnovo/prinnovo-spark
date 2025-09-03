@@ -20,6 +20,7 @@ export interface Company {
   "Term Sheet Signature Date": string | null;
   "Final Portfolio Decision Date": string | null;
   "Implementation Completion Date": string | null;
+  imgurl: string | null;
 }
 
 export function useCompanies() {
