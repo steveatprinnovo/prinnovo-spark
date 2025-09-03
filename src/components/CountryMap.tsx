@@ -52,7 +52,7 @@ export const CountryMap: React.FC<CountryMapProps> = ({
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/mapbox/outdoors-v12',
       zoom: 1.5,
       center: [20, 30],
       projection: 'globe',
