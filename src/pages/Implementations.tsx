@@ -66,12 +66,12 @@ const Implementations = () => {
     });
   }, [companies]);
 
-  // Filter companies by selected milestones (show companies WITHOUT these milestones)
+  // Filter companies by selected milestones (show companies WITHOUT these milestones - AND logic)
   const filteredCompanies = useMemo(() => {
     if (milestoneFilters.length === 0) return sortedCompanies;
     
     return sortedCompanies.filter(company => {
-      return milestoneFilters.some(filter => {
+      return milestoneFilters.every(filter => {
         switch (filter) {
           case "term-sheet":
             return !company["Term Sheet Signature Date"];
