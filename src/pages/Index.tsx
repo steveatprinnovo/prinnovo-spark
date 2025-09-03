@@ -4,7 +4,6 @@ import { KPICards } from "@/components/KPICards";
 import { FilterBar, FilterState } from "@/components/FilterBar";
 import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
-import { PortfolioChart } from "@/components/PortfolioChart";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { CountryMap } from "@/components/CountryMap";
 import { PipelineStages } from "@/components/PipelineStages";
@@ -110,9 +109,6 @@ const Index = () => {
           companies={filteredCompanies}
           onCompanyClick={setSelectedCompany}
         />
-        
-        {/* Portfolio Chart */}
-        <PortfolioChart companies={filteredCompanies} />
         
         {/* Company Detail Modal */}
         <CompanyModal
