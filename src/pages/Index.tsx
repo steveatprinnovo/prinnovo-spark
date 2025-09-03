@@ -62,22 +62,22 @@ const Index = () => {
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-6">
+        {/* Portfolio Companies Title */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Portfolio Companies</h2>
+          <span className="text-muted-foreground">
+            {filteredCompanies.length} of {companies.length} companies
+          </span>
+        </div>
+        
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />
         
         {/* Company Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Portfolio Companies</h2>
-            <span className="text-muted-foreground">
-              {filteredCompanies.length} of {companies.length} companies
-            </span>
-          </div>
-          <CompanyGrid 
-            companies={filteredCompanies}
-            onCompanyClick={setSelectedCompany}
-          />
-        </div>
+        <CompanyGrid 
+          companies={filteredCompanies}
+          onCompanyClick={setSelectedCompany}
+        />
         
         {/* KPI Cards */}
         <KPICards />
