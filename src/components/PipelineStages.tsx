@@ -1,11 +1,16 @@
 import { Company } from "@/hooks/useCompanies";
+import { FilterState } from "@/components/FilterBar";
 import { ChevronRight } from "lucide-react";
 
 interface PipelineStagesProps {
   companies: Company[];
+  filters: FilterState;
 }
 
-export function PipelineStages({ companies }: PipelineStagesProps) {
+export function PipelineStages({ companies, filters }: PipelineStagesProps) {
+  // Check if any filters are active
+  const hasActiveFilters = Object.values(filters).some(value => value !== "");
+  
   // Calculate counts from data
   const implementationCount = companies.filter(company => 
     company["Pipeline Stage"] === "Implementation"
@@ -20,9 +25,9 @@ export function PipelineStages({ companies }: PipelineStagesProps) {
   ).length;
 
   const stages = [
-    { name: "Qualified Leads", count: 54 },
-    { name: "Term Sheet Negotiations", count: 4 },
-    { name: "IPA Negotiations", count: 4 },
+    { name: "Qualified Leads", count: hasActiveFilters ? 0 : 54 },
+    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : 4 },
+    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : 4 },
     { name: "Implementation", count: implementationCount },
     { name: "Pilot", count: pilotCount },
     { name: "Portfolio Company", count: portfolioCount },
