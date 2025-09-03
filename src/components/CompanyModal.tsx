@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Building2, MapPin, User, Calendar, DollarSign, TrendingUp, Users, FileText } from "lucide-react";
+import { Building2, MapPin, User, Calendar, DollarSign, TrendingUp, Users, FileText, ChevronRight } from "lucide-react";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 
 interface Company {
@@ -67,6 +67,46 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
       default:
         return 'bg-secondary text-secondary-foreground';
     }
+  };
+
+  const calculateDaysBetween = (date1: string | null, date2: string | null) => {
+    if (!date1 || !date2) return null;
+    const start = new Date(date1);
+    const end = new Date(date2);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getProgressStages = () => {
+    const stages = [
+      {
+        name: "Term Sheet Signed",
+        date: company["Term Sheet Signature Date"],
+        completed: !!company["Term Sheet Signature Date"]
+      },
+      {
+        name: "IPA Signed", 
+        date: company["IPA Signature Date"],
+        completed: !!company["IPA Signature Date"]
+      },
+      {
+        name: "Implementation Completed",
+        date: company["Implementation Completion Date"], 
+        completed: !!company["Implementation Completion Date"]
+      },
+      {
+        name: "Pilot",
+        date: company["Final Portfolio Decision Date"],
+        completed: !!company["Final Portfolio Decision Date"]
+      }
+    ];
+
+    return stages.map((stage, index) => ({
+      ...stage,
+      daysToNext: index < stages.length - 1 ? 
+        calculateDaysBetween(stage.date, stages[index + 1].date) : null
+    }));
   };
 
   return (
@@ -181,25 +221,43 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
 
             <div className="space-y-4">
               <h3 className="font-semibold text-lg flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-primary" />
-                Important Dates
+                <TrendingUp className="w-5 h-5 mr-2 text-primary" />
+                Progress Timeline
               </h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">IPA Signature Date</p>
-                  <p>{formatDate(company["IPA Signature Date"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Term Sheet Signature</p>
-                  <p>{formatDate(company["Term Sheet Signature Date"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Portfolio Decision Date</p>
-                  <p>{formatDate(company["Final Portfolio Decision Date"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Implementation Completion</p>
-                  <p>{formatDate(company["Implementation Completion Date"])}</p>
+              <div className="relative">
+                {/* Progress Arrow Container */}
+                <div className="flex items-center justify-between relative">
+                  {/* Arrow Background */}
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
+                    <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
+                  </div>
+                  
+                  {/* Stage Labels */}
+                  <div className="relative z-10 flex justify-between w-full px-2">
+                    {getProgressStages().map((stage, index) => (
+                      <div key={stage.name} className="flex flex-col items-center space-y-1">
+                        <div className={`w-3 h-3 rounded-full border-2 ${
+                          stage.completed 
+                            ? 'bg-primary border-primary' 
+                            : 'bg-background border-muted-foreground'
+                        }`}></div>
+                        <div className="text-center">
+                          <p className="text-xs font-medium text-foreground">{stage.name}</p>
+                          {stage.date && (
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(stage.date)}
+                            </p>
+                          )}
+                          {stage.daysToNext && (
+                            <p className="text-xs text-primary font-medium">
+                              {stage.daysToNext} days
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
