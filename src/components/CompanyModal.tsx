@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Building2, MapPin, User, Calendar, DollarSign, TrendingUp, Users, FileText, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Building2, MapPin, User, Calendar, DollarSign, TrendingUp, Users, FileText, ChevronRight, Pencil, Check, X } from "lucide-react";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
-import { Company } from "@/hooks/useCompanies";
+import { Company, useCompanies } from "@/hooks/useCompanies";
 
 interface CompanyModalProps {
   company: Company | null;
@@ -13,6 +16,11 @@ interface CompanyModalProps {
 
 export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
   const { logoUrl, loading } = useCompanyLogo(company?.imgurl || null);
+  const { updateCompany } = useCompanies();
+  
+  // Edit state management
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<Partial<Company>>({});
   
   if (!company) return null;
 
@@ -87,6 +95,80 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
       daysToNext: index < stages.length - 1 ? 
         calculateDaysBetween(stage.date, stages[index + 1].date) : null
     }));
+  };
+
+  const handleEditStart = (fieldName: string, currentValue: any) => {
+    setEditingField(fieldName);
+    setEditValues({ [fieldName]: currentValue });
+  };
+
+  const handleEditSave = async () => {
+    if (!editingField || !company) return;
+    
+    const success = await updateCompany(company["Company Name"], editValues);
+    if (success) {
+      setEditingField(null);
+      setEditValues({});
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingField(null);
+    setEditValues({});
+  };
+
+  const handleEditChange = (fieldName: string, value: string) => {
+    setEditValues(prev => ({ ...prev, [fieldName]: value }));
+  };
+
+  const renderEditableField = (
+    label: string,
+    fieldName: keyof Company,
+    currentValue: any,
+    formatter?: (value: any) => string,
+    isNumeric?: boolean
+  ) => {
+    const isEditing = editingField === fieldName;
+    const displayValue = formatter ? formatter(currentValue) : (currentValue || "N/A");
+    const editValue = editValues[fieldName] ?? currentValue ?? "";
+
+    return (
+      <div>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          {!isEditing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              onClick={() => handleEditStart(fieldName, currentValue)}
+            >
+              <Pencil className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+        {isEditing ? (
+          <div className="flex items-center gap-2 mt-1">
+            <Input
+              value={editValue}
+              onChange={(e) => handleEditChange(fieldName, e.target.value)}
+              type={isNumeric ? "number" : "text"}
+              className="h-8"
+            />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleEditSave}>
+              <Check className="h-4 w-4 text-green-600" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleEditCancel}>
+              <X className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
+        ) : (
+          <p className={formatter && currentValue ? "text-lg font-semibold" : ""}>
+            {displayValue}
+          </p>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -229,22 +311,26 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 Company Overview
               </h3>
               <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Country of Origin</p>
-                  <p>{company["Country of Origin"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">High-Level Focus Area</p>
-                  <p>{company["High-Level Focus Area"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Specific Focus Area</p>
-                  <p>{company["Specific Focus Area"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Company Contact</p>
-                  <p>{company["Company Contact"] || "N/A"}</p>
-                </div>
+                {renderEditableField(
+                  "Country of Origin",
+                  "Country of Origin",
+                  company["Country of Origin"]
+                )}
+                {renderEditableField(
+                  "High-Level Focus Area",
+                  "High-Level Focus Area",
+                  company["High-Level Focus Area"]
+                )}
+                {renderEditableField(
+                  "Specific Focus Area",
+                  "Specific Focus Area",
+                  company["Specific Focus Area"]
+                )}
+                {renderEditableField(
+                  "Company Contact",
+                  "Company Contact",
+                  company["Company Contact"]
+                )}
               </div>
             </div>
 
@@ -255,22 +341,30 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 Financial Information
               </h3>
               <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Company Valuation</p>
-                  <p className="text-lg font-semibold">{formatCurrency(company["Current Company Valuation"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">HLV Valuation</p>
-                  <p className="text-lg font-semibold">{formatCurrency(company["Current HLV Valuation"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">HLV Ownership</p>
-                  <p>{company["HLV Ownership Percentage"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Intro Origin</p>
-                  <p>{company["Intro Origin"] || "N/A"}</p>
-                </div>
+                {renderEditableField(
+                  "Company Valuation",
+                  "Current Company Valuation",
+                  company["Current Company Valuation"],
+                  formatCurrency,
+                  true
+                )}
+                {renderEditableField(
+                  "HLV Valuation",
+                  "Current HLV Valuation",
+                  company["Current HLV Valuation"],
+                  formatCurrency,
+                  true
+                )}
+                {renderEditableField(
+                  "HLV Ownership",
+                  "HLV Ownership Percentage",
+                  company["HLV Ownership Percentage"]
+                )}
+                {renderEditableField(
+                  "Intro Origin",
+                  "Intro Origin",
+                  company["Intro Origin"]
+                )}
               </div>
             </div>
 
@@ -281,14 +375,16 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 Tanner Stakeholders
               </h3>
               <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">EVP Owner</p>
-                  <p>{company["EVP Owner"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Champions</p>
-                  <p>{company["Champions"] || "N/A"}</p>
-                </div>
+                {renderEditableField(
+                  "EVP Owner",
+                  "EVP Owner",
+                  company["EVP Owner"]
+                )}
+                {renderEditableField(
+                  "Champions",
+                  "Champions",
+                  company["Champions"]
+                )}
               </div>
             </div>
           </div>

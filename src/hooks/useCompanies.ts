@@ -53,5 +53,33 @@ export function useCompanies() {
     }
   };
 
-  return { companies, loading, error, refetch: fetchCompanies };
+  const updateCompany = async (companyName: string, updates: Partial<Company>) => {
+    try {
+      const { error } = await supabase
+        .from('Company Detail')
+        .update(updates)
+        .eq('Company Name', companyName);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setCompanies(prev => 
+        prev.map(company => 
+          company["Company Name"] === companyName 
+            ? { ...company, ...updates }
+            : company
+        )
+      );
+
+      toast.success("Company updated successfully");
+      return true;
+    } catch (err: any) {
+      toast.error(`Failed to update company: ${err.message}`);
+      return false;
+    }
+  };
+
+  return { companies, loading, error, refetch: fetchCompanies, updateCompany };
 }
