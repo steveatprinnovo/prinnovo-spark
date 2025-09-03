@@ -269,20 +269,23 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                   })}
                 </div>
 
-                {/* Days Between Stages with Arrows */}
+                {/* Days Between Stages - Centered between dots */}
                 <div className="absolute inset-0 flex items-center px-4">
                   {getProgressStages().slice(0, -1).map((stage, index) => {
                     const nextStage = getProgressStages()[index + 1];
                     const days = calculateDaysBetween(stage.date, nextStage.date);
                     const totalStages = getProgressStages().length;
-                    const leftOffset = `${(100 / (totalStages - 1)) * index + (50 / (totalStages - 1))}%`;
+                    // Position at midpoint between current and next dot
+                    const currentDotPosition = (100 / totalStages) * index + (100 / totalStages / 2);
+                    const nextDotPosition = (100 / totalStages) * (index + 1) + (100 / totalStages / 2);
+                    const midpointPosition = (currentDotPosition + nextDotPosition) / 2;
                     
                     return (
                       <div 
                         key={`days-${index}`} 
                         className="absolute flex justify-center"
                         style={{ 
-                          left: leftOffset,
+                          left: `${midpointPosition}%`,
                           transform: 'translateX(-50%)'
                         }}
                       >
