@@ -6,7 +6,7 @@ const kpiData = [
     label: "Companies Evaluated",
     value: "900",
     icon: Building2,
-    description: "Total companies evaluated by Healthliant Ventures",
+    description: "Companies evaluated to date",
     gradient: "var(--gradient-primary)"
   },
   {
