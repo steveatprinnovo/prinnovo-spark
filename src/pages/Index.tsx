@@ -89,7 +89,7 @@ const Index = () => {
           </div>
           
           {/* Right: Interactive Map - Expanded 10% to the left */}
-          <div className="-ml-[10%]">
+          <div className="-ml-[calc(10%-20px)]">{/* Narrowed by 20px from the left */}
             <CountryMap 
               companies={companies}
               onCountryClick={handleCountryClick}
