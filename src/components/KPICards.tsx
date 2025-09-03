@@ -27,7 +27,7 @@ const kpiData = [
 
 export function KPICards() {
   return (
-    <div className="flex flex-col justify-between h-[500px] max-w-xs gap-4 mr-5">{/* Added margin-right for 20px spacing */}
+    <div className="flex flex-col justify-between h-[500px] max-w-xs gap-4 mr-10">{/* Added total 40px margin-right for spacing */}
       {kpiData.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
