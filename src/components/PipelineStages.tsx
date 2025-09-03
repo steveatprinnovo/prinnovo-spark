@@ -34,31 +34,31 @@ export function PipelineStages({ companies, filters }: PipelineStagesProps) {
   ];
 
   return (
-    <div className="bg-card rounded-lg p-6 2xl:p-10 border">
-      <h3 className="text-lg 2xl:text-2xl font-semibold mb-6 2xl:mb-10 text-center">Pipeline Overview</h3>
+    <div className="bg-card rounded-lg p-6 border">
+      <h3 className="text-lg font-semibold mb-6 text-center">Pipeline Overview</h3>
       
-      <div className="flex items-center justify-center gap-4 2xl:gap-8 overflow-x-auto">
+      <div className="flex items-center justify-center gap-4 overflow-x-auto">
         {stages.map((stage, index) => (
-          <div key={stage.name} className="flex items-center gap-4 2xl:gap-8">
+          <div key={stage.name} className="flex items-center gap-4">
             {/* Stage Circle */}
-            <div className="flex flex-col items-center gap-2 2xl:gap-4 min-w-[120px] 2xl:min-w-[160px]">
-              <div className={`w-16 h-16 2xl:w-24 2xl:h-24 rounded-full flex items-center justify-center ${
+            <div className="flex flex-col items-center gap-2 min-w-[120px]">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
                 stage.name === "Portfolio Company" 
-                  ? "bg-green-500/10 border-2 2xl:border-4 border-green-500" 
-                  : "bg-primary/10 border-2 2xl:border-4 border-primary"
+                  ? "bg-green-500/10 border-2 border-green-500" 
+                  : "bg-primary/10 border-2 border-primary"
               }`}>
-                <span className={`text-xl 2xl:text-3xl font-bold ${
+                <span className={`text-xl font-bold ${
                   stage.name === "Portfolio Company" ? "text-green-600" : "text-primary"
                 }`}>{stage.count}</span>
               </div>
-              <span className="text-sm 2xl:text-lg text-muted-foreground text-center leading-tight">
+              <span className="text-sm text-muted-foreground text-center leading-tight">
                 {stage.name}
               </span>
             </div>
             
             {/* Arrow (except for last item) */}
             {index < stages.length - 1 && (
-              <ChevronRight className="w-6 h-6 2xl:w-10 2xl:h-10 text-muted-foreground flex-shrink-0" />
+              <ChevronRight className="w-6 h-6 text-muted-foreground flex-shrink-0" />
             )}
           </div>
         ))}

@@ -77,16 +77,16 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
-      <div className="container mx-auto p-8 2xl:p-12 space-y-8 2xl:space-y-12">
+      <div className="container mx-auto p-6 space-y-6">
         {/* Top Section: KPIs and Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-8 2xl:gap-12">
-          {/* Left: KPI Cards - Larger for 4K */}
+        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
+          {/* Left: KPI Cards - Smaller and vertically distributed */}
           <div className="w-auto">
             <KPICards />
           </div>
           
-          {/* Right: Interactive Map - Optimized for 4K viewing */}
-          <div className="2xl:-ml-[calc(10%-60px)]">{/* Adjusted for 4K spacing */}
+          {/* Right: Interactive Map - Expanded 10% to the left */}
+          <div className="-ml-[calc(10%-40px)]">{/* Narrowed by 40px total from the left */}
             <CountryMap 
               companies={companies}
               onCountryClick={handleCountryClick}
@@ -96,7 +96,7 @@ const Index = () => {
         </div>
         
         {/* Separator */}
-        <Separator className="my-8 2xl:my-12" />
+        <Separator className="my-6" />
         
         {/* Pipeline Stages */}
         <PipelineStages companies={filteredCompanies} filters={filters} />

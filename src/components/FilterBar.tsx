@@ -167,8 +167,8 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
       )}
 
       {/* Filter Controls */}
-      <div className="flex flex-wrap gap-4 2xl:gap-8 items-center">
-        <div className="w-50 2xl:w-60">{/* Larger dropdowns for 4K */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="w-50">
           <Select value={filters.ipaYear} onValueChange={(value) => updateFilter("ipaYear", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by IPA Year" />
@@ -183,7 +183,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="w-50 2xl:w-60">
+        <div className="w-50">
           <Select value={filters.countryOfOrigin} onValueChange={(value) => updateFilter("countryOfOrigin", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by Country" />
@@ -198,7 +198,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="w-50 2xl:w-60">
+        <div className="w-50">
           <Select value={filters.focusArea} onValueChange={(value) => updateFilter("focusArea", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by Focus Area" />
@@ -216,7 +216,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="w-50 2xl:w-60">
+        <div className="w-50">
           <Select value={filters.evpOwner} onValueChange={(value) => updateFilter("evpOwner", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by EVP Owner" />
@@ -231,7 +231,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="w-50 2xl:w-60">
+        <div className="w-50">
           <Select value={filters.pipelineStage} onValueChange={(value) => updateFilter("pipelineStage", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by Pipeline Stage" />
