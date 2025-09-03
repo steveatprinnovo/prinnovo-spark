@@ -6,6 +6,7 @@ import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { useCompanies, Company } from "@/hooks/useCompanies";
+import { CountryMap } from "@/components/CountryMap";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
@@ -35,6 +36,16 @@ const Index = () => {
       return true;
     });
   }, [companies, filters]);
+
+  const handleCountryClick = (country: string) => {
+    if (filters.countryOfOrigin === country) {
+      // If the same country is clicked, clear the filter
+      setFilters({...filters, countryOfOrigin: ""});
+    } else {
+      // Set the country filter
+      setFilters({...filters, countryOfOrigin: country});
+    }
+  };
 
   if (loading) {
     return (
@@ -70,6 +81,23 @@ const Index = () => {
           </span>
         </div>
         
+        {/* Top Section: KPIs and Map */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left: KPI Cards */}
+          <div className="space-y-4">
+            <KPICards />
+          </div>
+          
+          {/* Right: Interactive Map */}
+          <div>
+            <CountryMap 
+              companies={companies}
+              onCountryClick={handleCountryClick}
+              selectedCountry={filters.countryOfOrigin}
+            />
+          </div>
+        </div>
+        
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />
         
@@ -78,9 +106,6 @@ const Index = () => {
           companies={filteredCompanies}
           onCompanyClick={setSelectedCompany}
         />
-        
-        {/* KPI Cards */}
-        <KPICards />
         
         {/* Portfolio Chart */}
         <PortfolioChart companies={filteredCompanies} />
