@@ -82,14 +82,14 @@ const Index = () => {
         </div>
         
         {/* Top Section: KPIs and Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">{/* Map expands to fill remaining space */}
+        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
           {/* Left: KPI Cards */}
           <div className="space-y-4">
             <KPICards />
           </div>
           
-          {/* Right: Interactive Map */}
-          <div>
+          {/* Right: Interactive Map - Expanded 10% to the left */}
+          <div className="-ml-[10%]">
             <CountryMap 
               companies={companies}
               onCountryClick={handleCountryClick}

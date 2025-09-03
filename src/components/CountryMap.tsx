@@ -167,10 +167,10 @@ export const CountryMap: React.FC<CountryMapProps> = ({
   }
 
   return (
-    <div className="relative w-full h-96 rounded-lg overflow-hidden border">
+    <div className="relative w-full h-[500px] rounded-lg overflow-hidden border">{/* Expanded height by 30% */}
       <div ref={mapContainer} className="absolute inset-0" />
       <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg shadow-sm">
-        <h3 className="font-semibold text-sm mb-1">Portfolio Presence</h3>
+        <h3 className="font-semibold text-sm mb-1">Portfolio Company Presence</h3>
         <p className="text-xs text-muted-foreground">
           {countriesWithCompanies.length} countries with companies
         </p>
