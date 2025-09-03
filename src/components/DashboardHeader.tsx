@@ -28,7 +28,7 @@ export function DashboardHeader() {
                 location.pathname === "/" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              Dashboard
+              Home
             </Link>
             <Link 
               to="/implementations" 
