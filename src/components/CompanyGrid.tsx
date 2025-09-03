@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2 } from "lucide-react";
+import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 
 interface Company {
   "Company Name": string;
@@ -27,7 +28,9 @@ interface CompanyGridProps {
   onCompanyClick: (company: Company) => void;
 }
 
-export function CompanyGrid({ companies, onCompanyClick }: CompanyGridProps) {
+function CompanyCard({ company, onClick }: { company: Company; onClick: () => void }) {
+  const { logoUrl, loading } = useCompanyLogo(company["Company Name"]);
+
   const formatValuation = (value: number | null) => {
     if (!value) return "N/A";
     return new Intl.NumberFormat('en-US', {
@@ -54,43 +57,66 @@ export function CompanyGrid({ companies, onCompanyClick }: CompanyGridProps) {
   };
 
   return (
+    <Card 
+      className="cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-primary"
+      onClick={onClick}
+      style={{ boxShadow: "var(--shadow-card)" }}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg overflow-hidden">
+            {!loading && logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={`${company["Company Name"]} logo`}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  // Fallback to icon if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <Building2 
+              className={`h-6 w-6 text-primary ${!loading && logoUrl ? 'hidden' : ''}`} 
+            />
+          </div>
+          {company["Pipeline Stage"] && (
+            <Badge className={getStageColor(company["Pipeline Stage"])}>
+              {company["Pipeline Stage"]}
+            </Badge>
+          )}
+        </div>
+        
+        <h3 className="font-semibold text-sm mb-2 line-clamp-2">
+          {company["Company Name"]}
+        </h3>
+        
+        <div className="space-y-2 text-xs text-muted-foreground">
+          {company["High-Level Focus Area"] && (
+            <p>{company["High-Level Focus Area"]}</p>
+          )}
+          {company["Country of Origin"] && (
+            <p>{company["Country of Origin"]}</p>
+          )}
+          <p className="font-medium text-foreground">
+            {formatValuation(company["Current Company Valuation"])}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CompanyGrid({ companies, onCompanyClick }: CompanyGridProps) {
+  return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {companies.map((company, index) => (
-        <Card 
+        <CompanyCard
           key={index}
-          className="cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-primary"
+          company={company}
           onClick={() => onCompanyClick(company)}
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
-                <Building2 className="h-6 w-6 text-primary" />
-              </div>
-              {company["Pipeline Stage"] && (
-                <Badge className={getStageColor(company["Pipeline Stage"])}>
-                  {company["Pipeline Stage"]}
-                </Badge>
-              )}
-            </div>
-            
-            <h3 className="font-semibold text-sm mb-2 line-clamp-2">
-              {company["Company Name"]}
-            </h3>
-            
-            <div className="space-y-2 text-xs text-muted-foreground">
-              {company["High-Level Focus Area"] && (
-                <p>{company["High-Level Focus Area"]}</p>
-              )}
-              {company["Country of Origin"] && (
-                <p>{company["Country of Origin"]}</p>
-              )}
-              <p className="font-medium text-foreground">
-                {formatValuation(company["Current Company Valuation"])}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        />
       ))}
     </div>
   );

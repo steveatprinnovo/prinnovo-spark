@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Building2, MapPin, User, Calendar, DollarSign, TrendingUp, Users, FileText } from "lucide-react";
+import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 
 interface Company {
   "Company Name": string;
@@ -30,6 +31,8 @@ interface CompanyModalProps {
 }
 
 export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
+  const { logoUrl, loading } = useCompanyLogo(company?.["Company Name"] || "");
+  
   if (!company) return null;
 
   const formatCurrency = (value: number | null) => {
@@ -70,8 +73,19 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg">
-              <Building2 className="h-8 w-8 text-primary" />
+            <div className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg overflow-hidden">
+              {!loading && logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${company["Company Name"]} logo`}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <Building2 className={`h-8 w-8 text-primary ${!loading && logoUrl ? 'hidden' : ''}`} />
             </div>
             <div>
               <DialogTitle className="text-2xl">{company["Company Name"]}</DialogTitle>

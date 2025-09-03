@@ -1,6 +1,7 @@
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
+import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 
 interface Company {
   "Company Name": string;
