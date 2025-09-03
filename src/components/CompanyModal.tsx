@@ -136,9 +136,6 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                     {company["Pipeline Stage"]}
                   </Badge>
                 )}
-                {company["IPA Year"] && (
-                  <Badge variant="outline">IPA {company["IPA Year"]}</Badge>
-                )}
               </div>
             </div>
           </div>
