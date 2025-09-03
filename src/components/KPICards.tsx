@@ -27,7 +27,7 @@ const kpiData = [
 
 export function KPICards() {
   return (
-    <div className="grid gap-4">{/* Changed from md:grid-cols-3 to single column for vertical stacking */}
+    <div className="grid gap-4 max-w-md">{/* Constrained width to about half */}
       {kpiData.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
