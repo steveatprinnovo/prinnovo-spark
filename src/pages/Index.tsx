@@ -18,7 +18,8 @@ const Index = () => {
     ipaYear: "",
     countryOfOrigin: "",
     focusArea: "",
-    evpOwner: ""
+    evpOwner: "",
+    pipelineStage: ""
   });
 
   const filteredCompanies = useMemo(() => {
@@ -33,6 +34,9 @@ const Index = () => {
         return false;
       }
       if (filters.evpOwner && company["EVP Owner"] !== filters.evpOwner) {
+        return false;
+      }
+      if (filters.pipelineStage && company["Pipeline Stage"] !== filters.pipelineStage) {
         return false;
       }
       return true;
@@ -95,6 +99,9 @@ const Index = () => {
         {/* Separator */}
         <Separator className="my-6" />
         
+        {/* Pipeline Stages */}
+        <PipelineStages companies={filteredCompanies} />
+        
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />
         
@@ -103,9 +110,6 @@ const Index = () => {
           companies={filteredCompanies}
           onCompanyClick={setSelectedCompany}
         />
-        
-        {/* Pipeline Stages */}
-        <PipelineStages companies={filteredCompanies} />
         
         {/* Portfolio Chart */}
         <PortfolioChart companies={filteredCompanies} />

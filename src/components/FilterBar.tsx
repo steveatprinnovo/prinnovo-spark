@@ -11,6 +11,7 @@ interface FilterBarProps {
     "High-Level Focus Area": string | null;
     "EVP Owner": string | null;
     "IPA Year": number | null;
+    "Pipeline Stage": string | null;
     [key: string]: any;
   }>;
 }
@@ -20,6 +21,7 @@ export interface FilterState {
   countryOfOrigin: string;
   focusArea: string;
   evpOwner: string;
+  pipelineStage: string;
 }
 
 
@@ -50,6 +52,12 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
       .filter((owner): owner is string => owner !== null)
   )).sort();
 
+  const pipelineStages = Array.from(new Set(
+    companies
+      .map(company => company["Pipeline Stage"])
+      .filter((stage): stage is string => stage !== null)
+  )).sort();
+
   const getFocusAreaColor = (focusArea: string) => {
     switch (focusArea.toLowerCase()) {
       case 'operational':
@@ -73,7 +81,8 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
       ipaYear: "",
       countryOfOrigin: "",
       focusArea: "",
-      evpOwner: ""
+      evpOwner: "",
+      pipelineStage: ""
     };
     onFiltersChange(clearedFilters);
   };
@@ -124,11 +133,22 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
               </button>
             </Badge>
           )}
-          {filters.evpOwner && (
+           {filters.evpOwner && (
             <Badge variant="secondary" className="flex items-center gap-1">
               EVP Owner: {filters.evpOwner}
               <button 
                 onClick={() => clearSingleFilter("evpOwner")}
+                className="ml-1 hover:bg-muted rounded-full p-0.5"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          {filters.pipelineStage && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Pipeline Stage: {filters.pipelineStage}
+              <button 
+                onClick={() => clearSingleFilter("pipelineStage")}
                 className="ml-1 hover:bg-muted rounded-full p-0.5"
               >
                 ×
@@ -205,6 +225,21 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
               {evpOwners.map((owner) => (
                 <SelectItem key={owner} value={owner}>
                   {owner}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-50">
+          <Select value={filters.pipelineStage} onValueChange={(value) => updateFilter("pipelineStage", value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by Pipeline Stage" />
+            </SelectTrigger>
+            <SelectContent>
+              {pipelineStages.map((stage) => (
+                <SelectItem key={stage} value={stage}>
+                  {stage}
                 </SelectItem>
               ))}
             </SelectContent>
