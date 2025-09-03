@@ -84,7 +84,7 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
           )}
         </div>
         
-        <h3 className="font-semibold text-sm mb-2 line-clamp-2">
+        <h3 className="font-semibold text-base mb-2 line-clamp-2">
           {company["Company Name"]}
         </h3>
         
