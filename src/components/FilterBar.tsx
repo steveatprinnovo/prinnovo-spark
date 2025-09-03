@@ -5,6 +5,14 @@ import { Badge } from "@/components/ui/badge";
 interface FilterBarProps {
   onFiltersChange: (filters: FilterState) => void;
   filters: FilterState;
+  companies: Array<{
+    "Company Name": string;
+    "Country of Origin": string | null;
+    "High-Level Focus Area": string | null;
+    "EVP Owner": string | null;
+    "IPA Year": number | null;
+    [key: string]: any;
+  }>;
 }
 
 export interface FilterState {
@@ -14,25 +22,33 @@ export interface FilterState {
   evpOwner: string;
 }
 
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 10 }, (_, i) => (currentYear - i).toString());
 
-const countries = [
-  "United States", "Canada", "United Kingdom", "Germany", "France", 
-  "Israel", "Australia", "Netherlands", "Switzerland", "Sweden"
-];
+export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProps) {
+  // Generate dynamic filter options from actual data
+  const years = Array.from(new Set(
+    companies
+      .map(company => company["IPA Year"])
+      .filter((year): year is number => year !== null)
+      .map(year => year.toString())
+  )).sort();
 
-const focusAreas = [
-  "Digital Health", "Medical Devices", "Pharmaceuticals", "Biotechnology",
-  "Health IT", "Telehealth", "AI/ML", "Diagnostics", "Therapeutics"
-];
+  const countries = Array.from(new Set(
+    companies
+      .map(company => company["Country of Origin"])
+      .filter((country): country is string => country !== null)
+  )).sort();
 
-const evpOwners = [
-  "John Smith", "Sarah Johnson", "Michael Brown", "Emily Davis",
-  "Robert Wilson", "Lisa Anderson", "David Martinez", "Jennifer Taylor"
-];
+  const focusAreas = Array.from(new Set(
+    companies
+      .map(company => company["High-Level Focus Area"])
+      .filter((area): area is string => area !== null)
+  )).sort();
 
-export function FilterBar({ onFiltersChange, filters }: FilterBarProps) {
+  const evpOwners = Array.from(new Set(
+    companies
+      .map(company => company["EVP Owner"])
+      .filter((owner): owner is string => owner !== null)
+  )).sort();
 
   const updateFilter = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };

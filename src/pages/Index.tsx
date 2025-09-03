@@ -63,7 +63,7 @@ const Index = () => {
       
       <div className="container mx-auto p-6 space-y-6">
         {/* Filters */}
-        <FilterBar onFiltersChange={setFilters} filters={filters} />
+        <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />
         
         {/* Company Grid */}
         <div className="space-y-4">
