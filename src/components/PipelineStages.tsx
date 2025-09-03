@@ -58,7 +58,7 @@ export function PipelineStages({ companies, filters }: PipelineStagesProps) {
             
             {/* Arrow (except for last item) */}
             {index < stages.length - 1 && (
-              <ChevronRight className="w-6 h-6 text-muted-foreground flex-shrink-0" />
+              <ChevronRight className="w-6 h-6 text-muted-foreground flex-shrink-0 -mt-4" />
             )}
           </div>
         ))}
