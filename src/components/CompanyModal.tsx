@@ -57,7 +57,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
   const getStageColor = (stage: string | null) => {
     switch (stage?.toLowerCase()) {
       case 'portfolio':
-        return 'bg-accent text-accent-foreground';
+        return 'bg-background text-green-600 border border-green-600';
       case 'due diligence':
         return 'bg-primary text-primary-foreground';
       case 'term sheet':
