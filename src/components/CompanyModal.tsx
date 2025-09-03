@@ -3,27 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Building2, MapPin, User, Calendar, DollarSign, TrendingUp, Users, FileText, ChevronRight } from "lucide-react";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
-
-interface Company {
-  "Company Name": string;
-  "Country of Origin": string | null;
-  "High-Level Focus Area": string | null;
-  "Specific Focus Area": string | null;
-  "Current Company Valuation": number | null;
-  "Current HLV Valuation": number | null;
-  "Pipeline Stage": string | null;
-  "EVP Owner": string | null;
-  "IPA Year": number | null;
-  "Company Contact": string | null;
-  "Champions": string | null;
-  "Intro Origin": string | null;
-  "HLV Ownership Percentage": string | null;
-  "IPA Signature Date": string | null;
-  "Term Sheet Signature Date": string | null;
-  "Final Portfolio Decision Date": string | null;
-  "Implementation Completion Date": string | null;
-  imgurl: string | null;
-}
+import { Company } from "@/hooks/useCompanies";
 
 interface CompanyModalProps {
   company: Company | null;
@@ -130,6 +110,11 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
             </div>
             <div>
               <DialogTitle className="text-2xl">{company["Company Name"]}</DialogTitle>
+              {company["Company Description"] && (
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {company["Company Description"]}
+                </p>
+              )}
               <div className="flex items-center space-x-2 mt-2">
                 {company["Pipeline Stage"] && (
                   <Badge className={getStageColor(company["Pipeline Stage"])}>

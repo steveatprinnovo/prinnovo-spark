@@ -2,26 +2,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
-
-interface Company {
-  "Company Name": string;
-  "Country of Origin": string | null;
-  "High-Level Focus Area": string | null;
-  "Specific Focus Area": string | null;
-  "Current Company Valuation": number | null;
-  "Current HLV Valuation": number | null;
-  "Pipeline Stage": string | null;
-  "EVP Owner": string | null;
-  "IPA Year": number | null;
-  "Company Contact": string | null;
-  "Champions": string | null;
-  "Intro Origin": string | null;
-  "HLV Ownership Percentage": string | null;
-  "IPA Signature Date": string | null;
-  "Term Sheet Signature Date": string | null;
-  "Final Portfolio Decision Date": string | null;
-  "Implementation Completion Date": string | null;
-}
+import { Company } from "@/hooks/useCompanies";
 
 interface PortfolioChartProps {
   companies: Company[];

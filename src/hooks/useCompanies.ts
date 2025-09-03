@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 export interface Company {
   "Company Name": string;
+  "Company Description": string | null;
   "Country of Origin": string | null;
   "High-Level Focus Area": string | null;
   "Specific Focus Area": string | null;
