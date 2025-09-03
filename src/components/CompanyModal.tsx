@@ -232,16 +232,16 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
             </h3>
             <div className="relative py-4 px-8">
               {/* Stage Names Above Arrow - Positioned Above Each Dot */}
-              <div className="absolute top-0 left-8 right-8 flex justify-between items-center">
+              <div className="flex justify-between px-4 mb-2">
                 {getProgressStages().map((stage) => (
-                  <div key={stage.name} className="text-center">
+                  <div key={stage.name} className="flex-1 text-center">
                     <p className="text-sm font-medium text-foreground">{stage.name}</p>
                   </div>
                 ))}
               </div>
 
               {/* Progress Arrow Container */}
-              <div className="relative flex items-center mt-6 mb-6">
+              <div className="relative flex items-center">
                 {/* Arrow Background */}
                 <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
                 <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
@@ -263,7 +263,6 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                     const nextStage = getProgressStages()[index + 1];
                     const days = calculateDaysBetween(stage.date, nextStage.date);
                     const totalStages = getProgressStages().length;
-                    const segmentWidth = `${100 / (totalStages - 1)}%`;
                     const leftOffset = `${(100 / (totalStages - 1)) * index + (50 / (totalStages - 1))}%`;
                     
                     return (
@@ -287,9 +286,9 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               </div>
 
               {/* Dates Below Arrow - Positioned Below Each Dot */}
-              <div className="absolute bottom-0 left-8 right-8 flex justify-between items-center">
+              <div className="flex justify-between px-4 mt-2">
                 {getProgressStages().map((stage) => (
-                  <div key={`date-${stage.name}`} className="text-center">
+                  <div key={`date-${stage.name}`} className="flex-1 text-center">
                     {stage.date && (
                       <p className="text-xs text-muted-foreground">
                         {formatDate(stage.date)}
