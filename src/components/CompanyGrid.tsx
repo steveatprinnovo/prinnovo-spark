@@ -1,0 +1,97 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Building2 } from "lucide-react";
+
+interface Company {
+  "Company Name": string;
+  "Country of Origin": string | null;
+  "High-Level Focus Area": string | null;
+  "Specific Focus Area": string | null;
+  "Current Company Valuation": number | null;
+  "Current HLV Valuation": number | null;
+  "Pipeline Stage": string | null;
+  "EVP Owner": string | null;
+  "IPA Year": number | null;
+  "Company Contact": string | null;
+  "Champions": string | null;
+  "Intro Origin": string | null;
+  "HLV Ownership Percentage": string | null;
+  "IPA Signature Date": string | null;
+  "Term Sheet Signature Date": string | null;
+  "Final Portfolio Decision Date": string | null;
+  "Implementation Completion Date": string | null;
+}
+
+interface CompanyGridProps {
+  companies: Company[];
+  onCompanyClick: (company: Company) => void;
+}
+
+export function CompanyGrid({ companies, onCompanyClick }: CompanyGridProps) {
+  const formatValuation = (value: number | null) => {
+    if (!value) return "N/A";
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(value);
+  };
+
+  const getStageColor = (stage: string | null) => {
+    switch (stage?.toLowerCase()) {
+      case 'portfolio':
+        return 'bg-accent text-accent-foreground';
+      case 'due diligence':
+        return 'bg-primary text-primary-foreground';
+      case 'term sheet':
+        return 'bg-chart-3 text-white';
+      case 'evaluation':
+        return 'bg-muted text-muted-foreground';
+      default:
+        return 'bg-secondary text-secondary-foreground';
+    }
+  };
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {companies.map((company, index) => (
+        <Card 
+          key={index}
+          className="cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-primary"
+          onClick={() => onCompanyClick(company)}
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
+              {company["Pipeline Stage"] && (
+                <Badge className={getStageColor(company["Pipeline Stage"])}>
+                  {company["Pipeline Stage"]}
+                </Badge>
+              )}
+            </div>
+            
+            <h3 className="font-semibold text-sm mb-2 line-clamp-2">
+              {company["Company Name"]}
+            </h3>
+            
+            <div className="space-y-2 text-xs text-muted-foreground">
+              {company["High-Level Focus Area"] && (
+                <p>{company["High-Level Focus Area"]}</p>
+              )}
+              {company["Country of Origin"] && (
+                <p>{company["Country of Origin"]}</p>
+              )}
+              <p className="font-medium text-foreground">
+                {formatValuation(company["Current Company Valuation"])}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
