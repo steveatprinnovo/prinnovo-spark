@@ -7,6 +7,7 @@ import { CompanyModal } from "@/components/CompanyModal";
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { CountryMap } from "@/components/CountryMap";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
@@ -89,6 +90,9 @@ const Index = () => {
             />
           </div>
         </div>
+        
+        {/* Separator */}
+        <Separator className="my-6" />
         
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />
