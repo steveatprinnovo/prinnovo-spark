@@ -62,14 +62,8 @@ const Index = () => {
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-6">
-        {/* KPI Cards */}
-        <KPICards />
-        
         {/* Filters */}
-        <FilterBar onFiltersChange={setFilters} />
-        
-        {/* Portfolio Chart */}
-        <PortfolioChart companies={filteredCompanies} />
+        <FilterBar onFiltersChange={setFilters} filters={filters} />
         
         {/* Company Grid */}
         <div className="space-y-4">
@@ -84,6 +78,12 @@ const Index = () => {
             onCompanyClick={setSelectedCompany}
           />
         </div>
+        
+        {/* KPI Cards */}
+        <KPICards />
+        
+        {/* Portfolio Chart */}
+        <PortfolioChart companies={filteredCompanies} />
         
         {/* Company Detail Modal */}
         <CompanyModal

@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface FilterBarProps {
   onFiltersChange: (filters: FilterState) => void;
+  filters: FilterState;
 }
 
 export interface FilterState {
@@ -32,17 +32,10 @@ const evpOwners = [
   "Robert Wilson", "Lisa Anderson", "David Martinez", "Jennifer Taylor"
 ];
 
-export function FilterBar({ onFiltersChange }: FilterBarProps) {
-  const [filters, setFilters] = useState<FilterState>({
-    ipaYear: "",
-    countryOfOrigin: "",
-    focusArea: "",
-    evpOwner: ""
-  });
+export function FilterBar({ onFiltersChange, filters }: FilterBarProps) {
 
   const updateFilter = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
     onFiltersChange(newFilters);
   };
 
@@ -53,66 +46,139 @@ export function FilterBar({ onFiltersChange }: FilterBarProps) {
       focusArea: "",
       evpOwner: ""
     };
-    setFilters(clearedFilters);
     onFiltersChange(clearedFilters);
+  };
+
+  const clearSingleFilter = (key: keyof FilterState) => {
+    const newFilters = { ...filters, [key]: "" };
+    onFiltersChange(newFilters);
   };
 
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
 
   return (
-    <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/50 rounded-lg border">
-      <div className="flex items-center gap-4 flex-1 flex-wrap">
-        <Select value={filters.ipaYear} onValueChange={(value) => updateFilter("ipaYear", value)}>
-          <SelectTrigger className="w-48 bg-background">
-            <SelectValue placeholder="IPA Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map(year => (
-              <SelectItem key={year} value={year}>{year}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={filters.countryOfOrigin} onValueChange={(value) => updateFilter("countryOfOrigin", value)}>
-          <SelectTrigger className="w-48 bg-background">
-            <SelectValue placeholder="Country of Origin" />
-          </SelectTrigger>
-          <SelectContent>
-            {countries.map(country => (
-              <SelectItem key={country} value={country}>{country}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={filters.focusArea} onValueChange={(value) => updateFilter("focusArea", value)}>
-          <SelectTrigger className="w-48 bg-background">
-            <SelectValue placeholder="Focus Area" />
-          </SelectTrigger>
-          <SelectContent>
-            {focusAreas.map(area => (
-              <SelectItem key={area} value={area}>{area}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={filters.evpOwner} onValueChange={(value) => updateFilter("evpOwner", value)}>
-          <SelectTrigger className="w-48 bg-background">
-            <SelectValue placeholder="EVP Owner" />
-          </SelectTrigger>
-          <SelectContent>
-            {evpOwners.map(owner => (
-              <SelectItem key={owner} value={owner}>{owner}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
+    <div className="bg-card p-4 rounded-lg border space-y-4">
+      {/* Active Filters Display */}
       {hasActiveFilters && (
-        <Button variant="outline" size="sm" onClick={clearFilters}>
-          <X className="h-4 w-4 mr-2" />
-          Clear Filters
-        </Button>
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
+          {filters.ipaYear && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              IPA Year: {filters.ipaYear}
+              <button 
+                onClick={() => clearSingleFilter("ipaYear")}
+                className="ml-1 hover:bg-muted rounded-full p-0.5"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          {filters.countryOfOrigin && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Country: {filters.countryOfOrigin}
+              <button 
+                onClick={() => clearSingleFilter("countryOfOrigin")}
+                className="ml-1 hover:bg-muted rounded-full p-0.5"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          {filters.focusArea && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Focus Area: {filters.focusArea}
+              <button 
+                onClick={() => clearSingleFilter("focusArea")}
+                className="ml-1 hover:bg-muted rounded-full p-0.5"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          {filters.evpOwner && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              EVP Owner: {filters.evpOwner}
+              <button 
+                onClick={() => clearSingleFilter("evpOwner")}
+                className="ml-1 hover:bg-muted rounded-full p-0.5"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={clearFilters}
+            className="text-xs"
+          >
+            Clear All
+          </Button>
+        </div>
       )}
+
+      {/* Filter Controls */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex-1 min-w-[200px]">
+          <Select value={filters.ipaYear} onValueChange={(value) => updateFilter("ipaYear", value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by IPA Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1 min-w-[200px]">
+          <Select value={filters.countryOfOrigin} onValueChange={(value) => updateFilter("countryOfOrigin", value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by Country" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1 min-w-[200px]">
+          <Select value={filters.focusArea} onValueChange={(value) => updateFilter("focusArea", value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by Focus Area" />
+            </SelectTrigger>
+            <SelectContent>
+              {focusAreas.map((area) => (
+                <SelectItem key={area} value={area}>
+                  {area}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1 min-w-[200px]">
+          <Select value={filters.evpOwner} onValueChange={(value) => updateFilter("evpOwner", value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by EVP Owner" />
+            </SelectTrigger>
+            <SelectContent>
+              {evpOwners.map((owner) => (
+                <SelectItem key={owner} value={owner}>
+                  {owner}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
   );
 }

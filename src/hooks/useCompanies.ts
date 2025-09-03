@@ -43,7 +43,7 @@ export function useCompanies() {
         throw error;
       }
 
-      setCompanies(data || []);
+      setCompanies((data as Company[]) || []);
     } catch (err: any) {
       setError(err.message);
       toast.error(`Failed to load companies: ${err.message}`);
