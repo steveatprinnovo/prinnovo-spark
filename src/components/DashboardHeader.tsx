@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { LogOut } from "lucide-react";
+import { Building2, BarChart3, Users, TrendingUp } from "lucide-react";
 
 export function DashboardHeader() {
-  const { signOut, user } = useAuth();
-
   return (
     <div className="border-b bg-card">
       <div className="flex h-16 items-center px-6">
@@ -14,21 +10,12 @@ export function DashboardHeader() {
             alt="Healthliant Ventures" 
             className="h-8 w-auto"
           />
-          <span className="text-lg font-semibold">Portfolio Dashboard</span>
         </div>
         <div className="ml-auto flex items-center space-x-4">
-          <span className="text-sm text-muted-foreground">
-            {user?.email}
-          </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={signOut}
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Building2 className="h-4 w-4" />
+            <span>Portfolio Dashboard</span>
+          </div>
         </div>
       </div>
     </div>
