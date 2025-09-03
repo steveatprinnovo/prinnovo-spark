@@ -143,7 +143,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               className="h-6 w-6 p-0"
               onClick={() => handleEditStart(fieldName, currentValue)}
             >
-              <Pencil className="h-3 w-3" />
+              <Pencil className="h-3 w-3 text-gray-400" />
             </Button>
           )}
         </div>
