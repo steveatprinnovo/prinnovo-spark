@@ -7,13 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
-
+  const navigate = useNavigate();
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -84,6 +85,9 @@ export function AuthForm() {
             variant: "destructive",
           });
         }
+      } else {
+        toast({ title: "Welcome back", description: "Redirecting to your dashboard..." });
+        navigate("/");
       }
     } catch (error) {
       toast({
@@ -95,7 +99,6 @@ export function AuthForm() {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
