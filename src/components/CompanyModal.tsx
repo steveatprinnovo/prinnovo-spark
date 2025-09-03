@@ -127,86 +127,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
         </DialogHeader>
 
         <div className="grid gap-6 mt-6">
-          {/* Overview */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg flex items-center">
-                <MapPin className="w-5 h-5 mr-2 text-primary" />
-                Company Overview
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Country of Origin</p>
-                  <p>{company["Country of Origin"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">High-Level Focus Area</p>
-                  <p>{company["High-Level Focus Area"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Specific Focus Area</p>
-                  <p>{company["Specific Focus Area"] || "N/A"}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg flex items-center">
-                <DollarSign className="w-5 h-5 mr-2 text-primary" />
-                Financial Information
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Company Valuation</p>
-                  <p className="text-lg font-semibold">{formatCurrency(company["Current Company Valuation"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">HLV Valuation</p>
-                  <p className="text-lg font-semibold">{formatCurrency(company["Current HLV Valuation"])}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">HLV Ownership</p>
-                  <p>{company["HLV Ownership Percentage"] || "N/A"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Contacts & Management */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg flex items-center">
-              <Users className="w-5 h-5 mr-2 text-primary" />
-              Contacts & Management
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">EVP Owner</p>
-                  <p>{company["EVP Owner"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Company Contact</p>
-                  <p>{company["Company Contact"] || "N/A"}</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Champions</p>
-                  <p>{company["Champions"] || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Intro Origin</p>
-                  <p>{company["Intro Origin"] || "N/A"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Progress Timeline - Full Width */}
+          {/* Progress Timeline - Moved to top */}
           <div className="space-y-4">
             <h3 className="font-semibold text-lg flex items-center">
               <TrendingUp className="w-5 h-5 mr-2 text-primary" />
@@ -293,6 +214,81 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Horizontal layout for three sections */}
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Company Overview */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center">
+                <MapPin className="w-5 h-5 mr-2 text-primary" />
+                Company Overview
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Country of Origin</p>
+                  <p>{company["Country of Origin"] || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">High-Level Focus Area</p>
+                  <p>{company["High-Level Focus Area"] || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Specific Focus Area</p>
+                  <p>{company["Specific Focus Area"] || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Company Contact</p>
+                  <p>{company["Company Contact"] || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Financial Information */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center">
+                <DollarSign className="w-5 h-5 mr-2 text-primary" />
+                Financial Information
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Company Valuation</p>
+                  <p className="text-lg font-semibold">{formatCurrency(company["Current Company Valuation"])}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">HLV Valuation</p>
+                  <p className="text-lg font-semibold">{formatCurrency(company["Current HLV Valuation"])}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">HLV Ownership</p>
+                  <p>{company["HLV Ownership Percentage"] || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Intro Origin</p>
+                  <p>{company["Intro Origin"] || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tanner Stakeholders */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center">
+                <Users className="w-5 h-5 mr-2 text-primary" />
+                Tanner Stakeholders
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">EVP Owner</p>
+                  <p>{company["EVP Owner"] || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Champions</p>
+                  <p>{company["Champions"] || "N/A"}</p>
+                </div>
               </div>
             </div>
           </div>
