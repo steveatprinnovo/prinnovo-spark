@@ -230,20 +230,18 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               <TrendingUp className="w-5 h-5 mr-2 text-primary" />
               Progress Timeline
             </h3>
-            <div className="relative py-8">
+            <div className="relative py-8 px-8">
               {/* Stage Names Above Arrow - Positioned Above Each Dot */}
-              <div className="relative mb-4">
-                <div className="absolute inset-0 flex justify-between items-center px-4">
-                  {getProgressStages().map((stage) => (
-                    <div key={stage.name} className="text-center">
-                      <p className="text-sm font-medium text-foreground">{stage.name}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="absolute top-0 left-8 right-8 flex justify-between items-center mb-4">
+                {getProgressStages().map((stage) => (
+                  <div key={stage.name} className="text-center">
+                    <p className="text-sm font-medium text-foreground">{stage.name}</p>
+                  </div>
+                ))}
               </div>
 
               {/* Progress Arrow Container */}
-              <div className="relative flex items-center">
+              <div className="relative flex items-center mt-8 mb-8">
                 {/* Arrow Background */}
                 <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
                 <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
@@ -260,12 +258,23 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 </div>
 
                 {/* Days Between Stages with Arrows */}
-                <div className="absolute inset-0 flex items-center">
+                <div className="absolute inset-0 flex items-center px-4">
                   {getProgressStages().slice(0, -1).map((stage, index) => {
                     const nextStage = getProgressStages()[index + 1];
                     const days = calculateDaysBetween(stage.date, nextStage.date);
+                    const totalStages = getProgressStages().length;
+                    const segmentWidth = `${100 / (totalStages - 1)}%`;
+                    const leftOffset = `${(100 / (totalStages - 1)) * index + (50 / (totalStages - 1))}%`;
+                    
                     return (
-                      <div key={`days-${index}`} className="flex-1 flex justify-center">
+                      <div 
+                        key={`days-${index}`} 
+                        className="absolute flex justify-center"
+                        style={{ 
+                          left: leftOffset,
+                          transform: 'translateX(-50%)'
+                        }}
+                      >
                         {days && (
                           <span className="text-xs text-primary font-medium">
                             ← {days} days →
@@ -278,18 +287,16 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               </div>
 
               {/* Dates Below Arrow - Positioned Below Each Dot */}
-              <div className="relative mt-4">
-                <div className="absolute inset-0 flex justify-between items-center px-4">
-                  {getProgressStages().map((stage) => (
-                    <div key={`date-${stage.name}`} className="text-center">
-                      {stage.date && (
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(stage.date)}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
+              <div className="absolute bottom-0 left-8 right-8 flex justify-between items-center mt-4">
+                {getProgressStages().map((stage) => (
+                  <div key={`date-${stage.name}`} className="text-center">
+                    {stage.date && (
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(stage.date)}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
