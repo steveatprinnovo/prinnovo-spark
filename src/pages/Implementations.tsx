@@ -7,14 +7,19 @@ import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, Check, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
+import { Pencil, Check, X, Filter } from "lucide-react";
 
 const Implementations = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { companies, loading, updateCompany } = useCompanies();
-  const [editingTitle, setEditingTitle] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{ [key: string]: string }>({});
+  const [editingStatus, setEditingStatus] = useState<string | null>(null);
+  const [statusValues, setStatusValues] = useState<{ [key: string]: string }>({});
+  const [milestoneFilters, setMilestoneFilters] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -22,6 +27,14 @@ const Implementations = () => {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
+
+  // Available milestone filters
+  const availableMilestones = [
+    { id: "term-sheet", label: "Term Sheet Signed" },
+    { id: "ipa", label: "IPA Signed" },
+    { id: "implementation", label: "Implementation Completed" },
+    { id: "pilot", label: "Pilot Completed" }
+  ];
 
   // Sort companies by date priority
   const sortedCompanies = useMemo(() => {
@@ -52,6 +65,28 @@ const Implementations = () => {
       return 0;
     });
   }, [companies]);
+
+  // Filter companies by selected milestones
+  const filteredCompanies = useMemo(() => {
+    if (milestoneFilters.length === 0) return sortedCompanies;
+    
+    return sortedCompanies.filter(company => {
+      return milestoneFilters.some(filter => {
+        switch (filter) {
+          case "term-sheet":
+            return !!company["Term Sheet Signature Date"];
+          case "ipa":
+            return !!company["IPA Signature Date"];
+          case "implementation":
+            return !!company["Implementation Completion Date"];
+          case "pilot":
+            return !!company["Final Portfolio Decision Date"];
+          default:
+            return false;
+        }
+      });
+    });
+  }, [sortedCompanies, milestoneFilters]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
@@ -98,27 +133,31 @@ const Implementations = () => {
     return stages;
   };
 
-  const handleEditStart = (companyName: string) => {
-    setEditingTitle(companyName);
-    setEditValues({ [companyName]: companyName });
+  const handleStatusEditStart = (companyName: string) => {
+    setEditingStatus(companyName);
+    // Initialize with existing status or empty string
+    setStatusValues({ [companyName]: statusValues[companyName] || "" });
   };
 
-  const handleEditSave = async (oldName: string) => {
-    const newName = editValues[oldName];
-    if (newName && newName !== oldName) {
-      const success = await updateCompany(oldName, { "Company Name": newName });
-      if (success) {
-        setEditingTitle(null);
-        setEditValues({});
-      }
+  const handleStatusEditSave = async (companyName: string) => {
+    const newStatus = statusValues[companyName];
+    // In a real app, you'd save this to a status field in the database
+    // For now, we'll just store it locally
+    setEditingStatus(null);
+    console.log(`Status update for ${companyName}: ${newStatus}`);
+  };
+
+  const handleStatusEditCancel = () => {
+    setEditingStatus(null);
+    setStatusValues({});
+  };
+
+  const handleMilestoneFilterChange = (milestoneId: string, checked: boolean) => {
+    if (checked) {
+      setMilestoneFilters([...milestoneFilters, milestoneId]);
     } else {
-      handleEditCancel();
+      setMilestoneFilters(milestoneFilters.filter(id => id !== milestoneId));
     }
-  };
-
-  const handleEditCancel = () => {
-    setEditingTitle(null);
-    setEditValues({});
   };
 
   // Show loading while checking authentication or loading data
@@ -155,20 +194,60 @@ const Implementations = () => {
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-8">
-        <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
+          
+          {/* Filter Button */}
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filter Milestones
+          </Button>
+        </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <Card className="p-4 bg-card border">
+            <h3 className="font-semibold mb-3">Show companies with these milestones completed:</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {availableMilestones.map((milestone) => (
+                <div key={milestone.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={milestone.id}
+                    checked={milestoneFilters.includes(milestone.id)}
+                    onCheckedChange={(checked) => handleMilestoneFilterChange(milestone.id, checked as boolean)}
+                  />
+                  <label htmlFor={milestone.id} className="text-sm font-medium">
+                    {milestone.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {milestoneFilters.length > 0 && (
+              <div className="mt-3 pt-3 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Showing {filteredCompanies.length} of {sortedCompanies.length} companies
+                </p>
+              </div>
+            )}
+          </Card>
+        )}
         
         <div className="space-y-8">
-          {sortedCompanies.map((company, index) => (
+          {filteredCompanies.map((company, index) => (
             <CompanyImplementationItem
               key={company["Company Name"]}
               company={company}
-              index={index + 1}
-              isEditing={editingTitle === company["Company Name"]}
-              editValue={editValues[company["Company Name"]] || company["Company Name"]}
-              onEditStart={() => handleEditStart(company["Company Name"])}
-              onEditSave={() => handleEditSave(company["Company Name"])}
-              onEditCancel={handleEditCancel}
-              onEditChange={(value) => setEditValues({ ...editValues, [company["Company Name"]]: value })}
+              index={filteredCompanies.indexOf(company) + 1}
+              isEditingStatus={editingStatus === company["Company Name"]}
+              statusValue={statusValues[company["Company Name"]] || ""}
+              onStatusEditStart={() => handleStatusEditStart(company["Company Name"])}
+              onStatusEditSave={() => handleStatusEditSave(company["Company Name"])}
+              onStatusEditCancel={handleStatusEditCancel}
+              onStatusChange={(value) => setStatusValues({ ...statusValues, [company["Company Name"]]: value })}
               getProgressStages={getProgressStages}
               formatDate={formatDate}
               calculateDaysBetween={calculateDaysBetween}
@@ -183,12 +262,12 @@ const Implementations = () => {
 interface CompanyImplementationItemProps {
   company: Company;
   index: number;
-  isEditing: boolean;
-  editValue: string;
-  onEditStart: () => void;
-  onEditSave: () => void;
-  onEditCancel: () => void;
-  onEditChange: (value: string) => void;
+  isEditingStatus: boolean;
+  statusValue: string;
+  onStatusEditStart: () => void;
+  onStatusEditSave: () => void;
+  onStatusEditCancel: () => void;
+  onStatusChange: (value: string) => void;
   getProgressStages: (company: Company) => any[];
   formatDate: (date: string | null) => string;
   calculateDaysBetween: (date1: string | null, date2: string | null) => number | null;
@@ -197,12 +276,12 @@ interface CompanyImplementationItemProps {
 function CompanyImplementationItem({
   company,
   index,
-  isEditing,
-  editValue,
-  onEditStart,
-  onEditSave,
-  onEditCancel,
-  onEditChange,
+  isEditingStatus,
+  statusValue,
+  onStatusEditStart,
+  onStatusEditSave,
+  onStatusEditCancel,
+  onStatusChange,
   getProgressStages,
   formatDate,
   calculateDaysBetween
@@ -212,41 +291,53 @@ function CompanyImplementationItem({
 
   return (
     <div className="space-y-4">
-      {/* Editable Title */}
-      <div className="flex items-center space-x-2">
-        {isEditing ? (
-          <div className="flex items-center space-x-2">
-            <Input
-              value={editValue}
-              onChange={(e) => onEditChange(e.target.value)}
-              className="text-xl font-semibold"
-              autoFocus
-            />
-            <Button size="sm" onClick={onEditSave}>
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={onEditCancel}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-2">
-            <h2 className="text-xl font-semibold text-foreground">{company["Company Name"]}</h2>
-            <Button size="sm" variant="ghost" onClick={onEditStart}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+      {/* Company Name and Status Update */}
+      <div className="space-y-3">
+        <h2 className="text-xl font-semibold text-foreground">{company["Company Name"]}</h2>
+        
+        {/* Status Update Box */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Status Update:</label>
+          {isEditingStatus ? (
+            <div className="flex gap-2">
+              <Textarea
+                value={statusValue}
+                onChange={(e) => onStatusChange(e.target.value)}
+                placeholder="Enter status update..."
+                className="flex-1 min-h-[80px]"
+                autoFocus
+              />
+              <div className="flex flex-col gap-2">
+                <Button size="sm" onClick={onStatusEditSave}>
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="outline" onClick={onStatusEditCancel}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div 
+              className="min-h-[80px] p-3 border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors flex items-start justify-between"
+              onClick={onStatusEditStart}
+            >
+              <p className="text-sm text-muted-foreground">
+                {statusValue || "Click to add status update..."}
+              </p>
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Number, Logo, and Arrow Diagram */}
       <div className="flex items-center space-x-6">
-        {/* Number Circle */}
+        {/* Number Circle - Smaller with robust outline */}
         <div className={`
-          w-12 h-12 rounded-full border-2 flex items-center justify-center font-semibold text-lg
+          w-10 h-10 rounded-full border-4 flex items-center justify-center font-bold text-base
           ${isPortfolio 
             ? 'bg-background text-green-600 border-green-600' 
-            : 'bg-background text-foreground border-border'
+            : 'bg-background text-foreground border-gray-400'
           }
         `}>
           {index}
