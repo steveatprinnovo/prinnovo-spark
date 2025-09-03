@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut } from "lucide-react";
+import { LogOut, Home, ClipboardList } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export function DashboardHeader() {
@@ -24,18 +24,20 @@ export function DashboardHeader() {
           <nav className="flex items-center space-x-6">
             <Link 
               to="/" 
-              className={`text-sm font-medium transition-colors hover:text-primary ${
+              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
                 location.pathname === "/" ? "text-primary" : "text-muted-foreground"
               }`}
             >
+              <Home className="h-4 w-4" />
               Home
             </Link>
             <Link 
               to="/implementations" 
-              className={`text-sm font-medium transition-colors hover:text-primary ${
+              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
                 location.pathname === "/implementations" ? "text-primary" : "text-muted-foreground"
               }`}
             >
+              <ClipboardList className="h-4 w-4" />
               Implementations
             </Link>
           </nav>
