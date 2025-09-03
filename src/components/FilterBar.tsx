@@ -135,7 +135,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
 
       {/* Filter Controls */}
       <div className="flex flex-wrap gap-4 items-center">
-        <div className="flex-1 min-w-[200px]">
+        <div className="w-32">
           <Select value={filters.ipaYear} onValueChange={(value) => updateFilter("ipaYear", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by IPA Year" />
@@ -150,7 +150,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="flex-1 min-w-[200px]">
+        <div className="w-32">
           <Select value={filters.countryOfOrigin} onValueChange={(value) => updateFilter("countryOfOrigin", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by Country" />
@@ -165,7 +165,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="flex-1 min-w-[200px]">
+        <div className="w-32">
           <Select value={filters.focusArea} onValueChange={(value) => updateFilter("focusArea", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by Focus Area" />
@@ -180,7 +180,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           </Select>
         </div>
 
-        <div className="flex-1 min-w-[200px]">
+        <div className="w-32">
           <Select value={filters.evpOwner} onValueChange={(value) => updateFilter("evpOwner", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by EVP Owner" />
