@@ -1,16 +1,20 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { KPICards } from "@/components/KPICards";
 import { FilterBar, FilterState } from "@/components/FilterBar";
 import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
 import { useCompanies, Company } from "@/hooks/useCompanies";
+import { useAuth } from "@/hooks/useAuth";
 import { CountryMap } from "@/components/CountryMap";
 import { PipelineStages } from "@/components/PipelineStages";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { companies, loading } = useCompanies();
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [filters, setFilters] = useState<FilterState>({
@@ -20,6 +24,13 @@ const Index = () => {
     evpOwner: "",
     pipelineStage: ""
   });
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
 
   const filteredCompanies = useMemo(() => {
     return companies.filter(company => {
@@ -52,7 +63,8 @@ const Index = () => {
     }
   };
 
-  if (loading) {
+  // Show loading while checking authentication or loading data
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <DashboardHeader />
@@ -71,6 +83,11 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Don't render dashboard if not authenticated
+  if (!user) {
+    return null;
   }
 
   return (
