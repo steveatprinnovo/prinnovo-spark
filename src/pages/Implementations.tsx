@@ -295,18 +295,18 @@ function CompanyImplementationItem({
       <div className="flex items-start justify-between gap-6">
         <h2 className="text-xl font-semibold text-foreground flex-shrink-0">{company["Company Name"]}</h2>
         
-        {/* Status Update Box - More subtle */}
-        <div className="flex-1 max-w-md">
+        {/* Status Update Box - Twice as wide, single line */}
+        <div className="flex-1 max-w-2xl">
           {isEditingStatus ? (
             <div className="flex gap-2">
-              <Textarea
+              <Input
                 value={statusValue}
                 onChange={(e) => onStatusChange(e.target.value)}
                 placeholder="Enter status update..."
-                className="flex-1 min-h-[60px] text-sm"
+                className="flex-1 text-sm"
                 autoFocus
               />
-              <div className="flex flex-col gap-1">
+              <div className="flex gap-1">
                 <Button size="sm" onClick={onStatusEditSave}>
                   <Check className="h-3 w-3" />
                 </Button>
@@ -317,10 +317,10 @@ function CompanyImplementationItem({
             </div>
           ) : (
             <div 
-              className="min-h-[60px] p-2 border border-dashed border-gray-300 rounded-md bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors flex items-start justify-between text-sm"
+              className="h-9 px-3 py-2 border border-dashed border-gray-300 rounded-md bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors flex items-center justify-between text-sm"
               onClick={onStatusEditStart}
             >
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-xs text-gray-500 italic truncate">
                 {statusValue || "Add status note..."}
               </p>
               <Pencil className="h-3 w-3 text-gray-400 flex-shrink-0 ml-2" />
