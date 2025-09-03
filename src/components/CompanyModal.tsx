@@ -96,7 +96,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
         completed: !!company["Implementation Completion Date"]
       },
       {
-        name: "Pilot",
+        name: "Pilot Completed",
         date: company["Final Portfolio Decision Date"],
         completed: !!company["Final Portfolio Decision Date"]
       }
@@ -231,13 +231,15 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               Progress Timeline
             </h3>
             <div className="relative py-8">
-              {/* Stage Names Above Arrow */}
-              <div className="flex justify-between w-full px-4 mb-4">
-                {getProgressStages().map((stage) => (
-                  <div key={stage.name} className="text-center flex-1">
-                    <p className="text-sm font-medium text-foreground">{stage.name}</p>
-                  </div>
-                ))}
+              {/* Stage Names Above Arrow - Positioned Above Each Dot */}
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex justify-between items-center px-4">
+                  {getProgressStages().map((stage) => (
+                    <div key={stage.name} className="text-center">
+                      <p className="text-sm font-medium text-foreground">{stage.name}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Progress Arrow Container */}
@@ -257,7 +259,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                   ))}
                 </div>
 
-                {/* Days Between Stages */}
+                {/* Days Between Stages with Arrows */}
                 <div className="absolute inset-0 flex items-center">
                   {getProgressStages().slice(0, -1).map((stage, index) => {
                     const nextStage = getProgressStages()[index + 1];
@@ -265,8 +267,8 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                     return (
                       <div key={`days-${index}`} className="flex-1 flex justify-center">
                         {days && (
-                          <span className="text-xs text-primary font-medium bg-background/80 px-2 py-1 rounded">
-                            {days} days
+                          <span className="text-xs text-primary font-medium">
+                            ← {days} days →
                           </span>
                         )}
                       </div>
@@ -275,17 +277,19 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
                 </div>
               </div>
 
-              {/* Dates Below Arrow */}
-              <div className="flex justify-between w-full px-4 mt-4">
-                {getProgressStages().map((stage) => (
-                  <div key={`date-${stage.name}`} className="text-center flex-1">
-                    {stage.date && (
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(stage.date)}
-                      </p>
-                    )}
-                  </div>
-                ))}
+              {/* Dates Below Arrow - Positioned Below Each Dot */}
+              <div className="relative mt-4">
+                <div className="absolute inset-0 flex justify-between items-center px-4">
+                  {getProgressStages().map((stage) => (
+                    <div key={`date-${stage.name}`} className="text-center">
+                      {stage.date && (
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(stage.date)}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
