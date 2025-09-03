@@ -221,9 +221,9 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
           <Separator />
 
           {/* Horizontal layout for three sections */}
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3 divide-x divide-border">
             {/* Company Overview */}
-            <div className="space-y-4">
+            <div className="space-y-4 md:pr-6">
               <h3 className="font-semibold text-lg flex items-center">
                 <MapPin className="w-5 h-5 mr-2 text-primary" />
                 Company Overview
@@ -249,7 +249,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
             </div>
 
             {/* Financial Information */}
-            <div className="space-y-4">
+            <div className="space-y-4 md:px-6">
               <h3 className="font-semibold text-lg flex items-center">
                 <DollarSign className="w-5 h-5 mr-2 text-primary" />
                 Financial Information
@@ -275,7 +275,7 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
             </div>
 
             {/* Tanner Stakeholders */}
-            <div className="space-y-4">
+            <div className="space-y-4 md:pl-6">
               <h3 className="font-semibold text-lg flex items-center">
                 <Users className="w-5 h-5 mr-2 text-primary" />
                 Tanner Stakeholders
