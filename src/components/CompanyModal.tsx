@@ -230,40 +230,62 @@ export function CompanyModal({ company, isOpen, onClose }: CompanyModalProps) {
               <TrendingUp className="w-5 h-5 mr-2 text-primary" />
               Progress Timeline
             </h3>
-            <div className="relative py-4">
+            <div className="relative py-8">
+              {/* Stage Names Above Arrow */}
+              <div className="flex justify-between w-full px-4 mb-4">
+                {getProgressStages().map((stage) => (
+                  <div key={stage.name} className="text-center flex-1">
+                    <p className="text-sm font-medium text-foreground">{stage.name}</p>
+                  </div>
+                ))}
+              </div>
+
               {/* Progress Arrow Container */}
-              <div className="flex items-center justify-between relative">
+              <div className="relative flex items-center">
                 {/* Arrow Background */}
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
-                  <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
-                </div>
+                <div className="w-full h-8 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-l-lg"></div>
+                <div className="w-0 h-0 border-l-[32px] border-l-green-200 border-t-[16px] border-t-transparent border-b-[16px] border-b-transparent"></div>
                 
-                {/* Stage Labels */}
-                <div className="relative z-10 flex justify-between w-full px-4">
-                  {getProgressStages().map((stage, index) => (
-                    <div key={stage.name} className="flex flex-col items-center space-y-1">
-                      <div className={`w-3 h-3 rounded-full border-2 ${
-                        stage.completed 
-                          ? 'bg-primary border-primary' 
-                          : 'bg-background border-muted-foreground'
-                      }`}></div>
-                      <div className="text-center">
-                        <p className="text-xs font-medium text-foreground">{stage.name}</p>
-                        {stage.date && (
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(stage.date)}
-                          </p>
-                        )}
-                        {stage.daysToNext && (
-                          <p className="text-xs text-primary font-medium">
-                            {stage.daysToNext} days
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                {/* Stage Dots Aligned to Middle */}
+                <div className="absolute inset-0 flex justify-between items-center px-4">
+                  {getProgressStages().map((stage) => (
+                    <div key={`dot-${stage.name}`} className={`w-4 h-4 rounded-full border-2 ${
+                      stage.completed 
+                        ? 'bg-primary border-primary' 
+                        : 'bg-background border-muted-foreground'
+                    }`}></div>
                   ))}
                 </div>
+
+                {/* Days Between Stages */}
+                <div className="absolute inset-0 flex items-center">
+                  {getProgressStages().slice(0, -1).map((stage, index) => {
+                    const nextStage = getProgressStages()[index + 1];
+                    const days = calculateDaysBetween(stage.date, nextStage.date);
+                    return (
+                      <div key={`days-${index}`} className="flex-1 flex justify-center">
+                        {days && (
+                          <span className="text-xs text-primary font-medium bg-background/80 px-2 py-1 rounded">
+                            {days} days
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dates Below Arrow */}
+              <div className="flex justify-between w-full px-4 mt-4">
+                {getProgressStages().map((stage) => (
+                  <div key={`date-${stage.name}`} className="text-center flex-1">
+                    {stage.date && (
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(stage.date)}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
