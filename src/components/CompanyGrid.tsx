@@ -76,9 +76,9 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
       onClick={onClick}
       style={{ boxShadow: "var(--shadow-card)" }}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg overflow-hidden">
+      <CardContent className="p-4 2xl:p-8">
+        <div className="flex items-start justify-between mb-3 2xl:mb-6">
+          <div className="flex items-center justify-center w-12 h-12 2xl:w-20 2xl:h-20 bg-primary/10 rounded-lg overflow-hidden">
             {!loading && logoUrl ? (
               <img 
                 src={logoUrl} 
@@ -92,7 +92,7 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
               />
             ) : null}
             <Building2 
-              className={`h-6 w-6 text-primary ${!loading && logoUrl ? 'hidden' : ''}`} 
+              className={`h-6 w-6 2xl:h-10 2xl:w-10 text-primary ${!loading && logoUrl ? 'hidden' : ''}`} 
             />
           </div>
           {company["Pipeline Stage"] && (
@@ -104,11 +104,11 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
           )}
         </div>
         
-        <h3 className="font-semibold text-sm mb-2 line-clamp-2">
+        <h3 className="font-semibold text-sm 2xl:text-lg mb-2 2xl:mb-4 line-clamp-2">
           {company["Company Name"]}
         </h3>
         
-        <div className="space-y-2 text-xs text-muted-foreground">
+        <div className="space-y-2 2xl:space-y-3 text-xs 2xl:text-base text-muted-foreground">
           {company["High-Level Focus Area"] && (
             <p>{company["High-Level Focus Area"]}</p>
           )}
@@ -126,7 +126,7 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
 
 export function CompanyGrid({ companies, onCompanyClick }: CompanyGridProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-4 2xl:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-3">{/* Larger grid for 4K */}
       {companies.map((company, index) => (
         <CompanyCard
           key={index}

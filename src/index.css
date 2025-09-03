@@ -124,3 +124,21 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* 4K TV Optimizations */
+@media screen and (min-width: 2560px) {
+  :root {
+    font-size: 20px; /* Larger base font size for 4K */
+  }
+  
+  .tv-text-xs { @apply text-base; }
+  .tv-text-sm { @apply text-lg; }
+  .tv-text-base { @apply text-xl; }
+  .tv-text-lg { @apply text-2xl; }
+  .tv-text-xl { @apply text-3xl; }
+  .tv-text-2xl { @apply text-4xl; }
+  
+  .tv-spacing { @apply p-8 space-y-8; }
+  .tv-gap { @apply gap-8; }
+  .tv-card-padding { @apply p-8; }
+}

@@ -27,7 +27,7 @@ const kpiData = [
 
 export function KPICards() {
   return (
-    <div className="flex flex-col justify-between h-[500px] max-w-xs gap-4 mr-10">{/* Added total 40px margin-right for spacing */}
+    <div className="flex flex-col justify-between h-[500px] 2xl:h-[700px] max-w-xs 2xl:max-w-md gap-4 2xl:gap-6 mr-10 2xl:mr-16">{/* Larger for 4K */}
       {kpiData.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
@@ -39,21 +39,21 @@ export function KPICards() {
               boxShadow: "var(--shadow-kpi)"
             }}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-6 2xl:p-10">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-white/90">
+                <div className="space-y-2 2xl:space-y-4">
+                  <p className="text-sm 2xl:text-lg font-medium text-white/90">
                     {kpi.label}
                   </p>
-                  <p className="text-3xl font-bold text-white">
+                  <p className="text-3xl 2xl:text-5xl font-bold text-white">
                     {kpi.value}
                   </p>
-                  <p className="text-xs text-white/80">
+                  <p className="text-xs 2xl:text-base text-white/80">
                     {kpi.description}
                   </p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
-                  <Icon className="h-6 w-6 text-white" />
+                <div className="flex h-12 w-12 2xl:h-20 2xl:w-20 items-center justify-center rounded-lg bg-white/20">
+                  <Icon className="h-6 w-6 2xl:h-10 2xl:w-10 text-white" />
                 </div>
               </div>
             </CardContent>
