@@ -83,8 +83,8 @@ const Index = () => {
         
         {/* Top Section: KPIs and Map */}
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
-          {/* Left: KPI Cards */}
-          <div className="space-y-4">
+          {/* Left: KPI Cards - Smaller and vertically distributed */}
+          <div className="w-auto">
             <KPICards />
           </div>
           

@@ -27,13 +27,13 @@ const kpiData = [
 
 export function KPICards() {
   return (
-    <div className="grid gap-4 max-w-md">{/* Constrained width to about half */}
+    <div className="flex flex-col justify-between h-[500px] max-w-xs gap-4">{/* Match map height and distribute vertically */}
       {kpiData.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
           <Card 
             key={index} 
-            className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0"
+            className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 flex-1"
             style={{ 
               background: kpi.gradient,
               boxShadow: "var(--shadow-kpi)"
