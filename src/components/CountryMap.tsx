@@ -140,7 +140,7 @@ export const CountryMap: React.FC<CountryMapProps> = ({
       // Add Tanner Health marker in Carrollton, GA
       const tannerHealthMarker = new mapboxgl.Marker({
         color: '#ef4444', // Red color to make it stand out
-        scale: 1.2
+        scale: 0.7
       })
         .setLngLat([-85.0766, 33.5801]) // Coordinates for Carrollton, GA
         .setPopup(
