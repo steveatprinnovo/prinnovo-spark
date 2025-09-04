@@ -68,7 +68,9 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
                     : ""
                 } ${
                   filters.pipelineStage === stage.name
-                    ? "ring-2 ring-offset-2 ring-primary"
+                    ? stage.name === "Portfolio Company"
+                      ? "ring-2 ring-offset-2 ring-green-500"
+                      : "ring-2 ring-offset-2 ring-primary"
                     : ""
                 }`}
                 onClick={() => handleStageClick(stage.name)}
