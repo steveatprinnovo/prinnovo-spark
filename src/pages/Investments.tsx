@@ -165,15 +165,15 @@ export default function Investments() {
               }}
             >
               <CardContent className="p-6 h-full flex flex-col justify-end text-center">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-white/90">
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-white/90 leading-relaxed text-center">
                     {kpi.title}
                   </p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-2xl font-bold text-white text-center">
                     {formatCurrency(kpi.value)}
                   </p>
                   {kpi.subtitle && (
-                    <p className="text-xs text-white/80">
+                    <p className="text-xs text-white/80 text-center">
                       {kpi.subtitle}
                     </p>
                   )}
