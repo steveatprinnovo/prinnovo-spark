@@ -211,7 +211,7 @@ const Implementations = () => {
         {/* Filter Panel */}
         {showFilters && (
           <Card className="p-4 bg-card border">
-            <h3 className="font-semibold mb-3">Show companies missing these milestones:</h3>
+            <h3 className="font-semibold mb-3">Remove companies missing these milestones:</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {availableMilestones.map((milestone) => (
                 <div key={milestone.id} className="flex items-center space-x-2">
