@@ -240,16 +240,6 @@ const Implementations = () => {
       <div className="container mx-auto p-6 space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
-          
-          {/* Filter Button */}
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filter Milestones
-          </Button>
         </div>
 
         {/* KPI Cards */}
@@ -278,6 +268,18 @@ const Implementations = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Filter Button */}
+        <div className="flex justify-start">
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filter Milestones
+          </Button>
         </div>
 
         {/* Filter Panel */}
