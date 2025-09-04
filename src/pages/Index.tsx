@@ -50,7 +50,7 @@ const Index = () => {
         return false;
       }
       return true;
-    });
+    }).sort((a, b) => a["Company Name"].localeCompare(b["Company Name"]));
   }, [companies, filters]);
 
   const handleCountryClick = (country: string) => {
