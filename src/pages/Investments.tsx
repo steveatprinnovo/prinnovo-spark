@@ -158,7 +158,7 @@ export default function Investments() {
           {kpiData.map((kpi, index) => (
             <Card 
               key={index}
-              className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 h-32"
+              className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 h-40"
               style={{ 
                 background: kpi.gradient,
                 boxShadow: "var(--shadow-kpi)"
