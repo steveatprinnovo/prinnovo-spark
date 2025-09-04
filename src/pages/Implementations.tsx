@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Check, X, Filter } from "lucide-react";
 
 const Implementations = () => {
@@ -160,6 +160,50 @@ const Implementations = () => {
     }
   };
 
+  // Calculate KPIs
+  const kpiData = useMemo(() => {
+    const portfolioCompanies = companies.filter(company => 
+      company["Pipeline Stage"]?.toLowerCase() === "portfolio company"
+    );
+
+    // Helper function to calculate average days between two date fields
+    const calculateAverageDays = (dateField1: keyof Company, dateField2: keyof Company) => {
+      const validDays = companies
+        .map(company => calculateDaysBetween(company[dateField1] as string, company[dateField2] as string))
+        .filter(days => days !== null) as number[];
+      
+      if (validDays.length === 0) return 0;
+      return Math.round(validDays.reduce((sum, days) => sum + days, 0) / validDays.length);
+    };
+
+    return [
+      {
+        title: "Portfolio Companies",
+        value: portfolioCompanies.length.toString(),
+        subtitle: "Total companies in portfolio",
+        gradient: "var(--gradient-primary)"
+      },
+      {
+        title: "Term Sheet to IPA",
+        value: `${calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date")} days`,
+        subtitle: "Average time between milestones",
+        gradient: "var(--gradient-accent)"
+      },
+      {
+        title: "IPA to Implementation",
+        value: `${calculateAverageDays("IPA Signature Date", "Implementation Completion Date")} days`,
+        subtitle: "Average time between milestones",
+        gradient: "var(--gradient-primary)"
+      },
+      {
+        title: "Implementation to Pilot",
+        value: `${calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date")} days`,
+        subtitle: "Average time between milestones",
+        gradient: "var(--gradient-accent)"
+      }
+    ];
+  }, [companies, calculateDaysBetween]);
+
   // Show loading while checking authentication or loading data
   if (authLoading || loading) {
     return (
@@ -206,6 +250,34 @@ const Implementations = () => {
             <Filter className="h-4 w-4" />
             Filter Milestones
           </Button>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {kpiData.map((kpi, index) => (
+            <Card 
+              key={index}
+              className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 h-32"
+              style={{ 
+                background: kpi.gradient,
+                boxShadow: "var(--shadow-kpi)"
+              }}
+            >
+              <CardContent className="p-4 h-full flex flex-col justify-center text-center">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-white/90 leading-tight">
+                    {kpi.title}
+                  </p>
+                  <p className="text-xl font-bold text-white">
+                    {kpi.value}
+                  </p>
+                  <p className="text-xs text-white/80">
+                    {kpi.subtitle}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Filter Panel */}
