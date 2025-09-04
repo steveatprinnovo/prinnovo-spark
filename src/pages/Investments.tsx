@@ -108,7 +108,7 @@ export default function Investments() {
       {
         title: "Total Operational Funding",
         value: operationalSum,
-        subtitle: "",
+        subtitle: "loans, investments as payments, etc.",
         gradient: "var(--gradient-primary)"
       }
     ];
