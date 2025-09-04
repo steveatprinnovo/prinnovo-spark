@@ -173,7 +173,11 @@ export default function Investments() {
                     {formatCurrency(kpi.value)}
                   </p>
                   {kpi.subtitle && (
-                    <p className="text-xs text-white/80 text-center">
+                    <p className={`text-xs text-center ${
+                      kpi.title === "Portfolio Value" 
+                        ? "text-green-300 font-bold" 
+                        : "text-white/80"
+                    }`}>
                       {kpi.subtitle}
                     </p>
                   )}
