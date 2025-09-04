@@ -166,7 +166,7 @@ export default function Investments() {
             >
               <CardContent className="p-6 h-full flex flex-col justify-end text-center">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-white/90 leading-relaxed text-center">
+                  <p className="text-sm font-medium text-white/90 leading-tight text-center pt-2">
                     {kpi.title}
                   </p>
                   <p className="text-2xl font-bold text-white text-center">
