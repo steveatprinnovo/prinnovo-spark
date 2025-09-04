@@ -8,6 +8,12 @@ import { useMemo } from "react";
 export default function Investments() {
   const { companies, loading } = useCompanies();
 
+  const calculatePercentageIncrease = (invested: number | null, valuation: number | null) => {
+    if (!invested || !valuation || invested === 0) return "N/A";
+    const increase = ((valuation - invested) / invested) * 100;
+    return `${increase > 0 ? '+' : ''}${increase.toFixed(1)}%`;
+  };
+
   const { groupedCompanies, kpiData, lastUpdated } = useMemo(() => {
     if (!companies.length) return { groupedCompanies: {}, kpiData: [], lastUpdated: null };
 
@@ -117,12 +123,6 @@ export default function Investments() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  };
-
-  const calculatePercentageIncrease = (invested: number | null, valuation: number | null) => {
-    if (!invested || !valuation || invested === 0) return "N/A";
-    const increase = ((valuation - invested) / invested) * 100;
-    return `${increase > 0 ? '+' : ''}${increase.toFixed(1)}%`;
   };
 
   if (loading) {
