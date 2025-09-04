@@ -52,11 +52,11 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
     <div className="bg-card rounded-lg p-6 border">
       <h3 className="text-lg font-semibold mb-6 text-center">Pipeline Overview</h3>
       
-      <div className="flex items-center justify-center gap-4 overflow-x-auto">
+      <div className="flex items-center justify-center gap-4 overflow-x-auto pt-4">
         {stages.map((stage, index) => (
           <div key={stage.name} className="flex items-center gap-4">
             {/* Stage Circle */}
-            <div className="flex flex-col items-center gap-2 min-w-[120px]">
+            <div className="flex flex-col items-center gap-2 min-w-[120px] pt-2">
               <div 
                 className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 ${
                   stage.name === "Portfolio Company" 
