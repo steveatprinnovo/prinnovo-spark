@@ -116,7 +116,7 @@ const Index = () => {
         <Separator className="my-6" />
         
         {/* Pipeline Stages */}
-        <PipelineStages companies={filteredCompanies} filters={filters} />
+        <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} />
         
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />

@@ -5,9 +5,10 @@ import { ChevronRight } from "lucide-react";
 interface PipelineStagesProps {
   companies: Company[];
   filters: FilterState;
+  onFilterChange: (filters: FilterState) => void;
 }
 
-export function PipelineStages({ companies, filters }: PipelineStagesProps) {
+export function PipelineStages({ companies, filters, onFilterChange }: PipelineStagesProps) {
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
   
@@ -24,13 +25,27 @@ export function PipelineStages({ companies, filters }: PipelineStagesProps) {
     company["Pipeline Stage"] === "Portfolio Company"
   ).length;
 
+  const handleStageClick = (stageName: string) => {
+    // Only make Implementation, Pilot, and Portfolio Company clickable
+    if (["Implementation", "Pilot", "Portfolio Company"].includes(stageName)) {
+      const newFilters = { ...filters };
+      // If already filtering by this stage, clear the filter
+      if (newFilters.pipelineStage === stageName) {
+        newFilters.pipelineStage = "";
+      } else {
+        newFilters.pipelineStage = stageName;
+      }
+      onFilterChange(newFilters);
+    }
+  };
+
   const stages = [
-    { name: "Qualified Leads", count: hasActiveFilters ? 0 : 54 },
-    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : 4 },
-    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : 4 },
-    { name: "Implementation", count: implementationCount },
-    { name: "Pilot", count: pilotCount },
-    { name: "Portfolio Company", count: portfolioCount },
+    { name: "Qualified Leads", count: hasActiveFilters ? 0 : 54, isClickable: false },
+    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : 4, isClickable: false },
+    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : 4, isClickable: false },
+    { name: "Implementation", count: implementationCount, isClickable: true },
+    { name: "Pilot", count: pilotCount, isClickable: true },
+    { name: "Portfolio Company", count: portfolioCount, isClickable: true },
   ];
 
   return (
@@ -42,11 +57,22 @@ export function PipelineStages({ companies, filters }: PipelineStagesProps) {
           <div key={stage.name} className="flex items-center gap-4">
             {/* Stage Circle */}
             <div className="flex flex-col items-center gap-2 min-w-[120px]">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                stage.name === "Portfolio Company" 
-                  ? "bg-green-500/10 border-2 border-green-500" 
-                  : "bg-primary/10 border-2 border-primary"
-              }`}>
+              <div 
+                className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  stage.name === "Portfolio Company" 
+                    ? "bg-green-500/10 border-2 border-green-500" 
+                    : "bg-primary/10 border-2 border-primary"
+                } ${
+                  stage.isClickable 
+                    ? "cursor-pointer hover:scale-105 hover:shadow-md" 
+                    : ""
+                } ${
+                  filters.pipelineStage === stage.name
+                    ? "ring-2 ring-offset-2 ring-primary"
+                    : ""
+                }`}
+                onClick={() => handleStageClick(stage.name)}
+              >
                 <span className={`text-xl font-bold ${
                   stage.name === "Portfolio Company" ? "text-green-600" : "text-primary"
                 }`}>{stage.count}</span>
