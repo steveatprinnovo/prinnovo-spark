@@ -147,7 +147,7 @@ export default function Investments() {
             <p className="text-muted-foreground">Track and monitor hard dollar investment allocations and performance</p>
           </div>
           {lastUpdated && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground italic">
               Current as of {lastUpdated.toLocaleDateString()}
             </div>
           )}
@@ -158,13 +158,13 @@ export default function Investments() {
           {kpiData.map((kpi, index) => (
             <Card 
               key={index}
-              className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0"
+              className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 h-32"
               style={{ 
                 background: kpi.gradient,
                 boxShadow: "var(--shadow-kpi)"
               }}
             >
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-6 h-full flex flex-col justify-end text-center">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-white/90">
                     {kpi.title}
