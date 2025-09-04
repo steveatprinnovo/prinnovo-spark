@@ -58,7 +58,7 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-center w-24 h-12 rounded-lg overflow-hidden">
             {!loading && logoUrl ? (
               <img 
                 src={logoUrl} 
