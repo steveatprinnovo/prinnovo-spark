@@ -185,30 +185,35 @@ export default function Investments() {
 
         {/* Investment Tables by Stage */}
         <div className="space-y-8">
-          {Object.entries(groupedCompanies).map(([stage, stageCompanies]) => (
-            <Card key={stage} className="overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">{stage}</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Company</TableHead>
-                      <TableHead className="text-right">Invested Amount</TableHead>
-                      <TableHead className="text-right">Current Valuation</TableHead>
-                      <TableHead className="text-right">% Gain</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {stageCompanies.map((company) => (
-                      <CompanyRow key={company["Company Name"]} company={company} />
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          ))}
+          {["Committed", "IPA Obligation", "Term Sheet Proposed", "Operational Funding"].map((stage) => {
+            const stageCompanies = groupedCompanies[stage];
+            if (!stageCompanies || stageCompanies.length === 0) return null;
+            
+            return (
+              <Card key={stage} className="overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold">{stage}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Company</TableHead>
+                        <TableHead className="text-right">Invested Amount</TableHead>
+                        <TableHead className="text-right">Current Valuation</TableHead>
+                        <TableHead className="text-right">% Gain</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {stageCompanies.map((company) => (
+                        <CompanyRow key={company["Company Name"]} company={company} />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </main>
     </div>
