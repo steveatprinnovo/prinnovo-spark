@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Check, X, Filter } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const Implementations = () => {
   const navigate = useNavigate();
@@ -269,6 +270,9 @@ const Implementations = () => {
             </Card>
           ))}
         </div>
+
+        {/* Separator */}
+        <Separator />
 
         {/* Filter Button */}
         <div className="flex justify-start">
