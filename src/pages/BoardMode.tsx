@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ export default function BoardMode() {
   const [uploading, setUploading] = useState(false);
   const [presentationMode, setPresentationMode] = useState(true);
   const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
+  const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -364,7 +366,27 @@ export default function BoardMode() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">New Board Approvals</h2>
-              {!presentationMode && (
+              {presentationMode ? (
+                <div className="flex items-center gap-3">
+                  {companies.filter(c => c.readyToPresent && c.companyTitle.trim()).length > 0 && (
+                    <Select value={selectedPresentationCompany} onValueChange={setSelectedPresentationCompany}>
+                      <SelectTrigger className="w-64">
+                        <SelectValue placeholder="Select company to present..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white z-50">
+                        <SelectItem value="">All companies</SelectItem>
+                        {companies
+                          .filter(c => c.readyToPresent && c.companyTitle.trim())
+                          .map((company) => (
+                            <SelectItem key={company.id} value={company.id}>
+                              {company.companyTitle}
+                            </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              ) : (
                 <div className="flex items-center gap-3">
                   {companies.length > 0 && (
                     <select
@@ -390,7 +412,13 @@ export default function BoardMode() {
           {presentationMode ? (
             // Presentation Mode - Professional Slide Format
             <div className="space-y-8">
-              {companies.filter(company => company.companyTitle.trim()).map((company) => (
+              {companies
+                .filter(company => 
+                  company.companyTitle.trim() && 
+                  company.readyToPresent &&
+                  (selectedPresentationCompany === "" || selectedPresentationCompany === company.id)
+                )
+                .map((company) => (
                 <div key={company.id} className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
                   {/* Header */}
                   <div className="bg-white border-b border-gray-200 p-6">
@@ -569,30 +597,47 @@ export default function BoardMode() {
                    <p>Select a company from the dropdown above to edit.</p>
                  </div>
                ) : companies.filter(company => company.id === activeCompanyId).map((company, index) => (
-                <div key={company.id} className="border rounded-lg p-6 space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">Company {index + 1}</h2>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleSaveCompany(company.id)}
-                        disabled={saving || !company.companyTitle.trim()}
-                        className="flex items-center gap-2"
-                      >
-                        {saving ? "Saving..." : "Save"}
-                      </Button>
-                      {companies.length > 1 && (
-                        <Button
-                          onClick={() => removeCompany(company.id)}
-                          variant="destructive"
-                          size="sm"
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                   
-                   <div className="space-y-6">
+                 <div key={company.id} className="border rounded-lg p-6 space-y-6">
+                   <div className="flex justify-between items-center">
+                     <h2 className="text-xl font-semibold">Company {index + 1}</h2>
+                     <div className="flex gap-2">
+                       <Button
+                         onClick={() => handleSaveCompany(company.id)}
+                         disabled={saving || !company.companyTitle.trim()}
+                         className="flex items-center gap-2"
+                       >
+                         {saving ? "Saving..." : "Save"}
+                       </Button>
+                       {companies.length > 1 && (
+                         <Button
+                           onClick={() => removeCompany(company.id)}
+                           variant="destructive"
+                           size="sm"
+                         >
+                           Remove
+                         </Button>
+                       )}
+                     </div>
+                   </div>
+
+                   {/* Ready to Present Toggle */}
+                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                     <div className="space-y-1">
+                       <Label htmlFor={`ready-to-present-${company.id}`} className="text-sm font-medium">
+                         Ready to Present
+                       </Label>
+                       <p className="text-xs text-gray-600">
+                         Enable to show this company in Presentation Mode
+                       </p>
+                     </div>
+                     <Switch
+                       id={`ready-to-present-${company.id}`}
+                       checked={company.readyToPresent}
+                       onCheckedChange={(checked) => updateCompanyField(company.id, 'readyToPresent', checked)}
+                     />
+                   </div>
+                    
+                    <div className="space-y-6">
                      {/* Company Title */}
                      <div className="space-y-2">
                        <Label htmlFor={`company-title-${company.id}`}>Company Title</Label>

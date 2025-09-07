@@ -20,6 +20,7 @@ export interface BoardApprovalData {
   validation: string;
   it_needs_pilot: string;
   post_pilot: string;
+  ready_to_present: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +43,7 @@ export interface CompanyData {
   postPilot: string;
   excelFile: File | null;
   excelUrl: string | null;
+  readyToPresent: boolean;
 }
 
 export function useBoardApprovals() {
@@ -88,6 +90,7 @@ export function useBoardApprovals() {
       postPilot: record.post_pilot,
       excelFile: null,
       excelUrl,
+      readyToPresent: record.ready_to_present,
     };
   };
 
@@ -178,6 +181,7 @@ export function useBoardApprovals() {
         validation: company.validation,
         it_needs_pilot: company.itNeedsPilot,
         post_pilot: company.postPilot,
+        ready_to_present: company.readyToPresent,
       };
 
       if (existingData) {
@@ -229,6 +233,7 @@ export function useBoardApprovals() {
       postPilot: "",
       excelFile: null,
       excelUrl: null,
+      readyToPresent: false,
     };
 
     setCompanies(prev => [...prev, newCompany]);

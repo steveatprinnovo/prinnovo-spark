@@ -29,6 +29,7 @@ export type Database = {
           logo_storage_path: string | null
           one_time_implementation_cost: number | null
           post_pilot: string | null
+          ready_to_present: boolean
           referral_incentive: string | null
           updated_at: string | null
           user_id: string
@@ -49,6 +50,7 @@ export type Database = {
           logo_storage_path?: string | null
           one_time_implementation_cost?: number | null
           post_pilot?: string | null
+          ready_to_present?: boolean
           referral_incentive?: string | null
           updated_at?: string | null
           user_id: string
@@ -69,6 +71,7 @@ export type Database = {
           logo_storage_path?: string | null
           one_time_implementation_cost?: number | null
           post_pilot?: string | null
+          ready_to_present?: boolean
           referral_incentive?: string | null
           updated_at?: string | null
           user_id?: string
