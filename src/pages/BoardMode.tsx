@@ -72,6 +72,66 @@ export default function BoardMode() {
     }
   }, [companies, activeCompanyId]);
 
+  // Load Excel data when modal opens
+  useEffect(() => {
+    if (!showExcelModal || !activeCompanyId) return;
+    
+    const activeCompany = companies.find(c => c.id === activeCompanyId);
+    if (!activeCompany) return;
+
+    const loadExcelData = async () => {
+      try {
+        let arrayBuffer: ArrayBuffer;
+        
+        if (activeCompany.excelFile) {
+          // Load from local file
+          arrayBuffer = await activeCompany.excelFile.arrayBuffer();
+        } else if (activeCompany.excelUrl) {
+          // Load from URL
+          const response = await fetch(activeCompany.excelUrl);
+          arrayBuffer = await response.arrayBuffer();
+        } else {
+          return;
+        }
+
+        const workbook = XLSX.read(arrayBuffer);
+        const sheetNames = workbook.SheetNames;
+        
+        setExcelSheets(sheetNames);
+        
+        if (sheetNames.length > 0) {
+          const firstSheet = workbook.Sheets[sheetNames[0]];
+          const range = XLSX.utils.decode_range(firstSheet['!ref'] || 'A1:A1');
+          setSheetRange(range);
+          
+          const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+          setExcelData(data as any[][]);
+          setSelectedSheet(sheetNames[0]);
+          
+          // Calculate column widths
+          const widths = [];
+          for (let col = range.s.c; col <= range.e.c; col++) {
+            let maxWidth = 100;
+            for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
+              const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
+              const cellValue = firstSheet[cellAddress]?.v || '';
+              const textWidth = String(cellValue).length * 8;
+              maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
+            }
+            widths.push(maxWidth);
+          }
+          setColumnWidths(widths);
+          setExcelCells(firstSheet);
+        }
+      } catch (error) {
+        console.error('Error loading Excel data:', error);
+        toast.error('Failed to load Excel file');
+      }
+    };
+
+    loadExcelData();
+  }, [showExcelModal, activeCompanyId, companies]);
+
   const addAgendaItem = () => {
     const newItem: AgendaItem = {
       id: Date.now().toString(),
@@ -902,38 +962,41 @@ export default function BoardMode() {
                      <div className="space-y-2">
                        <Label>Upload Excel Pro-Forma</Label>
                        <div className="flex items-center gap-4">
-                         {company.excelFile ? (
-                           <div className="flex items-center gap-4">
-                             <div className="flex items-center gap-2 p-2 border rounded">
-                               <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                               <span className="text-sm">{company.excelFile.name}</span>
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 onClick={() => {
-                                   setShowExcelModal(true);
-                                   setActiveCompanyId(company.id);
-                                 }}
-                                 className="h-6 w-6 p-0"
-                               >
-                                 <FileSpreadsheet className="h-4 w-4" />
-                               </Button>
-                             </div>
-                             <Button
-                               variant="outline"
-                               onClick={() => {
-                                 updateCompanyField(company.id, 'excelFile', null);
-                                 setExcelData([]);
-                                 setExcelCells({});
-                                 setExcelSheets([]);
-                                 setSelectedSheet("");
-                                 setColumnWidths([]);
-                               }}
-                             >
-                               Remove Excel
-                             </Button>
-                           </div>
-                         ) : (
+                          {(company.excelFile || company.excelUrl) ? (
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 p-2 border rounded">
+                                <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                                <span className="text-sm">
+                                  {company.excelFile?.name || "Uploaded Excel File"}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setShowExcelModal(true);
+                                    setActiveCompanyId(company.id);
+                                  }}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <FileSpreadsheet className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  updateCompanyField(company.id, 'excelFile', null);
+                                  updateCompanyField(company.id, 'excelUrl', null);
+                                  setExcelData([]);
+                                  setExcelCells({});
+                                  setExcelSheets([]);
+                                  setSelectedSheet("");
+                                  setColumnWidths([]);
+                                }}
+                              >
+                                Remove Excel
+                              </Button>
+                            </div>
+                          ) : (
                            <Label htmlFor={`excel-upload-${company.id}`} className="cursor-pointer">
                              <Button variant="outline" asChild disabled={uploading}>
                                <span>
