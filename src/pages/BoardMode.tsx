@@ -1137,12 +1137,15 @@ export default function BoardMode() {
                                  className="border px-2 py-1 text-xs"
                                  style={{
                                    ...cellStyle,
-                                   width: `${columnWidths[cellIndex] || 100}px`,
-                                   minWidth: `${columnWidths[cellIndex] || 100}px`,
-                                   maxWidth: `${columnWidths[cellIndex] || 100}px`,
-                                   overflow: 'visible',
-                                   whiteSpace: cellStyle.whiteSpace || 'nowrap',
-                                   textOverflow: 'ellipsis'
+                                    width: `${columnWidths[cellIndex] || 100}px`,
+                                    minWidth: `${columnWidths[cellIndex] || 100}px`,
+                                    maxWidth: `${columnWidths[cellIndex] || 100}px`,
+                                    overflow: 'hidden',
+                                    whiteSpace: 'normal',
+                                    wordWrap: 'break-word',
+                                    wordBreak: 'break-word',
+                                    textOverflow: 'clip',
+                                    verticalAlign: 'top'
                                  }}
                                  title={formattedValue}
                                >
