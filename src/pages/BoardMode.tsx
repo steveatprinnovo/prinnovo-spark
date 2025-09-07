@@ -56,7 +56,7 @@ export default function BoardMode() {
   const [uploading, setUploading] = useState(false);
   const [presentationMode, setPresentationMode] = useState(true);
   const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
-  const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("all");
+  const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -422,7 +422,8 @@ export default function BoardMode() {
                 .filter(company => 
                   company.companyTitle.trim() && 
                   company.readyToPresent &&
-                  (selectedPresentationCompany === "all" || selectedPresentationCompany === company.id)
+                  (selectedPresentationCompany === "all" || 
+                   (selectedPresentationCompany !== "" && selectedPresentationCompany === company.id))
                 )
                 .map((company) => (
                 <div key={company.id} className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
