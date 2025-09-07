@@ -198,7 +198,12 @@ export default function BoardMode() {
       if (excelWorkbook) {
         const ws = excelWorkbook.Sheets?.[sheetName];
         if (!ws) return;
-        const html = XLSX.utils.sheet_to_html(ws, { header: "", footer: "" });
+        const html = XLSX.utils.sheet_to_html(ws, { 
+          header: "", 
+          footer: "",
+          editable: false,
+          id: "excel-preview-table"
+        });
         setExcelHTML(extractTable(html));
         return;
       }
@@ -210,7 +215,12 @@ export default function BoardMode() {
         if (!buf) return;
         const wb = XLSX.read(buf);
         const ws2 = wb.Sheets[sheetName];
-        const html2 = XLSX.utils.sheet_to_html(ws2, { header: "", footer: "" });
+        const html2 = XLSX.utils.sheet_to_html(ws2, { 
+          header: "", 
+          footer: "",
+          editable: false,
+          id: "excel-preview-table"
+        });
         setExcelHTML(extractTable(html2));
       };
       reader.readAsArrayBuffer(activeCompany.excelFile);
@@ -219,10 +229,18 @@ export default function BoardMode() {
     }
   };
 
-  // Helper to extract only the table from sheet_to_html output
+  // Helper to extract only the table from sheet_to_html output and add proper styling
   const extractTable = (html: string) => {
     const match = html.match(/<table[\s\S]*?<\/table>/i);
-    return match ? match[0] : html;
+    if (!match) return html;
+    
+    // Add comprehensive styling to preserve Excel formatting
+    const styledTable = match[0].replace(
+      '<table',
+      `<table style="border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 12px;"`
+    );
+    
+    return styledTable;
   };
 
   // Open Excel preview from file or URL, parse workbook, and render first sheet
@@ -249,7 +267,14 @@ export default function BoardMode() {
       const first = sheets[0];
       setSelectedSheet(first);
       const ws = wb.Sheets[first];
-      const html = XLSX.utils.sheet_to_html(ws, { header: "", footer: "" });
+      
+      // Use sheet_to_html with options to preserve all formatting
+      const html = XLSX.utils.sheet_to_html(ws, { 
+        header: "", 
+        footer: "",
+        editable: false,
+        id: "excel-preview-table"
+      });
       setExcelHTML(extractTable(html));
       setActiveCompanyId(companyId);
       setShowExcelModal(true);
@@ -1023,7 +1048,46 @@ export default function BoardMode() {
               
               {excelHTML ? (
                 <div className="flex-1 overflow-auto border rounded">
-                  <div className="min-w-full" dangerouslySetInnerHTML={{ __html: excelHTML }} />
+                  <style>{`
+                    #excel-preview-table {
+                      border-collapse: collapse !important;
+                      width: 100% !important;
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                    }
+                    #excel-preview-table td, #excel-preview-table th {
+                      border: 1px solid #d1d5db !important;
+                      padding: 4px 8px !important;
+                      text-align: left !important;
+                      vertical-align: top !important;
+                      word-wrap: break-word !important;
+                      max-width: 300px !important;
+                    }
+                    #excel-preview-table .b {
+                      font-weight: bold !important;
+                    }
+                    #excel-preview-table .i {
+                      font-style: italic !important;
+                    }
+                    #excel-preview-table .u {
+                      text-decoration: underline !important;
+                    }
+                    /* Preserve Excel number formatting */
+                    #excel-preview-table .number {
+                      text-align: right !important;
+                    }
+                    #excel-preview-table .currency {
+                      text-align: right !important;
+                    }
+                    /* Ensure merged cells display properly */
+                    #excel-preview-table td[colspan], #excel-preview-table th[colspan] {
+                      text-align: center !important;
+                      background-color: #f8fafc !important;
+                    }
+                    #excel-preview-table td[rowspan], #excel-preview-table th[rowspan] {
+                      vertical-align: middle !important;
+                    }
+                  `}</style>
+                  <div className="min-w-full excel-container" dangerouslySetInnerHTML={{ __html: excelHTML }} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
