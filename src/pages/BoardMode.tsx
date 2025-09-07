@@ -843,44 +843,48 @@ export default function BoardMode() {
                     
                     {/* Back Side - Financial Pro-Forma */}
                     <div className="flip-card-back bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
-                      {/* Header */}
-                      <div className="bg-white border-b border-gray-200 p-6">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-start gap-6">
-                            <div className="flex flex-col items-center gap-3">
-                              {(company.logoUrl || company.logoFile) && (
-                                <img 
-                                  src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
-                                  alt="Company logo" 
-                                  className="h-14 w-14 object-contain"
-                                />
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => flipBackToReview(company.id)}
-                                className="flex items-center gap-2 text-xs"
-                              >
-                                <FileText className="h-3 w-3" />
-                                Back to Review
-                              </Button>
-                            </div>
-                            <div className="flex-1">
-                              <h2 className="text-2xl font-bold text-gray-900">
-                                {company.companyTitle} Financial Pro-Forma
-                              </h2>
-                              <p className="text-sm text-gray-600 mt-1">Financial Analysis & Projections</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <img 
-                              src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
-                              alt="Healthliant Ventures"
-                              className="h-8 w-auto object-contain"
-                            />
-                          </div>
-                        </div>
-                      </div>
+                       {/* Header */}
+                       <div className="bg-white border-b border-gray-200 p-6">
+                         <div className="flex justify-between items-center">
+                           <div className="flex items-center gap-6">
+                             <div className="flex items-center gap-4">
+                               {(company.logoUrl || company.logoFile) && (
+                                 <img 
+                                   src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
+                                   alt="Company logo" 
+                                   className="w-24 h-auto object-contain"
+                                 />
+                               )}
+                               <div className="flex-1">
+                                 <h2 className="text-2xl font-bold text-gray-900">
+                                   {company.companyTitle} Financial Pro-Forma
+                                 </h2>
+                                 <p className="text-sm text-gray-600 mt-1">Financial Analysis & Projections</p>
+                               </div>
+                             </div>
+                           </div>
+                           <div className="flex items-center gap-2">
+                             <img 
+                               src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
+                               alt="Healthliant Ventures"
+                               className="h-8 w-auto object-contain"
+                             />
+                           </div>
+                         </div>
+                         
+                         {/* Back to Review Button */}
+                         <div className="mt-4 flex justify-start">
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => flipBackToReview(company.id)}
+                             className="flex items-center gap-2 text-xs"
+                           >
+                             <FileText className="h-3 w-3" />
+                             Back to Review
+                           </Button>
+                         </div>
+                       </div>
 
                       {/* Excel Content */}
                       <div className="p-6">
