@@ -57,6 +57,8 @@ export default function BoardMode() {
   const [presentationMode, setPresentationMode] = useState(true);
   const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
   const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("");
+  const [excelWorkbook, setExcelWorkbook] = useState<any | null>(null);
+  const [excelHTML, setExcelHTML] = useState<string>("");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -191,39 +193,72 @@ export default function BoardMode() {
   };
 
   const handleSheetChange = (sheetName: string) => {
-    const activeCompany = companies.find(c => c.id === activeCompanyId);
-    if (!activeCompany?.excelFile) return;
-
     setSelectedSheet(sheetName);
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const arrayBuffer = e.target?.result;
-      if (arrayBuffer) {
-        const workbook = XLSX.read(arrayBuffer);
-        const sheet = workbook.Sheets[sheetName];
-        const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
-        setSheetRange(range);
-        
-        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        setExcelData(data as any[][]);
-        
-        const widths = [];
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          let maxWidth = 100;
-          for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
-            const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
-            const cellValue = sheet[cellAddress]?.v || '';
-            const textWidth = String(cellValue).length * 8;
-            maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
-          }
-          widths.push(maxWidth);
-        }
-        setColumnWidths(widths);
-        setExcelCells(sheet);
+    try {
+      if (excelWorkbook) {
+        const ws = excelWorkbook.Sheets?.[sheetName];
+        if (!ws) return;
+        const html = XLSX.utils.sheet_to_html(ws, { header: "", footer: "" });
+        setExcelHTML(extractTable(html));
+        return;
       }
-    };
-    reader.readAsArrayBuffer(activeCompany.excelFile);
+      const activeCompany = companies.find(c => c.id === activeCompanyId);
+      if (!activeCompany?.excelFile) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const buf = e.target?.result;
+        if (!buf) return;
+        const wb = XLSX.read(buf);
+        const ws2 = wb.Sheets[sheetName];
+        const html2 = XLSX.utils.sheet_to_html(ws2, { header: "", footer: "" });
+        setExcelHTML(extractTable(html2));
+      };
+      reader.readAsArrayBuffer(activeCompany.excelFile);
+    } catch (e) {
+      console.error('Error switching sheet:', e);
+    }
+  };
+
+  // Helper to extract only the table from sheet_to_html output
+  const extractTable = (html: string) => {
+    const match = html.match(/<table[\s\S]*?<\/table>/i);
+    return match ? match[0] : html;
+  };
+
+  // Open Excel preview from file or URL, parse workbook, and render first sheet
+  const openExcelPreview = async (companyId: string) => {
+    const company = companies.find(c => c.id === companyId);
+    if (!company) return;
+    try {
+      setUploading(true);
+      let buf: ArrayBuffer | null = null;
+      if (company.excelFile) {
+        buf = await company.excelFile.arrayBuffer();
+      } else if (company.excelUrl) {
+        const res = await fetch(company.excelUrl);
+        buf = await res.arrayBuffer();
+      }
+      if (!buf) {
+        toast.error('No Excel file available');
+        return;
+      }
+      const wb = XLSX.read(buf);
+      setExcelWorkbook(wb);
+      const sheets = wb.SheetNames;
+      setExcelSheets(sheets);
+      const first = sheets[0];
+      setSelectedSheet(first);
+      const ws = wb.Sheets[first];
+      const html = XLSX.utils.sheet_to_html(ws, { header: "", footer: "" });
+      setExcelHTML(extractTable(html));
+      setActiveCompanyId(companyId);
+      setShowExcelModal(true);
+    } catch (e) {
+      console.error('Error opening Excel preview:', e);
+      toast.error('Failed to open Excel preview');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const loading = authLoading || companiesLoading;
@@ -445,10 +480,7 @@ export default function BoardMode() {
                              <Button
                                variant="outline"
                                size="sm"
-                               onClick={() => {
-                                 setActiveCompanyId(company.id);
-                                 setShowExcelModal(true);
-                               }}
+                                onClick={() => openExcelPreview(company.id)}
                                className="flex items-center gap-2 text-xs"
                              >
                                <FileSpreadsheet className="h-3 w-3" />
@@ -914,10 +946,7 @@ export default function BoardMode() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => {
-                                    setShowExcelModal(true);
-                                    setActiveCompanyId(company.id);
-                                  }}
+                                  onClick={() => openExcelPreview(company.id)}
                                   className="h-6 w-6 p-0"
                                 >
                                   <FileSpreadsheet className="h-4 w-4" />
@@ -992,53 +1021,9 @@ export default function BoardMode() {
                 </div>
               )}
               
-              {excelData.length > 0 ? (
+              {excelHTML ? (
                 <div className="flex-1 overflow-auto border rounded">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      {excelData.map((row: any[], rowIndex: number) => (
-                        <tr key={rowIndex} className="border-b">
-                          {row.map((cell: any, cellIndex: number) => {
-                            const cellAddress = XLSX.utils.encode_cell({ c: cellIndex, r: rowIndex });
-                            const cellData = excelCells[cellAddress];
-                            const cellStyle = cellData?.s || {};
-                            
-                            let formattedValue = cell;
-                            if (cellData?.t === 'n' && cellData?.z) {
-                              try {
-                                formattedValue = XLSX.SSF.format(cellData.z, cell);
-                              } catch (e) {
-                                formattedValue = String(cell || '');
-                              }
-                            } else {
-                              formattedValue = String(cell || '');
-                            }
-
-                            return (
-                              <td
-                                key={cellIndex}
-                                className="border-r p-2 text-left"
-                                style={{
-                                  width: `${columnWidths[cellIndex] || 100}px`,
-                                  minWidth: `${columnWidths[cellIndex] || 100}px`,
-                                  maxWidth: `${columnWidths[cellIndex] || 100}px`,
-                                  overflow: 'hidden',
-                                  whiteSpace: 'normal',
-                                  wordWrap: 'break-word',
-                                  wordBreak: 'break-word',
-                                  textOverflow: 'clip',
-                                  verticalAlign: 'top'
-                                }}
-                                title={formattedValue}
-                              >
-                                {formattedValue}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="min-w-full" dangerouslySetInnerHTML={{ __html: excelHTML }} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
