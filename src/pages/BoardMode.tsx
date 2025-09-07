@@ -365,9 +365,25 @@ export default function BoardMode() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">New Board Approvals</h2>
               {!presentationMode && (
-                <Button onClick={handleAddNewCompany} className="flex items-center gap-2">
-                  <span>Add New Company</span>
-                </Button>
+                <div className="flex items-center gap-3">
+                  {companies.length > 0 && (
+                    <select
+                      value={activeCompanyId}
+                      onChange={(e) => setActiveCompanyId(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select a company to edit...</option>
+                      {companies.map((company) => (
+                        <option key={company.id} value={company.id}>
+                          {company.companyTitle || 'Untitled Company'}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <Button onClick={handleAddNewCompany} className="flex items-center gap-2">
+                    <span>Add New Company</span>
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -541,10 +557,18 @@ export default function BoardMode() {
                  </div>
                ))}
              </div>
-           ) : (
-            // Edit Mode - Original Form Layout
-            <div className="space-y-6">
-              {companies.map((company, index) => (
+            ) : (
+             // Edit Mode - Original Form Layout
+             <div className="space-y-6">
+               {companies.length === 0 ? (
+                 <div className="text-center py-8 text-gray-500">
+                   <p>No companies yet. Click "Add New Company" to get started.</p>
+                 </div>
+               ) : !activeCompanyId ? (
+                 <div className="text-center py-8 text-gray-500">
+                   <p>Select a company from the dropdown above to edit.</p>
+                 </div>
+               ) : companies.filter(company => company.id === activeCompanyId).map((company, index) => (
                 <div key={company.id} className="border rounded-lg p-6 space-y-6">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold">Company {index + 1}</h2>
@@ -876,10 +900,10 @@ export default function BoardMode() {
                          )}
                        </div>
                      </div>
-                   </div>
-                 </div>
-               ))}
-             </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
            )}
           </div>
         </div>
