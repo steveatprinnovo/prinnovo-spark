@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as XLSX from 'xlsx';
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X } from "lucide-react";
+import { Upload, X, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 
 interface AgendaItem {
@@ -31,6 +32,11 @@ export default function BoardMode() {
   const [companyTitle, setCompanyTitle] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [excelFile, setExcelFile] = useState<File | null>(null);
+  const [excelData, setExcelData] = useState<any[][]>([]);
+  const [excelSheets, setExcelSheets] = useState<string[]>([]);
+  const [selectedSheet, setSelectedSheet] = useState<string>("");
+  const [showExcelModal, setShowExcelModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   // Redirect to auth if not authenticated
@@ -101,6 +107,73 @@ export default function BoardMode() {
     }
   };
 
+  const handleExcelUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check if it's an Excel file
+    const allowedTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel.sheet.macroEnabled.12',
+      'text/csv'
+    ];
+    
+    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      toast.error("Please select a valid Excel file (.xlsx, .xls, .csv)");
+      return;
+    }
+
+    setExcelFile(file);
+    setUploading(true);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer);
+      
+      // Get sheet names
+      const sheetNames = workbook.SheetNames;
+      setExcelSheets(sheetNames);
+      
+      // Set first sheet as default
+      if (sheetNames.length > 0) {
+        const firstSheet = sheetNames[0];
+        setSelectedSheet(firstSheet);
+        
+        // Convert sheet to JSON
+        const worksheet = workbook.Sheets[firstSheet];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        setExcelData(jsonData as any[][]);
+      }
+      
+      setShowExcelModal(true);
+      toast.success("Excel file loaded successfully!");
+    } catch (error) {
+      console.error('Error reading Excel file:', error);
+      toast.error("Failed to read Excel file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSheetChange = (sheetName: string) => {
+    if (!excelFile) return;
+    
+    setSelectedSheet(sheetName);
+    
+    // Re-read the file and extract data for the selected sheet
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const arrayBuffer = e.target?.result;
+      if (arrayBuffer) {
+        const workbook = XLSX.read(arrayBuffer);
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        setExcelData(jsonData as any[][]);
+      }
+    };
+    reader.readAsArrayBuffer(excelFile);
+  };
 
   if (authLoading) {
     return <div>Loading...</div>;
@@ -263,8 +336,117 @@ export default function BoardMode() {
               )}
             </div>
 
+            {/* Excel Upload */}
+            <div className="space-y-2">
+              <Label>Excel Document</Label>
+              <div className="flex items-center gap-4">
+                {excelFile ? (
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 p-2 border rounded">
+                      <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">{excelFile.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowExcelModal(true)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <FileSpreadsheet className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setExcelFile(null);
+                        setExcelData([]);
+                        setExcelSheets([]);
+                        setSelectedSheet("");
+                      }}
+                    >
+                      Remove Excel
+                    </Button>
+                  </div>
+                ) : (
+                  <Label htmlFor="excel-upload" className="cursor-pointer">
+                    <Button variant="outline" asChild disabled={uploading}>
+                      <span>
+                        {uploading ? "Loading..." : "Upload Excel"}
+                      </span>
+                    </Button>
+                    <Input
+                      id="excel-upload"
+                      type="file"
+                      accept=".xlsx,.xls,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                      onChange={handleExcelUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </Label>
+                )}
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Excel Preview Modal */}
+        <Dialog open={showExcelModal} onOpenChange={setShowExcelModal}>
+          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-4">
+            <DialogHeader>
+              <DialogTitle>Excel Preview{excelFile?.name ? ` - ${excelFile.name}` : ""}</DialogTitle>
+              <DialogDescription className="sr-only">
+                Preview of the uploaded Excel document
+              </DialogDescription>
+            </DialogHeader>
+            
+            {excelSheets.length > 1 && (
+              <div className="mb-4">
+                <Label htmlFor="sheet-select" className="text-sm font-medium">
+                  Select Sheet:
+                </Label>
+                <select
+                  id="sheet-select"
+                  value={selectedSheet}
+                  onChange={(e) => handleSheetChange(e.target.value)}
+                  className="ml-2 px-3 py-1 border rounded text-sm"
+                >
+                  {excelSheets.map((sheetName) => (
+                    <option key={sheetName} value={sheetName}>
+                      {sheetName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            <div className="flex-1 overflow-auto border rounded">
+              {excelData.length > 0 ? (
+                <div className="min-w-full">
+                  <table className="w-full border-collapse">
+                    <tbody>
+                      {excelData.map((row, rowIndex) => (
+                        <tr key={rowIndex} className={rowIndex === 0 ? "bg-muted font-medium" : ""}>
+                          {row.map((cell, cellIndex) => (
+                            <td
+                              key={cellIndex}
+                              className="border px-2 py-1 text-sm min-w-[100px] max-w-[200px] truncate"
+                              title={cell?.toString() || ""}
+                            >
+                              {cell?.toString() || ""}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                  No data available to display.
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
