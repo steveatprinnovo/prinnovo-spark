@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           Champions: string | null
           "Company Contact": string | null
+          "Company Description": string | null
           "Company Name": string
           "Country of Origin": string | null
           "Current Company Valuation": number | null
@@ -29,6 +30,9 @@ export type Database = {
           imgurl: string | null
           "Implementation Completion Date": string | null
           "Intro Origin": string | null
+          "Invested Amount": number | null
+          "Invested Amount Valuation": number | null
+          "Investment Tracker Stage": string | null
           "IPA Signature Date": string | null
           "IPA Year": number | null
           "Pipeline Stage": string | null
@@ -38,6 +42,7 @@ export type Database = {
         Insert: {
           Champions?: string | null
           "Company Contact"?: string | null
+          "Company Description"?: string | null
           "Company Name": string
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
@@ -49,6 +54,9 @@ export type Database = {
           imgurl?: string | null
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
+          "Invested Amount"?: number | null
+          "Invested Amount Valuation"?: number | null
+          "Investment Tracker Stage"?: string | null
           "IPA Signature Date"?: string | null
           "IPA Year"?: number | null
           "Pipeline Stage"?: string | null
@@ -58,6 +66,7 @@ export type Database = {
         Update: {
           Champions?: string | null
           "Company Contact"?: string | null
+          "Company Description"?: string | null
           "Company Name"?: string
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
@@ -69,6 +78,9 @@ export type Database = {
           imgurl?: string | null
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
+          "Invested Amount"?: number | null
+          "Invested Amount Valuation"?: number | null
+          "Investment Tracker Stage"?: string | null
           "IPA Signature Date"?: string | null
           "IPA Year"?: number | null
           "Pipeline Stage"?: string | null

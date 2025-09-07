@@ -1,7 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Home, ClipboardList, DollarSign } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, ChevronDown } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function DashboardHeader() {
   const { signOut, user } = useAuth();
@@ -17,7 +23,26 @@ export function DashboardHeader() {
               alt="Healthliant Ventures" 
               className="h-8 w-auto"
             />
-            <span className="text-lg font-semibold">Portfolio Dashboard</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent">
+                  Portfolio Dashboard
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-popover z-50">
+                <DropdownMenuItem asChild>
+                  <Link to="/" className="w-full">
+                    Home Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/board-mode" className="w-full">
+                    Board Mode
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           {/* Navigation Links */}

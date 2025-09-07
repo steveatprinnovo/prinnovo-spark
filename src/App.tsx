@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Implementations from "./pages/Implementations";
 import Investments from "./pages/Investments";
+import BoardMode from "./pages/BoardMode";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/implementations" element={<Implementations />} />
           <Route path="/investments" element={<Investments />} />
+          <Route path="/board-mode" element={<BoardMode />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
