@@ -33,6 +33,7 @@ export default function BoardMode() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -131,9 +132,8 @@ export default function BoardMode() {
       if (signedPdfErr) throw signedPdfErr;
 
       setPdfUrl(signedPdf?.signedUrl || null);
-      if (signedPdf?.signedUrl) {
-        setShowPdfModal(true);
-      }
+      setPdfPreviewUrl(URL.createObjectURL(file));
+      setShowPdfModal(true);
       toast.success("PDF uploaded successfully!");
     } catch (error) {
       console.error('Error uploading PDF:', error);
@@ -324,7 +324,11 @@ export default function BoardMode() {
                     <Button
                       variant="outline"
                       onClick={() => {
+                        if (pdfPreviewUrl) {
+                          URL.revokeObjectURL(pdfPreviewUrl);
+                        }
                         setPdfFile(null);
+                        setPdfPreviewUrl(null);
                         setPdfUrl(null);
                       }}
                     >
@@ -347,6 +351,12 @@ export default function BoardMode() {
                       disabled={uploading}
                     />
                   </Label>
+              )}
+              <div className="mt-2 text-right text-xs text-muted-foreground">
+                {pdfUrl && (
+                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                    Open original file
+                  </a>
                 )}
               </div>
             </div>
@@ -363,13 +373,15 @@ export default function BoardMode() {
               </DialogDescription>
             </DialogHeader>
             <div className="h-full overflow-hidden">
-              {pdfUrl ? (
-                <object data={pdfUrl} type="application/pdf" className="w-full h-full rounded border">
+              {pdfPreviewUrl || pdfUrl ? (
+                <object data={(pdfPreviewUrl ?? pdfUrl) as string} type="application/pdf" className="w-full h-full rounded border">
                   <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                     Your browser cannot display PDFs.
-                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="ml-2 underline">
-                      Open in a new tab
-                    </a>
+                    {pdfUrl && (
+                      <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="ml-2 underline">
+                        Open in a new tab
+                      </a>
+                    )}
                   </div>
                 </object>
               ) : (
