@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, FileSpreadsheet, Presentation } from "lucide-react";
+import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch } from "lucide-react";
 import { toast } from "sonner";
 
 interface AgendaItem {
@@ -637,36 +637,36 @@ export default function BoardMode() {
                   {/* Header with logos */}
                   <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 border-b">
                     <div className="flex justify-between items-start">
-                       <div className="flex items-center gap-4">
-                         {(company.logoUrl || company.logoFile) && (
-                           <img 
-                             src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
-                             alt="Company logo" 
-                             className="h-18 w-18 object-contain"
-                           />
-                         )}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <h2 className="text-2xl font-bold text-gray-900">
-                              Partnership Review – {company.companyTitle}
-                            </h2>
-                             {company.excelFile && (
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => {
-                                   setActiveCompanyId(company.id);
-                                   setShowExcelModal(true);
-                                 }}
-                                 className="flex items-center gap-2"
-                               >
-                                 <FileSpreadsheet className="h-4 w-4" />
-                                 Excel Preview
-                               </Button>
-                             )}
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
-                        </div>
+                       <div className="flex items-start gap-6">
+                         <div className="flex flex-col items-center gap-3">
+                           {(company.logoUrl || company.logoFile) && (
+                             <img 
+                               src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
+                               alt="Company logo" 
+                               className="h-14 w-14 object-contain"
+                             />
+                           )}
+                           {company.excelFile && (
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => {
+                                 setActiveCompanyId(company.id);
+                                 setShowExcelModal(true);
+                               }}
+                               className="flex items-center gap-2 text-xs"
+                             >
+                               <FileSpreadsheet className="h-3 w-3" />
+                               View Financial Pro-Forma
+                             </Button>
+                           )}
+                         </div>
+                         <div className="flex-1">
+                           <h2 className="text-2xl font-bold text-gray-900">
+                             Partnership Review – {company.companyTitle}
+                           </h2>
+                           <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
+                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <img 
@@ -682,51 +682,51 @@ export default function BoardMode() {
                   <div className="p-6 grid grid-cols-2 gap-8">
                     {/* Left Column */}
                     <div className="space-y-6">
-                      {/* Value & Impact Team */}
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Value & Impact Team:
-                        </h3>
+                       <div className="bg-green-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <Users className="h-4 w-4" />
+                           Value & Impact Team:
+                         </h3>
                         <p className="text-sm text-gray-700">
                           {company.valueImpactTeam || "Team details to be provided"}
                         </p>
                       </div>
 
-                      {/* Key Points Section */}
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Key Points:
-                        </h3>
+                       <div className="bg-blue-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <Target className="h-4 w-4" />
+                           Key Points:
+                         </h3>
                         <p className="text-sm text-gray-700 leading-relaxed">
                           {company.keyPoints || "Key points to be documented"}
                         </p>
                       </div>
 
-                      {/* IPA Terms */}
-                      <div className="bg-yellow-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          IPA Terms:
-                        </h3>
+                       <div className="bg-yellow-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <FileText className="h-4 w-4" />
+                           IPA Terms:
+                         </h3>
                         <p className="text-sm text-gray-700">
                           {company.ipaTerms || "IPA terms to be defined"}
                         </p>
                       </div>
 
-                      {/* Referral Incentive */}
-                      <div className="bg-orange-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Referral Incentive:
-                        </h3>
+                       <div className="bg-orange-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <Gift className="h-4 w-4" />
+                           Referral Incentive:
+                         </h3>
                         <p className="text-sm text-gray-700">
                           {company.referralIncentive || "Incentive structure to be defined"}
                         </p>
                       </div>
 
-                      {/* Financial Information */}
-                      <div className="bg-red-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Internal Annual Cost:
-                        </h3>
+                       <div className="bg-red-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <DollarSign className="h-4 w-4" />
+                           Internal Annual Cost:
+                         </h3>
                         <p className="text-lg font-bold text-gray-900">
                           {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
                         </p>
@@ -735,31 +735,31 @@ export default function BoardMode() {
 
                     {/* Right Column */}
                     <div className="space-y-6">
-                      {/* Validation Section */}
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Validation:
-                        </h3>
+                       <div className="bg-gray-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <CheckCircle className="h-4 w-4" />
+                           Validation:
+                         </h3>
                         <p className="text-sm text-gray-700 leading-relaxed">
                           {company.validation || "Validation details to be provided"}
                         </p>
                       </div>
 
-                      {/* Post-Pilot / Co-Development */}
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Post-Pilot / Co-Development:
-                        </h3>
+                       <div className="bg-purple-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <GitBranch className="h-4 w-4" />
+                           Post-Pilot / Co-Development:
+                         </h3>
                         <p className="text-sm text-gray-700 leading-relaxed">
                           {company.postPilot || "Post-pilot strategy to be developed"}
                         </p>
                       </div>
 
-                      {/* IT Needs and Pilot */}
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          IT Needs and Pilot:
-                        </h3>
+                       <div className="bg-indigo-50 p-4 rounded-lg">
+                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                           <Cog className="h-4 w-4" />
+                           IT Needs and Pilot:
+                         </h3>
                         <p className="text-sm text-gray-700 leading-relaxed">
                           {company.itNeedsPilot || "IT requirements and pilot details"}
                         </p>
