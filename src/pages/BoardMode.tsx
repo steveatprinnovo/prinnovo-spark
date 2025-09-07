@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, Eye } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface AgendaItem {
@@ -31,10 +31,6 @@ export default function BoardMode() {
   const [companyTitle, setCompanyTitle] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const [showPdfModal, setShowPdfModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   // Redirect to auth if not authenticated
@@ -105,43 +101,6 @@ export default function BoardMode() {
     }
   };
 
-  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || file.type !== 'application/pdf') {
-      toast.error("Please select a PDF file");
-      return;
-    }
-
-    setPdfFile(file);
-    setUploading(true);
-
-    try {
-      const fileName = `${Date.now()}-${file.name}`;
-      const filePath = `${user?.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('New Company approvals')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: signedPdf, error: signedPdfErr } = await supabase.storage
-        .from('New Company approvals')
-        .createSignedUrl(filePath, 3600);
-
-      if (signedPdfErr) throw signedPdfErr;
-
-      setPdfUrl(signedPdf?.signedUrl || null);
-      setPdfPreviewUrl(URL.createObjectURL(file));
-      setShowPdfModal(true);
-      toast.success("PDF uploaded successfully!");
-    } catch (error) {
-      console.error('Error uploading PDF:', error);
-      toast.error("Failed to upload PDF");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   if (authLoading) {
     return <div>Loading...</div>;
@@ -304,95 +263,8 @@ export default function BoardMode() {
               )}
             </div>
 
-            {/* PDF Upload */}
-            <div className="space-y-2">
-              <Label>Approval Document (PDF)</Label>
-              <div className="flex items-center gap-4">
-                {pdfFile ? (
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 p-2 border rounded">
-                      <span className="text-sm">{pdfFile.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowPdfModal(true)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        if (pdfPreviewUrl) {
-                          URL.revokeObjectURL(pdfPreviewUrl);
-                        }
-                        setPdfFile(null);
-                        setPdfPreviewUrl(null);
-                        setPdfUrl(null);
-                      }}
-                    >
-                      Remove PDF
-                    </Button>
-                  </div>
-                ) : (
-                  <Label htmlFor="pdf-upload" className="cursor-pointer">
-                    <Button variant="outline" asChild disabled={uploading}>
-                      <span>
-                        {uploading ? "Uploading..." : "Upload PDF"}
-                      </span>
-                    </Button>
-                    <Input
-                      id="pdf-upload"
-                      type="file"
-                      accept="application/pdf"
-                      onChange={handlePdfUpload}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                  </Label>
-                )}
-              </div>
-              <div className="mt-2 text-right text-xs text-muted-foreground">
-                {pdfUrl && (
-                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">
-                    Open original file
-                  </a>
-                )}
-              </div>
-            </div>
           </div>
         </div>
-
-        {/* PDF Preview Modal */}
-        <Dialog open={showPdfModal} onOpenChange={setShowPdfModal}>
-          <DialogContent className="max-w-6xl w-[90vw] h-[90vh] p-4">
-            <DialogHeader>
-              <DialogTitle>PDF Preview{pdfFile?.name ? ` - ${pdfFile.name}` : ""}</DialogTitle>
-              <DialogDescription className="sr-only">
-                Preview of the uploaded PDF document
-              </DialogDescription>
-            </DialogHeader>
-            <div className="h-full overflow-hidden">
-              {pdfPreviewUrl || pdfUrl ? (
-                <object data={(pdfPreviewUrl ?? pdfUrl) as string} type="application/pdf" className="w-full h-full rounded border">
-                  <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                    Your browser cannot display PDFs.
-                    {pdfUrl && (
-                      <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="ml-2 underline">
-                        Open in a new tab
-                      </a>
-                    )}
-                  </div>
-                </object>
-              ) : (
-                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                  No PDF available to preview.
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
