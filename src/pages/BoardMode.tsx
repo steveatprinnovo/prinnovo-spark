@@ -198,13 +198,8 @@ export default function BoardMode() {
       if (excelWorkbook) {
         const ws = excelWorkbook.Sheets?.[sheetName];
         if (!ws) return;
-        const html = XLSX.utils.sheet_to_html(ws, { 
-          header: "", 
-          footer: "",
-          editable: false,
-          id: "excel-preview-table"
-        });
-        setExcelHTML(extractTable(html));
+        const html = renderWorksheetToHTML(ws);
+        setExcelHTML(html);
         return;
       }
       const activeCompany = companies.find(c => c.id === activeCompanyId);
@@ -213,7 +208,7 @@ export default function BoardMode() {
       reader.onload = (e) => {
         const buf = e.target?.result;
         if (!buf) return;
-        const wb = XLSX.read(buf);
+      const wb = XLSX.read(buf, { cellStyles: true });
         const ws2 = wb.Sheets[sheetName];
         const html2 = XLSX.utils.sheet_to_html(ws2, { 
           header: "", 
@@ -243,6 +238,114 @@ export default function BoardMode() {
     return styledTable;
   };
 
+  // Convert XLSX ARGB or RGB to CSS hex (#RRGGBB)
+  const xlsxColorToCss = (rgb?: { rgb?: string } | any): string | null => {
+    const val: string | undefined = rgb?.rgb;
+    if (!val) return null;
+    const hex = val.length === 8 ? val.slice(2) : val; // strip alpha if present
+    return `#${hex}`;
+  };
+
+  // Approximate width from Excel wch units to pixels
+  const wchToPx = (wch?: number): number => {
+    if (!wch) return 100;
+    return Math.max(50, Math.min(800, Math.floor(wch * 8 + 5)));
+  };
+
+  // Render a worksheet to HTML with inline styles (fonts, fills, alignment, merges, column widths)
+  const renderWorksheetToHTML = (ws: any): string => {
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+    const merges: any[] = ws['!merges'] || [];
+
+    // Build merge maps
+    const skip = new Set<string>();
+    const spanMap = new Map<string, { rowspan: number; colspan: number }>();
+    merges.forEach((m: any) => {
+      const rowspan = m.e.r - m.s.r + 1;
+      const colspan = m.e.c - m.s.c + 1;
+      spanMap.set(`${m.s.r},${m.s.c}`, { rowspan, colspan });
+      for (let r = m.s.r; r <= m.e.r; r++) {
+        for (let c = m.s.c; c <= m.e.c; c++) {
+          if (r === m.s.r && c === m.s.c) continue;
+          skip.add(`${r},${c}`);
+        }
+      }
+    });
+
+    // Column widths
+    const cols = ws['!cols'] || [];
+    let colgroup = '<colgroup>';
+    for (let c = range.s.c; c <= range.e.c; c++) {
+      const meta = cols[c] || {};
+      const wpx = meta.wpx || wchToPx(meta.wch);
+      colgroup += `<col style="width:${wpx}px" />`;
+    }
+    colgroup += '</colgroup>';
+
+    let html = `
+      <table id="excel-preview-table" style="border-collapse:collapse;width:100%;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;font-size:12px;">
+        ${colgroup}
+        <tbody>
+    `;
+
+    for (let r = range.s.r; r <= range.e.r; r++) {
+      html += '<tr>';
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const key = `${r},${c}`;
+        if (skip.has(key)) continue;
+        const addr = XLSX.utils.encode_cell({ r, c });
+        const cell = ws[addr];
+        const span = spanMap.get(key);
+
+        // Value formatting
+        let text = '';
+        if (cell) {
+          if (cell.z && cell.t === 'n') {
+            try {
+              text = String(XLSX.SSF.format(cell.z, cell.v));
+            } catch {
+              text = String(cell.w ?? cell.v ?? '');
+            }
+          } else {
+            text = String(cell.w ?? cell.v ?? '');
+          }
+        }
+
+        // Style extraction
+        const s = cell?.s || {};
+        const styles: string[] = [
+          'border:1px solid #d1d5db',
+          'padding:4px 8px',
+          'vertical-align:top',
+          s?.alignment?.wrapText ? 'white-space:pre-wrap' : 'white-space:normal'
+        ];
+        if (s?.font?.bold) styles.push('font-weight:bold');
+        if (s?.font?.italic) styles.push('font-style:italic');
+        if (s?.font?.underline) styles.push('text-decoration:underline');
+        const fgc = xlsxColorToCss(s?.font?.color);
+        if (fgc) styles.push(`color:${fgc}`);
+        const bgc = xlsxColorToCss(s?.fill?.fgColor);
+        if (bgc) styles.push(`background-color:${bgc}`);
+        const halign = s?.alignment?.horizontal;
+        if (halign) styles.push(`text-align:${halign}`);
+        const valign = s?.alignment?.vertical;
+        if (valign) styles.push(`vertical-align:${valign === 'center' ? 'middle' : valign}`);
+
+        const attrs: string[] = [`style="${styles.join(';')}"`];
+        if (span) {
+          if (span.colspan > 1) attrs.push(`colspan="${span.colspan}"`);
+          if (span.rowspan > 1) attrs.push(`rowspan="${span.rowspan}"`);
+        }
+
+        html += `<td ${attrs.join(' ')}>${text}</td>`;
+      }
+      html += '</tr>';
+    }
+
+    html += '</tbody></table>';
+    return html;
+  };
+
   // Open Excel preview from file or URL, parse workbook, and render first sheet
   const openExcelPreview = async (companyId: string) => {
     const company = companies.find(c => c.id === companyId);
@@ -260,22 +363,16 @@ export default function BoardMode() {
         toast.error('No Excel file available');
         return;
       }
-      const wb = XLSX.read(buf);
+      const wb = XLSX.read(buf, { cellStyles: true });
       setExcelWorkbook(wb);
       const sheets = wb.SheetNames;
       setExcelSheets(sheets);
       const first = sheets[0];
       setSelectedSheet(first);
       const ws = wb.Sheets[first];
-      
-      // Use sheet_to_html with options to preserve all formatting
-      const html = XLSX.utils.sheet_to_html(ws, { 
-        header: "", 
-        footer: "",
-        editable: false,
-        id: "excel-preview-table"
-      });
-      setExcelHTML(extractTable(html));
+      // Use custom renderer to preserve fonts, alignment, fills, merges
+      const html = renderWorksheetToHTML(ws);
+      setExcelHTML(html);
       setActiveCompanyId(companyId);
       setShowExcelModal(true);
     } catch (e) {
