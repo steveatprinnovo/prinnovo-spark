@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      board_approvals: {
+        Row: {
+          annual_subscription_cost: number | null
+          company_title: string
+          created_at: string | null
+          excel_storage_path: string | null
+          id: string
+          internal_annual_cost: number | null
+          internal_champions: string | null
+          ipa_terms: string | null
+          it_needs_pilot: string | null
+          key_points: string | null
+          logo_storage_path: string | null
+          one_time_implementation_cost: number | null
+          post_pilot: string | null
+          referral_incentive: string | null
+          updated_at: string | null
+          user_id: string
+          validation: string | null
+          value_impact_team: string | null
+        }
+        Insert: {
+          annual_subscription_cost?: number | null
+          company_title: string
+          created_at?: string | null
+          excel_storage_path?: string | null
+          id?: string
+          internal_annual_cost?: number | null
+          internal_champions?: string | null
+          ipa_terms?: string | null
+          it_needs_pilot?: string | null
+          key_points?: string | null
+          logo_storage_path?: string | null
+          one_time_implementation_cost?: number | null
+          post_pilot?: string | null
+          referral_incentive?: string | null
+          updated_at?: string | null
+          user_id: string
+          validation?: string | null
+          value_impact_team?: string | null
+        }
+        Update: {
+          annual_subscription_cost?: number | null
+          company_title?: string
+          created_at?: string | null
+          excel_storage_path?: string | null
+          id?: string
+          internal_annual_cost?: number | null
+          internal_champions?: string | null
+          ipa_terms?: string | null
+          it_needs_pilot?: string | null
+          key_points?: string | null
+          logo_storage_path?: string | null
+          one_time_implementation_cost?: number | null
+          post_pilot?: string | null
+          referral_incentive?: string | null
+          updated_at?: string | null
+          user_id?: string
+          validation?: string | null
+          value_impact_team?: string | null
+        }
+        Relationships: []
+      }
       "Company Detail": {
         Row: {
           Champions: string | null
