@@ -270,7 +270,9 @@ export default function BoardMode() {
         <div className="grid grid-cols-1 gap-8">
           {/* Agenda Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold mb-4">Meeting Agenda</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {presentationMode ? `${agendaDate} Board Agenda` : "Meeting Agenda"}
+            </h2>
             
             <div className="mb-4">
               <Label htmlFor="agenda-date">Date</Label>
