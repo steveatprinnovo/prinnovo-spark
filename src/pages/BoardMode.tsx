@@ -274,16 +274,17 @@ export default function BoardMode() {
               {presentationMode ? `${agendaDate} Board Agenda` : "Meeting Agenda"}
             </h2>
             
-            <div className="mb-4">
-              <Label htmlFor="agenda-date">Date</Label>
-              <Input
-                id="agenda-date"
-                value={agendaDate}
-                onChange={(e) => setAgendaDate(e.target.value)}
-                className="max-w-md mt-1"
-                disabled={presentationMode}
-              />
-            </div>
+            {!presentationMode && (
+              <div className="mb-4">
+                <Label htmlFor="agenda-date">Date</Label>
+                <Input
+                  id="agenda-date"
+                  value={agendaDate}
+                  onChange={(e) => setAgendaDate(e.target.value)}
+                  className="max-w-md mt-1"
+                />
+              </div>
+            )}
 
             <div className="space-y-4">
               {agendaItems.map((item, index) => (
