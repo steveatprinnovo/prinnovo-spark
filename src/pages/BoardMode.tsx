@@ -672,7 +672,7 @@ export default function BoardMode() {
                         <img 
                           src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
                           alt="Healthliant Ventures"
-                          className="h-10 w-auto object-contain"
+                          className="h-8 w-auto object-contain"
                         />
                       </div>
                     </div>
@@ -681,49 +681,6 @@ export default function BoardMode() {
                   {/* Content Grid */}
                   <div className="p-6 grid grid-cols-2 gap-8">
                     {/* Left Column */}
-                    <div className="space-y-6">
-                      {/* Validation Section */}
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Validation:
-                        </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.validation || "Validation details to be provided"}
-                        </p>
-                      </div>
-
-                      {/* Post-Pilot / Co-Development */}
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Post-Pilot / Co-Development:
-                        </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.postPilot || "Post-pilot strategy to be developed"}
-                        </p>
-                      </div>
-
-                      {/* IT Needs and Pilot */}
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          IT Needs and Pilot:
-                        </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.itNeedsPilot || "IT requirements and pilot details"}
-                        </p>
-                      </div>
-
-                      {/* Financial Information */}
-                      <div className="bg-red-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Internal Annual Cost:
-                        </h3>
-                        <p className="text-lg font-bold text-gray-900">
-                          {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right Column */}
                     <div className="space-y-6">
                       {/* Value & Impact Team */}
                       <div className="bg-green-50 p-4 rounded-lg">
@@ -762,6 +719,49 @@ export default function BoardMode() {
                         </h3>
                         <p className="text-sm text-gray-700">
                           {company.referralIncentive || "Incentive structure to be defined"}
+                        </p>
+                      </div>
+
+                      {/* Financial Information */}
+                      <div className="bg-red-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          Internal Annual Cost:
+                        </h3>
+                        <p className="text-lg font-bold text-gray-900">
+                          {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                      {/* Validation Section */}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          Validation:
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {company.validation || "Validation details to be provided"}
+                        </p>
+                      </div>
+
+                      {/* Post-Pilot / Co-Development */}
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          Post-Pilot / Co-Development:
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {company.postPilot || "Post-pilot strategy to be developed"}
+                        </p>
+                      </div>
+
+                      {/* IT Needs and Pilot */}
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          IT Needs and Pilot:
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {company.itNeedsPilot || "IT requirements and pilot details"}
                         </p>
                       </div>
                     </div>
