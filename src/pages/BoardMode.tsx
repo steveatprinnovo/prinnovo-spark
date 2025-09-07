@@ -619,13 +619,22 @@ export default function BoardMode() {
                     </SelectTrigger>
                     <SelectContent className="bg-white z-50">
                       <SelectItem value="all">Please Select...</SelectItem>
-                      {companies
-                        .filter(c => c.readyToPresent && c.companyTitle.trim())
-                        .map((company) => (
-                          <SelectItem key={company.id} value={company.id}>
-                            {company.companyTitle}
-                          </SelectItem>
-                      ))}
+                       {companies
+                         .filter(c => c.readyToPresent && c.companyTitle.trim())
+                         .map((company) => (
+                           <SelectItem key={company.id} value={company.id}>
+                             <div className="flex items-center gap-2">
+                               {(company.logoUrl || company.logoFile) && (
+                                 <img 
+                                   src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
+                                   alt="Company logo" 
+                                   className="w-4 h-4 object-contain flex-shrink-0"
+                                 />
+                               )}
+                               <span>{company.companyTitle}</span>
+                             </div>
+                           </SelectItem>
+                       ))}
                       {companies.filter(c => c.readyToPresent && c.companyTitle.trim()).length === 0 && (
                         <SelectItem value="none" disabled>
                           No companies ready to present
