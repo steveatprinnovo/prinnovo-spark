@@ -681,13 +681,13 @@ export default function BoardMode() {
                     <div className="flex justify-between items-start">
                        <div className="flex items-start gap-6">
                          <div className="flex flex-col items-center gap-3">
-                           {(company.logoUrl || company.logoFile) && (
-                             <img 
-                               src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
-                               alt="Company logo" 
-                               className="h-14 w-14 object-contain"
-                             />
-                           )}
+                            {(company.logoUrl || company.logoFile) && (
+                              <img 
+                                src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
+                                alt="Company logo" 
+                                className="w-24 h-auto object-contain"
+                              />
+                            )}
                            {(company.excelFile || company.excelUrl) && (
                              <Button
                                variant="outline"
