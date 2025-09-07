@@ -20,6 +20,23 @@ interface AgendaItem {
   time: string;
 }
 
+interface CompanyData {
+  id: string;
+  companyTitle: string;
+  logoFile: File | null;
+  logoUrl: string | null;
+  internalChampions: string;
+  valueImpactTeam: string;
+  ipaTerms: string;
+  referralIncentive: string;
+  internalAnnualCost: string;
+  keyPoints: string;
+  validation: string;
+  itNeedsPilot: string;
+  postPilot: string;
+  excelFile: File | null;
+}
+
 export default function BoardMode() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -29,10 +46,25 @@ export default function BoardMode() {
     { id: "2", item: "", presenter: "", time: "" },
     { id: "3", item: "", presenter: "", time: "" }
   ]);
-  const [companyTitle, setCompanyTitle] = useState("");
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [excelFile, setExcelFile] = useState<File | null>(null);
+  const [companies, setCompanies] = useState<CompanyData[]>([
+    {
+      id: "1",
+      companyTitle: "",
+      logoFile: null,
+      logoUrl: null,
+      internalChampions: "",
+      valueImpactTeam: "",
+      ipaTerms: "",
+      referralIncentive: "",
+      internalAnnualCost: "",
+      keyPoints: "",
+      validation: "",
+      itNeedsPilot: "",
+      postPilot: "",
+      excelFile: null,
+    }
+  ]);
+  const [activeCompanyId, setActiveCompanyId] = useState("1");
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [excelCells, setExcelCells] = useState<any>({});
   const [excelSheets, setExcelSheets] = useState<string[]>([]);
@@ -73,19 +105,49 @@ export default function BoardMode() {
     }
   };
 
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const updateCompanyField = (companyId: string, field: keyof CompanyData, value: any) => {
+    setCompanies(companies => 
+      companies.map(company => 
+        company.id === companyId ? { ...company, [field]: value } : company
+      )
+    );
+  };
+
+  const addNewCompany = () => {
+    const newCompany: CompanyData = {
+      id: Date.now().toString(),
+      companyTitle: "",
+      logoFile: null,
+      logoUrl: null,
+      internalChampions: "",
+      valueImpactTeam: "",
+      ipaTerms: "",
+      referralIncentive: "",
+      internalAnnualCost: "",
+      keyPoints: "",
+      validation: "",
+      itNeedsPilot: "",
+      postPilot: "",
+      excelFile: null,
+    };
+    setCompanies([...companies, newCompany]);
+    setActiveCompanyId(newCompany.id);
+  };
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>, companyId: string) => {
     const file = event.target.files?.[0];
-    if (!file || !companyTitle.trim()) {
+    const company = companies.find(c => c.id === companyId);
+    if (!file || !company?.companyTitle.trim()) {
       toast.error("Please enter a company title first");
       return;
     }
 
-    setLogoFile(file);
+    updateCompanyField(companyId, 'logoFile', file);
     setUploading(true);
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${companyTitle.toLowerCase().replace(/\s+/g, '-')}-logo.${fileExt}`;
+      const fileName = `${company.companyTitle.toLowerCase().replace(/\s+/g, '-')}-logo.${fileExt}`;
       const filePath = `${user?.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -100,7 +162,7 @@ export default function BoardMode() {
 
       if (signedErr) throw signedErr;
 
-      setLogoUrl(signedLogo?.signedUrl || null);
+      updateCompanyField(companyId, 'logoUrl', signedLogo?.signedUrl || null);
       toast.success("Logo uploaded successfully!");
     } catch (error) {
       console.error('Error uploading logo:', error);
@@ -110,7 +172,7 @@ export default function BoardMode() {
     }
   };
 
-  const handleExcelUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExcelUpload = async (event: React.ChangeEvent<HTMLInputElement>, companyId: string) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -127,7 +189,7 @@ export default function BoardMode() {
       return;
     }
 
-    setExcelFile(file);
+    updateCompanyField(companyId, 'excelFile', file);
     setUploading(true);
 
     try {
@@ -160,6 +222,7 @@ export default function BoardMode() {
       }
       
       setShowExcelModal(true);
+      setActiveCompanyId(companyId);
       toast.success("Excel file loaded successfully!");
     } catch (error) {
       console.error('Error reading Excel file:', error);
@@ -170,7 +233,8 @@ export default function BoardMode() {
   };
 
   const handleSheetChange = (sheetName: string) => {
-    if (!excelFile) return;
+    const activeCompany = companies.find(c => c.id === activeCompanyId);
+    if (!activeCompany?.excelFile) return;
     
     setSelectedSheet(sheetName);
     
@@ -191,7 +255,7 @@ export default function BoardMode() {
         calculateColumnWidths(jsonData as any[][], worksheet);
       }
     };
-    reader.readAsArrayBuffer(excelFile);
+    reader.readAsArrayBuffer(activeCompany.excelFile);
   };
 
   const calculateColumnWidths = (data: any[][], worksheet: any) => {
@@ -509,215 +573,254 @@ export default function BoardMode() {
         <div className="space-y-6">
           <h1 className="text-2xl font-bold">New Board Approvals</h1>
           
-          <div className="space-y-6">
-            {/* Company Title */}
-            <div className="space-y-2">
-              <Label htmlFor="company-title">Company Title</Label>
-              <Input
-                id="company-title"
-                value={companyTitle}
-                onChange={(e) => setCompanyTitle(e.target.value)}
-                placeholder="Enter company title"
-                className="max-w-md"
-              />
-            </div>
-
-            {/* Logo Upload */}
-            <div className="space-y-2">
-              <Label>Company Logo</Label>
-              <div className="flex items-center gap-4">
-                {logoUrl ? (
-                  <div className="flex items-center gap-4">
-                    <img 
-                      src={logoUrl} 
-                      alt="Company logo" 
-                      className="h-16 w-16 object-contain border rounded"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setLogoUrl(null);
-                        setLogoFile(null);
-                      }}
-                    >
-                      Remove Logo
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 border-2 border-dashed border-muted-foreground/25 rounded flex items-center justify-center">
-                      <Upload className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <Label htmlFor="logo-upload" className="cursor-pointer">
-                      <Button variant="outline" asChild disabled={uploading || !companyTitle.trim()}>
-                        <span>
-                          {uploading ? "Uploading..." : "Upload Logo"}
-                        </span>
-                      </Button>
-                      <Input
-                        id="logo-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                        disabled={uploading || !companyTitle.trim()}
-                      />
-                    </Label>
-                  </div>
-                )}
-              </div>
-              {!companyTitle.trim() && (
-                <p className="text-sm text-muted-foreground">Please enter a company title first</p>
-              )}
-            </div>
-
-            {/* Additional Input Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="internal-champions">Internal Champion(s)</Label>
-                <Input
-                  id="internal-champions"
-                  placeholder="Enter internal champion(s)"
-                  className="w-full"
-                />
-              </div>
+          {companies.map((company, index) => (
+            <div key={company.id} className="border rounded-lg p-6 space-y-6">
+              <h2 className="text-xl font-semibold">Company {index + 1}</h2>
               
-              <div className="space-y-2">
-                <Label htmlFor="value-impact-team">Value and Impact Team</Label>
-                <Input
-                  id="value-impact-team"
-                  placeholder="Enter value and impact team"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="ipa-terms">IPA Terms</Label>
-                <Input
-                  id="ipa-terms"
-                  placeholder="Enter IPA terms"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="referral-incentive">Referral Incentive</Label>
-                <Input
-                  id="referral-incentive"
-                  placeholder="Enter referral incentive"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="internal-annual-cost">Internal Annual Cost</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+              <div className="space-y-6">
+                {/* Company Title */}
+                <div className="space-y-2">
+                  <Label htmlFor={`company-title-${company.id}`}>Company Title</Label>
                   <Input
-                    id="internal-annual-cost"
-                    type="number"
-                    placeholder="0.00"
-                    className="pl-8 w-full"
+                    id={`company-title-${company.id}`}
+                    value={company.companyTitle}
+                    onChange={(e) => updateCompanyField(company.id, 'companyTitle', e.target.value)}
+                    placeholder="Enter company title"
+                    className="max-w-md"
                   />
+                </div>
+
+                {/* Logo Upload */}
+                <div className="space-y-2">
+                  <Label>Company Logo</Label>
+                  <div className="flex items-center gap-4">
+                    {company.logoUrl ? (
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={company.logoUrl} 
+                          alt="Company logo" 
+                          className="h-16 w-16 object-contain border rounded"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            updateCompanyField(company.id, 'logoUrl', null);
+                            updateCompanyField(company.id, 'logoFile', null);
+                          }}
+                        >
+                          Remove Logo
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="h-16 w-16 border-2 border-dashed border-muted-foreground/25 rounded flex items-center justify-center">
+                          <Upload className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <Label htmlFor={`logo-upload-${company.id}`} className="cursor-pointer">
+                          <Button variant="outline" asChild disabled={uploading || !company.companyTitle.trim()}>
+                            <span>
+                              {uploading ? "Uploading..." : "Upload Logo"}
+                            </span>
+                          </Button>
+                          <Input
+                            id={`logo-upload-${company.id}`}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleLogoUpload(e, company.id)}
+                            className="hidden"
+                            disabled={uploading || !company.companyTitle.trim()}
+                          />
+                        </Label>
+                      </div>
+                    )}
+                  </div>
+                  {!company.companyTitle.trim() && (
+                    <p className="text-sm text-muted-foreground">Please enter a company title first</p>
+                  )}
+                </div>
+
+                {/* Additional Input Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor={`internal-champions-${company.id}`}>Internal Champion(s)</Label>
+                    <Input
+                      id={`internal-champions-${company.id}`}
+                      value={company.internalChampions}
+                      onChange={(e) => updateCompanyField(company.id, 'internalChampions', e.target.value)}
+                      placeholder="Enter internal champion(s)"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`value-impact-team-${company.id}`}>Value and Impact Team</Label>
+                    <Input
+                      id={`value-impact-team-${company.id}`}
+                      value={company.valueImpactTeam}
+                      onChange={(e) => updateCompanyField(company.id, 'valueImpactTeam', e.target.value)}
+                      placeholder="Enter value and impact team"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`ipa-terms-${company.id}`}>IPA Terms</Label>
+                    <Input
+                      id={`ipa-terms-${company.id}`}
+                      value={company.ipaTerms}
+                      onChange={(e) => updateCompanyField(company.id, 'ipaTerms', e.target.value)}
+                      placeholder="Enter IPA terms"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`referral-incentive-${company.id}`}>Referral Incentive</Label>
+                    <Input
+                      id={`referral-incentive-${company.id}`}
+                      value={company.referralIncentive}
+                      onChange={(e) => updateCompanyField(company.id, 'referralIncentive', e.target.value)}
+                      placeholder="Enter referral incentive"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`internal-annual-cost-${company.id}`}>Internal Annual Cost</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                      <Input
+                        id={`internal-annual-cost-${company.id}`}
+                        type="number"
+                        value={company.internalAnnualCost}
+                        onChange={(e) => updateCompanyField(company.id, 'internalAnnualCost', e.target.value)}
+                        placeholder="0.00"
+                        className="pl-8 w-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`key-points-${company.id}`}>Key Points</Label>
+                    <Input
+                      id={`key-points-${company.id}`}
+                      value={company.keyPoints}
+                      onChange={(e) => updateCompanyField(company.id, 'keyPoints', e.target.value)}
+                      placeholder="Enter key points"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`validation-${company.id}`}>Validation</Label>
+                    <Input
+                      id={`validation-${company.id}`}
+                      value={company.validation}
+                      onChange={(e) => updateCompanyField(company.id, 'validation', e.target.value)}
+                      placeholder="Enter validation"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`it-needs-pilot-${company.id}`}>IT Needs and Pilot</Label>
+                    <Input
+                      id={`it-needs-pilot-${company.id}`}
+                      value={company.itNeedsPilot}
+                      onChange={(e) => updateCompanyField(company.id, 'itNeedsPilot', e.target.value)}
+                      placeholder="Enter IT needs and pilot"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor={`post-pilot-${company.id}`}>Post-Pilot and Co-Development</Label>
+                    <Input
+                      id={`post-pilot-${company.id}`}
+                      value={company.postPilot}
+                      onChange={(e) => updateCompanyField(company.id, 'postPilot', e.target.value)}
+                      placeholder="Enter post-pilot and co-development"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* Excel Upload */}
+                <div className="space-y-2">
+                  <Label>Upload Excel Pro-Forma</Label>
+                  <div className="flex items-center gap-4">
+                    {company.excelFile ? (
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 p-2 border rounded">
+                          <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                          <span className="text-sm">{company.excelFile.name}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setShowExcelModal(true);
+                              setActiveCompanyId(company.id);
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <FileSpreadsheet className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            updateCompanyField(company.id, 'excelFile', null);
+                            setExcelData([]);
+                            setExcelCells({});
+                            setExcelSheets([]);
+                            setSelectedSheet("");
+                            setColumnWidths([]);
+                          }}
+                        >
+                          Remove Excel
+                        </Button>
+                      </div>
+                    ) : (
+                      <Label htmlFor={`excel-upload-${company.id}`} className="cursor-pointer">
+                        <Button variant="outline" asChild disabled={uploading}>
+                          <span>
+                            {uploading ? "Loading..." : "Upload Excel"}
+                          </span>
+                        </Button>
+                        <Input
+                          id={`excel-upload-${company.id}`}
+                          type="file"
+                          accept=".xlsx,.xls,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          onChange={(e) => handleExcelUpload(e, company.id)}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                      </Label>
+                    )}
+                  </div>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="key-points">Key Points</Label>
-                <Input
-                  id="key-points"
-                  placeholder="Enter key points"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="validation">Validation</Label>
-                <Input
-                  id="validation"
-                  placeholder="Enter validation"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="it-needs-pilot">IT Needs and Pilot</Label>
-                <Input
-                  id="it-needs-pilot"
-                  placeholder="Enter IT needs and pilot"
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="post-pilot">Post-Pilot and Co-Development</Label>
-                <Input
-                  id="post-pilot"
-                  placeholder="Enter post-pilot and co-development"
-                  className="w-full"
-                />
-              </div>
+              {/* Separator line below Upload Excel */}
+              <Separator />
             </div>
-
-            {/* Excel Upload */}
-            <div className="space-y-2">
-              <Label>Upload Excel Pro-Forma</Label>
-              <div className="flex items-center gap-4">
-                {excelFile ? (
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 p-2 border rounded">
-                      <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                      <span className="text-sm">{excelFile.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowExcelModal(true)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <FileSpreadsheet className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setExcelFile(null);
-                        setExcelData([]);
-                        setExcelCells({});
-                        setExcelSheets([]);
-                        setSelectedSheet("");
-                        setColumnWidths([]);
-                      }}
-                    >
-                      Remove Excel
-                    </Button>
-                  </div>
-                ) : (
-                  <Label htmlFor="excel-upload" className="cursor-pointer">
-                    <Button variant="outline" asChild disabled={uploading}>
-                      <span>
-                        {uploading ? "Loading..." : "Upload Excel"}
-                      </span>
-                    </Button>
-                    <Input
-                      id="excel-upload"
-                      type="file"
-                      accept=".xlsx,.xls,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                      onChange={handleExcelUpload}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                  </Label>
-                )}
-              </div>
-            </div>
-          </div>
+          ))}
+          
+          {/* Add New Company Button */}
+          <Button
+            variant="outline"
+            onClick={addNewCompany}
+            className="w-full mt-4"
+          >
+            Add New Company
+          </Button>
         </div>
 
         {/* Excel Preview Modal */}
         <Dialog open={showExcelModal} onOpenChange={setShowExcelModal}>
           <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] p-4 overflow-hidden">
             <DialogHeader className="pb-2">
-              <DialogTitle className="text-lg">Excel Preview{excelFile?.name ? ` - ${excelFile.name}` : ""}</DialogTitle>
+              <DialogTitle className="text-lg">Excel Preview{companies.find(c => c.id === activeCompanyId)?.excelFile?.name ? ` - ${companies.find(c => c.id === activeCompanyId)?.excelFile?.name}` : ""}</DialogTitle>
               <DialogDescription className="sr-only">
                 Preview of the uploaded Excel document
               </DialogDescription>
