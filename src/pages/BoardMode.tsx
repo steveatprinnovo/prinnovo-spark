@@ -59,6 +59,7 @@ export default function BoardMode() {
   const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("");
   const [excelWorkbook, setExcelWorkbook] = useState<any | null>(null);
   const [excelHTML, setExcelHTML] = useState<string>("");
+  const [flippedCompanies, setFlippedCompanies] = useState<Set<string>>(new Set());
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -383,6 +384,55 @@ export default function BoardMode() {
     }
   };
 
+  // Flip card to show Excel preview
+  const flipToProForma = async (companyId: string) => {
+    const company = companies.find(c => c.id === companyId);
+    if (!company) return;
+    
+    try {
+      setUploading(true);
+      let buf: ArrayBuffer | null = null;
+      if (company.excelFile) {
+        buf = await company.excelFile.arrayBuffer();
+      } else if (company.excelUrl) {
+        const res = await fetch(company.excelUrl);
+        buf = await res.arrayBuffer();
+      }
+      if (!buf) {
+        toast.error('No Excel file available');
+        return;
+      }
+      const wb = XLSX.read(buf, { cellStyles: true });
+      setExcelWorkbook(wb);
+      const sheets = wb.SheetNames;
+      setExcelSheets(sheets);
+      const first = sheets[0];
+      setSelectedSheet(first);
+      const ws = wb.Sheets[first];
+      
+      // Use custom renderer to preserve fonts, alignment, fills, merges
+      const html = renderWorksheetToHTML(ws);
+      setExcelHTML(html);
+      
+      // Flip the card
+      setFlippedCompanies(prev => new Set([...prev, companyId]));
+    } catch (e) {
+      console.error('Error opening Excel preview:', e);
+      toast.error('Failed to open Excel preview');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Flip card back to partnership review
+  const flipBackToReview = (companyId: string) => {
+    setFlippedCompanies(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(companyId);
+      return newSet;
+    });
+  };
+
   const loading = authLoading || companiesLoading;
 
   if (loading) {
@@ -405,6 +455,42 @@ export default function BoardMode() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        
+        .flip-card {
+          position: relative;
+          width: 100%;
+          height: auto;
+          transform-style: preserve-3d;
+          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .flip-card.flipped {
+          transform: rotateY(180deg);
+        }
+        
+        .flip-card-front,
+        .flip-card-back {
+          position: relative;
+          width: 100%;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+        
+        .flip-card-back {
+          position: absolute;
+          top: 0;
+          left: 0;
+          transform: rotateY(180deg);
+        }
+        
+        .flip-card-front {
+          transform: rotateY(0deg);
+        }
+      `}</style>
       <DashboardHeader />
       
       <div className="container mx-auto px-4 py-8">
@@ -585,7 +671,11 @@ export default function BoardMode() {
                    (selectedPresentationCompany !== "" && selectedPresentationCompany === company.id))
                 )
                 .map((company) => (
-                <div key={company.id} className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
+                <div key={company.id} className="perspective-1000">
+                  <div className={`flip-card ${flippedCompanies.has(company.id) ? 'flipped' : ''}`}>
+                    
+                    {/* Front Side - Partnership Review */}
+                    <div className="flip-card-front bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
                   {/* Header */}
                   <div className="bg-white border-b border-gray-200 p-6">
                     <div className="flex justify-between items-start">
@@ -602,7 +692,7 @@ export default function BoardMode() {
                              <Button
                                variant="outline"
                                size="sm"
-                                onClick={() => openExcelPreview(company.id)}
+                                 onClick={() => flipToProForma(company.id)}
                                className="flex items-center gap-2 text-xs"
                              >
                                <FileSpreadsheet className="h-3 w-3" />
@@ -744,10 +834,87 @@ export default function BoardMode() {
                    {/* Footer */}
                    <div className="bg-gray-100 px-6 py-3 text-right">
                      <p className="text-xs text-gray-500">Proprietary and Confidential</p>
-                   </div>
-                 </div>
-               ))}
-             </div>
+                    </div>
+                    </div>
+                    
+                    {/* Back Side - Financial Pro-Forma */}
+                    <div className="flip-card-back bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
+                      {/* Header */}
+                      <div className="bg-white border-b border-gray-200 p-6">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start gap-6">
+                            <div className="flex flex-col items-center gap-3">
+                              {(company.logoUrl || company.logoFile) && (
+                                <img 
+                                  src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
+                                  alt="Company logo" 
+                                  className="h-14 w-14 object-contain"
+                                />
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => flipBackToReview(company.id)}
+                                className="flex items-center gap-2 text-xs"
+                              >
+                                <FileText className="h-3 w-3" />
+                                Back to Review
+                              </Button>
+                            </div>
+                            <div className="flex-1">
+                              <h2 className="text-2xl font-bold text-gray-900">
+                                {company.companyTitle} Financial Pro-Forma
+                              </h2>
+                              <p className="text-sm text-gray-600 mt-1">Financial Analysis & Projections</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <img 
+                              src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
+                              alt="Healthliant Ventures"
+                              className="h-8 w-auto object-contain"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Excel Content */}
+                      <div className="p-6">
+                        {excelSheets.length > 1 && (
+                          <div className="mb-4 flex gap-2 flex-wrap">
+                            {excelSheets.map((sheetName) => (
+                              <Button
+                                key={sheetName}
+                                variant={selectedSheet === sheetName ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => handleSheetChange(sheetName)}
+                              >
+                                {sheetName}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                        
+                        <div className="max-h-96 overflow-auto border rounded">
+                          {excelHTML ? (
+                            <div dangerouslySetInnerHTML={{ __html: excelHTML }} />
+                          ) : (
+                            <div className="flex items-center justify-center h-32 text-gray-500">
+                              No financial data available
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Footer */}
+                      <div className="bg-gray-100 px-6 py-3 text-right">
+                        <p className="text-xs text-gray-500">Proprietary and Confidential</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                ))}
+              </div>
             ) : (
              // Edit Mode - Original Form Layout
              <div className="space-y-6">
