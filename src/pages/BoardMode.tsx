@@ -677,10 +677,10 @@ export default function BoardMode() {
                     {/* Front Side - Partnership Review */}
                     <div className="flip-card-front bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
                   {/* Header */}
-                  <div className="bg-white border-b border-gray-200 p-6">
-                    <div className="flex justify-between items-start">
-                       <div className="flex items-start gap-6">
-                         <div className="flex flex-col items-center gap-3">
+                   <div className="bg-white border-b border-gray-200 p-6">
+                     <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-6">
+                          <div className="flex items-center gap-4">
                             {(company.logoUrl || company.logoFile) && (
                               <img 
                                 src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
@@ -688,34 +688,38 @@ export default function BoardMode() {
                                 className="w-24 h-auto object-contain"
                               />
                             )}
-                           {(company.excelFile || company.excelUrl) && (
-                             <Button
-                               variant="outline"
-                               size="sm"
-                                 onClick={() => flipToProForma(company.id)}
-                               className="flex items-center gap-2 text-xs"
-                             >
-                               <FileSpreadsheet className="h-3 w-3" />
-                               View Financial Pro-Forma
-                             </Button>
-                           )}
-                         </div>
-                         <div className="flex-1">
-                            <h2 className="text-2xl font-bold text-gray-900">
-                              Partnership Review – {company.companyTitle}
-                            </h2>
-                           <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
-                         </div>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         <img 
-                           src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
-                           alt="Healthliant Ventures"
-                           className="h-8 w-auto object-contain"
-                         />
-                       </div>
-                     </div>
-                   </div>
+                            <div className="flex-1">
+                             <h2 className="text-2xl font-bold text-gray-900">
+                               Partnership Review – {company.companyTitle}
+                             </h2>
+                            <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
+                          </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
+                            alt="Healthliant Ventures"
+                            className="h-8 w-auto object-contain"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Financial Pro-Forma Button */}
+                      {(company.excelFile || company.excelUrl) && (
+                        <div className="mt-4 flex justify-start">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => flipToProForma(company.id)}
+                            className="flex items-center gap-2 text-xs"
+                          >
+                            <FileSpreadsheet className="h-3 w-3" />
+                            View Financial Pro-Forma
+                          </Button>
+                        </div>
+                      )}
+                    </div>
 
                    {/* Content Grid */}
                    <div className="p-6 grid grid-cols-2 gap-8">
