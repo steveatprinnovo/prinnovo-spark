@@ -41,7 +41,7 @@ interface CompanyData {
 export default function BoardMode() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [agendaDate, setAgendaDate] = useState(format(new Date(), "MMMM, dd, yyyy"));
+  const [agendaDate, setAgendaDate] = useState(format(new Date(), "MMMM dd yyyy"));
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([
     { id: "1", item: "", presenter: "", time: "" },
     { id: "2", item: "", presenter: "", time: "" },
@@ -550,7 +550,8 @@ export default function BoardMode() {
                 value={agendaDate}
                 onChange={(e) => setAgendaDate(e.target.value)}
                 className="w-48"
-                placeholder="MMMM, DD, YYYY"
+                placeholder="MMMM DD YYYY"
+                disabled={presentationMode}
               />
             </div>
           </div>
@@ -573,6 +574,7 @@ export default function BoardMode() {
                     onChange={(e) => updateAgendaItem(item.id, 'item', e.target.value)}
                     placeholder="Enter agenda item"
                     className="border-0 shadow-none focus-visible:ring-0 p-2"
+                    disabled={presentationMode}
                   />
                 </div>
                 <div className="col-span-4">
@@ -581,6 +583,7 @@ export default function BoardMode() {
                     onChange={(e) => updateAgendaItem(item.id, 'presenter', e.target.value)}
                     placeholder="Enter presenter(s)"
                     className="border-0 shadow-none focus-visible:ring-0 p-2"
+                    disabled={presentationMode}
                   />
                 </div>
                 <div className="col-span-2">
@@ -589,10 +592,11 @@ export default function BoardMode() {
                     onChange={(e) => updateAgendaItem(item.id, 'time', e.target.value)}
                     placeholder="Time"
                     className="border-0 shadow-none focus-visible:ring-0 p-2"
+                    disabled={presentationMode}
                   />
                 </div>
                 <div className="col-span-1 flex justify-center">
-                  {agendaItems.length > 1 && (
+                  {agendaItems.length > 1 && !presentationMode && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -606,13 +610,15 @@ export default function BoardMode() {
               </div>
             ))}
             
-            <Button
-              variant="outline"
-              onClick={addAgendaItem}
-              className="mt-4"
-            >
-              Add Agenda Item
-            </Button>
+            {!presentationMode && (
+              <Button
+                variant="outline"
+                onClick={addAgendaItem}
+                className="mt-4"
+              >
+                Add Agenda Item
+              </Button>
+            )}
           </div>
         </div>
 
@@ -636,19 +642,38 @@ export default function BoardMode() {
                           <img 
                             src={company.logoUrl} 
                             alt="Company logo" 
-                            className="h-12 w-12 object-contain"
+                            className="h-18 w-18 object-contain"
                           />
                         )}
-                        <div>
-                          <h2 className="text-2xl font-bold text-gray-900">
-                            Partnership Review – {company.companyTitle}
-                          </h2>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4">
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              Partnership Review – {company.companyTitle}
+                            </h2>
+                            {company.excelFile && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveCompanyId(company.id);
+                                  setShowExcelModal(true);
+                                }}
+                                className="flex items-center gap-2"
+                              >
+                                <FileSpreadsheet className="h-4 w-4" />
+                                Excel Preview
+                              </Button>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-blue-600 font-semibold text-lg">Healthling</div>
-                        <div className="text-blue-500 text-sm">Ventures</div>
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
+                          alt="Healthliant Ventures"
+                          className="h-10 w-auto object-contain"
+                        />
                       </div>
                     </div>
                   </div>
@@ -667,49 +692,6 @@ export default function BoardMode() {
                         </p>
                       </div>
 
-                      {/* Key Points Section */}
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Key Points:
-                        </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.keyPoints || "Key points to be documented"}
-                        </p>
-                      </div>
-
-                      {/* Value & Impact Team */}
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Value & Impact Team:
-                        </h3>
-                        <p className="text-sm text-gray-700">
-                          {company.valueImpactTeam || "Team details to be provided"}
-                        </p>
-                      </div>
-
-                      {/* IPA Terms */}
-                      <div className="bg-yellow-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          IPA Terms:
-                        </h3>
-                        <p className="text-sm text-gray-700">
-                          {company.ipaTerms || "IPA terms to be defined"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="space-y-6">
-                      {/* Post-Pilot / Co-Development */}
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          Post-Pilot / Co-Development:
-                        </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.postPilot || "Post-pilot strategy to be developed"}
-                        </p>
-                      </div>
-
                       {/* IT Needs and Pilot */}
                       <div className="bg-indigo-50 p-4 rounded-lg">
                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
@@ -720,6 +702,16 @@ export default function BoardMode() {
                         </p>
                       </div>
 
+                      {/* Post-Pilot / Co-Development */}
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          Post-Pilot / Co-Development:
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {company.postPilot || "Post-pilot strategy to be developed"}
+                        </p>
+                      </div>
+
                       {/* Financial Information */}
                       <div className="bg-red-50 p-4 rounded-lg">
                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
@@ -727,6 +719,39 @@ export default function BoardMode() {
                         </h3>
                         <p className="text-lg font-bold text-gray-900">
                           {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                      {/* Value & Impact Team */}
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          Value & Impact Team:
+                        </h3>
+                        <p className="text-sm text-gray-700">
+                          {company.valueImpactTeam || "Team details to be provided"}
+                        </p>
+                      </div>
+
+                      {/* Key Points Section */}
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          Key Points:
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {company.keyPoints || "Key points to be documented"}
+                        </p>
+                      </div>
+
+                      {/* IPA Terms */}
+                      <div className="bg-yellow-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          IPA Terms:
+                        </h3>
+                        <p className="text-sm text-gray-700">
+                          {company.ipaTerms || "IPA terms to be defined"}
                         </p>
                       </div>
 
