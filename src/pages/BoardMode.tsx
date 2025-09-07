@@ -368,23 +368,29 @@ export default function BoardMode() {
               <h2 className="text-xl font-semibold">New Board Approvals</h2>
               {presentationMode ? (
                 <div className="flex items-center gap-3">
-                  {companies.filter(c => c.readyToPresent && c.companyTitle.trim()).length > 0 && (
-                    <Select value={selectedPresentationCompany} onValueChange={setSelectedPresentationCompany}>
-                      <SelectTrigger className="w-64">
-                        <SelectValue placeholder="Select company to present..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white z-50">
-                        <SelectItem value="all">All companies</SelectItem>
-                        {companies
-                          .filter(c => c.readyToPresent && c.companyTitle.trim())
-                          .map((company) => (
-                            <SelectItem key={company.id} value={company.id}>
-                              {company.companyTitle}
-                            </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
+                  <Select value={selectedPresentationCompany} onValueChange={setSelectedPresentationCompany}>
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select company to present..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      <SelectItem value="all">All companies</SelectItem>
+                      {companies
+                        .filter(c => c.readyToPresent && c.companyTitle.trim())
+                        .map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.companyTitle}
+                          </SelectItem>
+                      ))}
+                      {companies.filter(c => c.readyToPresent && c.companyTitle.trim()).length === 0 && (
+                        <SelectItem value="none" disabled>
+                          No companies ready to present
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <div className="text-xs text-gray-500">
+                    ({companies.filter(c => c.readyToPresent && c.companyTitle.trim()).length} ready)
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
