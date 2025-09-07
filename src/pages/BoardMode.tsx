@@ -351,7 +351,8 @@ export default function BoardMode() {
                       disabled={uploading}
                     />
                   </Label>
-              )}
+                )}
+              </div>
               <div className="mt-2 text-right text-xs text-muted-foreground">
                 {pdfUrl && (
                   <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">
