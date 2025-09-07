@@ -38,6 +38,7 @@ export default function BoardMode() {
   const [excelSheets, setExcelSheets] = useState<string[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<string>("");
   const [sheetRange, setSheetRange] = useState<any>(null);
+  const [columnWidths, setColumnWidths] = useState<number[]>([]);
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -153,6 +154,9 @@ export default function BoardMode() {
         // Convert sheet to JSON but preserve cell info
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
         setExcelData(jsonData as any[][]);
+        
+        // Calculate column widths
+        calculateColumnWidths(jsonData as any[][], worksheet);
       }
       
       setShowExcelModal(true);
@@ -182,9 +186,58 @@ export default function BoardMode() {
         setExcelCells(worksheet);
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
         setExcelData(jsonData as any[][]);
+        
+        // Calculate column widths
+        calculateColumnWidths(jsonData as any[][], worksheet);
       }
     };
     reader.readAsArrayBuffer(excelFile);
+  };
+
+  const calculateColumnWidths = (data: any[][], worksheet: any) => {
+    if (!data.length) return;
+    
+    const maxCols = Math.max(...data.map(row => row.length));
+    const widths: number[] = [];
+    
+    for (let col = 0; col < maxCols; col++) {
+      let maxWidth = 80; // Minimum width
+      
+      for (let row = 0; row < Math.min(data.length, 100); row++) { // Check first 100 rows for performance
+        const cellValue = data[row][col];
+        if (cellValue != null) {
+          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+          const cell = worksheet[cellAddress];
+          
+          let displayValue = "";
+          if (cell) {
+            displayValue = formatCellValue(cellValue, row, col);
+          } else {
+            displayValue = cellValue.toString();
+          }
+          
+          // Estimate width based on character count
+          const estimatedWidth = Math.min(Math.max(displayValue.length * 8 + 20, 80), 300);
+          maxWidth = Math.max(maxWidth, estimatedWidth);
+        }
+      }
+      
+      widths.push(maxWidth);
+    }
+    
+    setColumnWidths(widths);
+  };
+
+  const getTableStyle = () => {
+    const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+    const maxViewportWidth = window.innerWidth * 0.9; // 90% of viewport width
+    const maxViewportHeight = window.innerHeight * 0.7; // 70% of viewport height
+    
+    return {
+      width: Math.min(totalWidth, maxViewportWidth),
+      maxHeight: maxViewportHeight,
+      fontSize: totalWidth > maxViewportWidth ? '12px' : '14px'
+    };
   };
 
   const formatCellValue = (value: any, rowIndex: number, cellIndex: number) => {
@@ -544,7 +597,7 @@ export default function BoardMode() {
                         setExcelCells({});
                         setExcelSheets([]);
                         setSelectedSheet("");
-                        setSheetRange(null);
+                        setColumnWidths([]);
                       }}
                     >
                       Remove Excel
@@ -574,24 +627,24 @@ export default function BoardMode() {
 
         {/* Excel Preview Modal */}
         <Dialog open={showExcelModal} onOpenChange={setShowExcelModal}>
-          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-4">
-            <DialogHeader>
-              <DialogTitle>Excel Preview{excelFile?.name ? ` - ${excelFile.name}` : ""}</DialogTitle>
+          <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] p-4 overflow-hidden">
+            <DialogHeader className="pb-2">
+              <DialogTitle className="text-lg">Excel Preview{excelFile?.name ? ` - ${excelFile.name}` : ""}</DialogTitle>
               <DialogDescription className="sr-only">
                 Preview of the uploaded Excel document
               </DialogDescription>
             </DialogHeader>
             
             {excelSheets.length > 1 && (
-              <div className="mb-4">
-                <Label htmlFor="sheet-select" className="text-sm font-medium">
+              <div className="mb-3 pb-2 border-b">
+                <Label htmlFor="sheet-select" className="text-sm font-medium mr-2">
                   Select Sheet:
                 </Label>
                 <select
                   id="sheet-select"
                   value={selectedSheet}
                   onChange={(e) => handleSheetChange(e.target.value)}
-                  className="ml-2 px-3 py-1 border rounded text-sm"
+                  className="px-3 py-1 border rounded text-sm"
                 >
                   {excelSheets.map((sheetName) => (
                     <option key={sheetName} value={sheetName}>
@@ -602,29 +655,38 @@ export default function BoardMode() {
               </div>
             )}
             
-            <div className="flex-1 overflow-auto border rounded">
+            <div className="flex-1 overflow-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
               {excelData.length > 0 ? (
-                <div className="min-w-full">
-                  <table className="w-full border-collapse">
+                <div style={getTableStyle()}>
+                  <table className="border-collapse" style={{ width: '100%', tableLayout: 'fixed' }}>
+                    <colgroup>
+                      {columnWidths.map((width, index) => (
+                        <col key={index} style={{ width: `${width}px` }} />
+                      ))}
+                    </colgroup>
                     <tbody>
                       {excelData.map((row, rowIndex) => (
                         <tr key={rowIndex} className={rowIndex === 0 ? "bg-muted font-medium" : ""}>
                           {row.map((cell, cellIndex) => {
                             const formattedValue = formatCellValue(cell, rowIndex, cellIndex);
                             const cellStyle = getCellStyle(rowIndex, cellIndex);
-                            return (
-                              <td
-                                key={cellIndex}
-                                className="border px-2 py-1 text-sm min-w-[100px] truncate"
-                                style={{
-                                  ...cellStyle,
-                                  maxWidth: cellStyle.whiteSpace === 'pre-wrap' ? '300px' : '200px',
-                                  overflow: cellStyle.whiteSpace === 'pre-wrap' ? 'visible' : 'hidden'
-                                }}
-                                title={formattedValue}
-                              >
-                                {formattedValue}
-                              </td>
+                             return (
+                               <td
+                                 key={cellIndex}
+                                 className="border px-2 py-1 text-xs"
+                                 style={{
+                                   ...cellStyle,
+                                   width: `${columnWidths[cellIndex] || 100}px`,
+                                   minWidth: `${columnWidths[cellIndex] || 100}px`,
+                                   maxWidth: `${columnWidths[cellIndex] || 100}px`,
+                                   overflow: 'visible',
+                                   whiteSpace: cellStyle.whiteSpace || 'nowrap',
+                                   textOverflow: 'ellipsis'
+                                 }}
+                                 title={formattedValue}
+                               >
+                                 {formattedValue}
+                               </td>
                             );
                           })}
                         </tr>
