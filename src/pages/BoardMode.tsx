@@ -50,19 +50,19 @@ export default function BoardMode() {
   const [companies, setCompanies] = useState<CompanyData[]>([
     {
       id: "1",
-      companyTitle: "",
+      companyTitle: "Sample Healthcare Company",
       logoFile: null,
-      logoUrl: null,
-      internalChampions: "",
-      valueImpactTeam: "",
-      ipaTerms: "",
-      referralIncentive: "",
-      internalAnnualCost: "",
-      keyPoints: "",
-      validation: "",
-      itNeedsPilot: "",
-      postPilot: "",
-      excelFile: null,
+      logoUrl: "https://via.placeholder.com/150x150/4F46E5/FFFFFF?text=LOGO",
+      internalChampions: "Dr. Smith, Jane Doe",
+      valueImpactTeam: "Value engineering team assigned with 3 clinical specialists",
+      ipaTerms: "24-month term with quarterly review milestones",
+      referralIncentive: "Tiered commission structure: 2% Year 1, 1.5% Year 2",
+      internalAnnualCost: "125000",
+      keyPoints: "Strong clinical outcomes, proven ROI, scalable platform",
+      validation: "Pilot completed successfully with 95% provider satisfaction",
+      itNeedsPilot: "Integration with Epic EHR required, 6-month implementation timeline",
+      postPilot: "Expand to 3 additional locations, develop custom reporting dashboard",
+      excelFile: new File(["sample,data\n1,2\n3,4"], "sample.xlsx", { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
     }
   ]);
   const [activeCompanyId, setActiveCompanyId] = useState("1");
@@ -637,33 +637,33 @@ export default function BoardMode() {
                   {/* Header with logos */}
                   <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 border-b">
                     <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-4">
-                        {company.logoUrl && (
-                          <img 
-                            src={company.logoUrl} 
-                            alt="Company logo" 
-                            className="h-18 w-18 object-contain"
-                          />
-                        )}
+                       <div className="flex items-center gap-4">
+                         {(company.logoUrl || company.logoFile) && (
+                           <img 
+                             src={company.logoUrl || (company.logoFile ? URL.createObjectURL(company.logoFile) : '')} 
+                             alt="Company logo" 
+                             className="h-18 w-18 object-contain"
+                           />
+                         )}
                         <div className="flex-1">
                           <div className="flex items-center gap-4">
                             <h2 className="text-2xl font-bold text-gray-900">
                               Partnership Review – {company.companyTitle}
                             </h2>
-                            {company.excelFile && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setActiveCompanyId(company.id);
-                                  setShowExcelModal(true);
-                                }}
-                                className="flex items-center gap-2"
-                              >
-                                <FileSpreadsheet className="h-4 w-4" />
-                                Excel Preview
-                              </Button>
-                            )}
+                             {company.excelFile && (
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => {
+                                   setActiveCompanyId(company.id);
+                                   setShowExcelModal(true);
+                                 }}
+                                 className="flex items-center gap-2"
+                               >
+                                 <FileSpreadsheet className="h-4 w-4" />
+                                 Excel Preview
+                               </Button>
+                             )}
                           </div>
                           <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
                         </div>
