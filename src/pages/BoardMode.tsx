@@ -88,11 +88,13 @@ export default function BoardMode() {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
+      const { data: signedLogo, error: signedErr } = await supabase.storage
         .from('Company Logos')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 3600);
 
-      setLogoUrl(data.publicUrl);
+      if (signedErr) throw signedErr;
+
+      setLogoUrl(signedLogo?.signedUrl || null);
       toast.success("Logo uploaded successfully!");
     } catch (error) {
       console.error('Error uploading logo:', error);
@@ -122,11 +124,13 @@ export default function BoardMode() {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
+      const { data: signedPdf, error: signedPdfErr } = await supabase.storage
         .from('New Company approvals')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 3600);
 
-      setPdfUrl(data.publicUrl);
+      if (signedPdfErr) throw signedPdfErr;
+
+      setPdfUrl(signedPdf?.signedUrl || null);
       toast.success("PDF uploaded successfully!");
     } catch (error) {
       console.error('Error uploading PDF:', error);
