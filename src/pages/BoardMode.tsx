@@ -131,7 +131,7 @@ export default function BoardMode() {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer);
+      const workbook = XLSX.read(arrayBuffer, { cellStyles: true, cellNF: true });
       
       // Get sheet names
       const sheetNames = workbook.SheetNames;
@@ -175,7 +175,7 @@ export default function BoardMode() {
     reader.onload = (e) => {
       const arrayBuffer = e.target?.result;
       if (arrayBuffer) {
-        const workbook = XLSX.read(arrayBuffer);
+        const workbook = XLSX.read(arrayBuffer, { cellStyles: true, cellNF: true });
         const worksheet = workbook.Sheets[sheetName];
         const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
         setSheetRange(range);
@@ -232,32 +232,126 @@ export default function BoardMode() {
     
     let style: React.CSSProperties = {};
     
-    // Check cell type for basic styling
-    if (cell.t === 'n' && cell.z) {
-      // Number formatting hints
-      const format = cell.z.toLowerCase();
-      if (format.includes('$') || format.includes('currency')) {
-        style.textAlign = 'right';
-        style.fontFamily = 'monospace';
-      } else if (format.includes('%')) {
-        style.textAlign = 'right';
-      } else if (format.includes('date') || format.includes('mm') || format.includes('dd')) {
-        style.textAlign = 'center';
-      } else if (format.includes('accounting') || format.includes('#,##0')) {
-        style.textAlign = 'right';
-        style.fontFamily = 'monospace';
+    // Check for style information
+    if (cell.s) {
+      const cellStyle = cell.s;
+      
+      // Font styling
+      if (cellStyle.font) {
+        const font = cellStyle.font;
+        
+        // Font weight (bold)
+        if (font.bold) {
+          style.fontWeight = 'bold';
+        }
+        
+        // Font style (italic)
+        if (font.italic) {
+          style.fontStyle = 'italic';
+        }
+        
+        // Underline
+        if (font.underline) {
+          style.textDecoration = 'underline';
+        }
+        
+        // Font size
+        if (font.sz) {
+          style.fontSize = `${font.sz}px`;
+        }
+        
+        // Font color
+        if (font.color && font.color.rgb) {
+          style.color = `#${font.color.rgb}`;
+        }
+        
+        // Font name
+        if (font.name) {
+          style.fontFamily = font.name;
+        }
+      }
+      
+      // Background color
+      if (cellStyle.fill && cellStyle.fill.fgColor && cellStyle.fill.fgColor.rgb) {
+        style.backgroundColor = `#${cellStyle.fill.fgColor.rgb}`;
+      }
+      
+      // Text alignment
+      if (cellStyle.alignment) {
+        if (cellStyle.alignment.horizontal) {
+          switch (cellStyle.alignment.horizontal) {
+            case 'left':
+              style.textAlign = 'left';
+              break;
+            case 'center':
+              style.textAlign = 'center';
+              break;
+            case 'right':
+              style.textAlign = 'right';
+              break;
+            case 'justify':
+              style.textAlign = 'justify';
+              break;
+          }
+        }
+        
+        if (cellStyle.alignment.vertical) {
+          switch (cellStyle.alignment.vertical) {
+            case 'top':
+              style.verticalAlign = 'top';
+              break;
+            case 'center':
+              style.verticalAlign = 'middle';
+              break;
+            case 'bottom':
+              style.verticalAlign = 'bottom';
+              break;
+          }
+        }
+        
+        // Text wrap
+        if (cellStyle.alignment.wrapText) {
+          style.whiteSpace = 'pre-wrap';
+          style.wordWrap = 'break-word';
+        }
+      }
+      
+      // Borders
+      if (cellStyle.border) {
+        const border = cellStyle.border;
+        if (border.top && border.top.style) {
+          style.borderTop = `1px solid #000`;
+        }
+        if (border.bottom && border.bottom.style) {
+          style.borderBottom = `1px solid #000`;
+        }
+        if (border.left && border.left.style) {
+          style.borderLeft = `1px solid #000`;
+        }
+        if (border.right && border.right.style) {
+          style.borderRight = `1px solid #000`;
+        }
       }
     }
     
-    // Date cells
-    if (cell.t === 'd') {
-      style.textAlign = 'center';
-    }
-    
-    // Boolean cells
-    if (cell.t === 'b') {
-      style.textAlign = 'center';
-      style.fontWeight = 'bold';
+    // Fallback styling based on cell type for basic formatting
+    if (!style.textAlign) {
+      if (cell.t === 'n' && cell.z) {
+        const format = cell.z.toLowerCase();
+        if (format.includes('$') || format.includes('currency') || format.includes('accounting') || format.includes('#,##0')) {
+          style.textAlign = 'right';
+          style.fontFamily = style.fontFamily || 'monospace';
+        } else if (format.includes('%')) {
+          style.textAlign = 'right';
+        } else if (format.includes('date') || format.includes('mm') || format.includes('dd')) {
+          style.textAlign = 'center';
+        }
+      } else if (cell.t === 'd') {
+        style.textAlign = 'center';
+      } else if (cell.t === 'b') {
+        style.textAlign = 'center';
+        style.fontWeight = style.fontWeight || 'bold';
+      }
     }
     
     return style;
@@ -521,8 +615,12 @@ export default function BoardMode() {
                             return (
                               <td
                                 key={cellIndex}
-                                className="border px-2 py-1 text-sm min-w-[100px] max-w-[200px] truncate"
-                                style={cellStyle}
+                                className="border px-2 py-1 text-sm min-w-[100px] truncate"
+                                style={{
+                                  ...cellStyle,
+                                  maxWidth: cellStyle.whiteSpace === 'pre-wrap' ? '300px' : '200px',
+                                  overflow: cellStyle.whiteSpace === 'pre-wrap' ? 'visible' : 'hidden'
+                                }}
                                 title={formattedValue}
                               >
                                 {formattedValue}
