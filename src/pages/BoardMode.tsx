@@ -618,7 +618,7 @@ export default function BoardMode() {
                       <SelectValue placeholder="Select company to present..." />
                     </SelectTrigger>
                     <SelectContent className="bg-white z-50">
-                      <SelectItem value="all">All companies</SelectItem>
+                      <SelectItem value="all">Please Select...</SelectItem>
                       {companies
                         .filter(c => c.readyToPresent && c.companyTitle.trim())
                         .map((company) => (
