@@ -34,8 +34,10 @@ export default function BoardMode() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [excelData, setExcelData] = useState<any[][]>([]);
+  const [excelCells, setExcelCells] = useState<any>({});
   const [excelSheets, setExcelSheets] = useState<string[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<string>("");
+  const [sheetRange, setSheetRange] = useState<any>(null);
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -140,9 +142,16 @@ export default function BoardMode() {
         const firstSheet = sheetNames[0];
         setSelectedSheet(firstSheet);
         
-        // Convert sheet to JSON
+        // Get worksheet and its range
         const worksheet = workbook.Sheets[firstSheet];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+        setSheetRange(range);
+        
+        // Store the raw worksheet cells for formatting
+        setExcelCells(worksheet);
+        
+        // Convert sheet to JSON but preserve cell info
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
         setExcelData(jsonData as any[][]);
       }
       
@@ -168,11 +177,90 @@ export default function BoardMode() {
       if (arrayBuffer) {
         const workbook = XLSX.read(arrayBuffer);
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+        setSheetRange(range);
+        setExcelCells(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
         setExcelData(jsonData as any[][]);
       }
     };
     reader.readAsArrayBuffer(excelFile);
+  };
+
+  const formatCellValue = (value: any, rowIndex: number, cellIndex: number) => {
+    if (!excelCells || !sheetRange) return value?.toString() || "";
+    
+    // Calculate the Excel cell address
+    const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: cellIndex });
+    const cell = excelCells[cellAddress];
+    
+    if (!cell) return value?.toString() || "";
+    
+    // Handle different cell types
+    switch (cell.t) {
+      case 'n': // Number
+        if (cell.z) {
+          // Apply number format
+          try {
+            return XLSX.SSF.format(cell.z, cell.v);
+          } catch {
+            return cell.w || cell.v?.toString() || "";
+          }
+        }
+        return cell.w || cell.v?.toString() || "";
+      case 'd': // Date
+        if (cell.w) return cell.w;
+        return new Date(cell.v).toLocaleDateString();
+      case 's': // String
+        return cell.v?.toString() || "";
+      case 'b': // Boolean
+        return cell.v ? 'TRUE' : 'FALSE';
+      case 'e': // Error
+        return cell.w || '#ERROR';
+      default:
+        return cell.w || cell.v?.toString() || "";
+    }
+  };
+
+  const getCellStyle = (rowIndex: number, cellIndex: number) => {
+    if (!excelCells || !sheetRange) return {};
+    
+    const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: cellIndex });
+    const cell = excelCells[cellAddress];
+    
+    if (!cell) return {};
+    
+    let style: React.CSSProperties = {};
+    
+    // Check cell type for basic styling
+    if (cell.t === 'n' && cell.z) {
+      // Number formatting hints
+      const format = cell.z.toLowerCase();
+      if (format.includes('$') || format.includes('currency')) {
+        style.textAlign = 'right';
+        style.fontFamily = 'monospace';
+      } else if (format.includes('%')) {
+        style.textAlign = 'right';
+      } else if (format.includes('date') || format.includes('mm') || format.includes('dd')) {
+        style.textAlign = 'center';
+      } else if (format.includes('accounting') || format.includes('#,##0')) {
+        style.textAlign = 'right';
+        style.fontFamily = 'monospace';
+      }
+    }
+    
+    // Date cells
+    if (cell.t === 'd') {
+      style.textAlign = 'center';
+    }
+    
+    // Boolean cells
+    if (cell.t === 'b') {
+      style.textAlign = 'center';
+      style.fontWeight = 'bold';
+    }
+    
+    return style;
   };
 
   if (authLoading) {
@@ -359,8 +447,10 @@ export default function BoardMode() {
                       onClick={() => {
                         setExcelFile(null);
                         setExcelData([]);
+                        setExcelCells({});
                         setExcelSheets([]);
                         setSelectedSheet("");
+                        setSheetRange(null);
                       }}
                     >
                       Remove Excel
@@ -425,15 +515,20 @@ export default function BoardMode() {
                     <tbody>
                       {excelData.map((row, rowIndex) => (
                         <tr key={rowIndex} className={rowIndex === 0 ? "bg-muted font-medium" : ""}>
-                          {row.map((cell, cellIndex) => (
-                            <td
-                              key={cellIndex}
-                              className="border px-2 py-1 text-sm min-w-[100px] max-w-[200px] truncate"
-                              title={cell?.toString() || ""}
-                            >
-                              {cell?.toString() || ""}
-                            </td>
-                          ))}
+                          {row.map((cell, cellIndex) => {
+                            const formattedValue = formatCellValue(cell, rowIndex, cellIndex);
+                            const cellStyle = getCellStyle(rowIndex, cellIndex);
+                            return (
+                              <td
+                                key={cellIndex}
+                                className="border px-2 py-1 text-sm min-w-[100px] max-w-[200px] truncate"
+                                style={cellStyle}
+                                title={formattedValue}
+                              >
+                                {formattedValue}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>
