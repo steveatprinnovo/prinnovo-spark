@@ -56,7 +56,7 @@ export default function BoardMode() {
   const [uploading, setUploading] = useState(false);
   const [presentationMode, setPresentationMode] = useState(true);
   const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
-  const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("");
+  const [selectedPresentationCompany, setSelectedPresentationCompany] = useState<string>("all");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -374,7 +374,7 @@ export default function BoardMode() {
                         <SelectValue placeholder="Select company to present..." />
                       </SelectTrigger>
                       <SelectContent className="bg-white z-50">
-                        <SelectItem value="">All companies</SelectItem>
+                        <SelectItem value="all">All companies</SelectItem>
                         {companies
                           .filter(c => c.readyToPresent && c.companyTitle.trim())
                           .map((company) => (
@@ -416,7 +416,7 @@ export default function BoardMode() {
                 .filter(company => 
                   company.companyTitle.trim() && 
                   company.readyToPresent &&
-                  (selectedPresentationCompany === "" || selectedPresentationCompany === company.id)
+                  (selectedPresentationCompany === "all" || selectedPresentationCompany === company.id)
                 )
                 .map((company) => (
                 <div key={company.id} className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
