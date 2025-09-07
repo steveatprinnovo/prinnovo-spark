@@ -647,21 +647,21 @@ export default function BoardMode() {
                         <div className="h-16 w-16 border-2 border-dashed border-muted-foreground/25 rounded flex items-center justify-center">
                           <Upload className="h-6 w-6 text-muted-foreground" />
                         </div>
-                        <Label htmlFor={`logo-upload-${company.id}`} className="cursor-pointer">
-                          <Button variant="outline" asChild disabled={uploading || !company.companyTitle.trim()}>
-                            <span>
-                              {uploading ? "Uploading..." : "Upload Logo"}
-                            </span>
-                          </Button>
-                          <Input
-                            id={`logo-upload-${company.id}`}
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleLogoUpload(e, company.id)}
-                            className="hidden"
-                            disabled={uploading || !company.companyTitle.trim()}
-                          />
-                        </Label>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => document.getElementById(`logo-upload-${company.id}`)?.click()}
+                          disabled={uploading || !company.companyTitle.trim()}
+                        >
+                          {uploading ? "Uploading..." : "Upload Logo"}
+                        </Button>
+                        <Input
+                          id={`logo-upload-${company.id}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleLogoUpload(e, company.id)}
+                          className="hidden"
+                          disabled={uploading || !company.companyTitle.trim()}
+                        />
                       </div>
                     )}
                   </div>
