@@ -248,40 +248,49 @@ export default function BoardMode() {
     }
   };
 
-  const handleSheetChange = (sheetName: string) => {
+  const handleSheetChange = async (sheetName: string) => {
     const activeCompany = companies.find(c => c.id === activeCompanyId);
-    if (!activeCompany?.excelFile) return;
+    if (!activeCompany || (!activeCompany.excelFile && !activeCompany.excelUrl)) return;
 
     setSelectedSheet(sheetName);
     
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const arrayBuffer = e.target?.result;
-      if (arrayBuffer) {
-        const workbook = XLSX.read(arrayBuffer);
-        const sheet = workbook.Sheets[sheetName];
-        const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
-        setSheetRange(range);
-        
-        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        setExcelData(data as any[][]);
-        
-        const widths = [];
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          let maxWidth = 100;
-          for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
-            const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
-            const cellValue = sheet[cellAddress]?.v || '';
-            const textWidth = String(cellValue).length * 8;
-            maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
-          }
-          widths.push(maxWidth);
-        }
-        setColumnWidths(widths);
-        setExcelCells(sheet);
+    try {
+      let arrayBuffer: ArrayBuffer;
+      
+      if (activeCompany.excelFile) {
+        arrayBuffer = await activeCompany.excelFile.arrayBuffer();
+      } else if (activeCompany.excelUrl) {
+        const response = await fetch(activeCompany.excelUrl);
+        arrayBuffer = await response.arrayBuffer();
+      } else {
+        return;
       }
-    };
-    reader.readAsArrayBuffer(activeCompany.excelFile);
+
+      const workbook = XLSX.read(arrayBuffer);
+      const sheet = workbook.Sheets[sheetName];
+      const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
+      setSheetRange(range);
+      
+      const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      setExcelData(data as any[][]);
+      
+      const widths = [];
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        let maxWidth = 100;
+        for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
+          const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
+          const cellValue = sheet[cellAddress]?.v || '';
+          const textWidth = String(cellValue).length * 8;
+          maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
+        }
+        widths.push(maxWidth);
+      }
+      setColumnWidths(widths);
+      setExcelCells(sheet);
+    } catch (error) {
+      console.error('Error loading sheet:', error);
+      toast.error('Failed to load sheet data');
+    }
   };
 
   const loading = authLoading || companiesLoading;
