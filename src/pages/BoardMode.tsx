@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ReactMarkdown from 'react-markdown';
 import * as XLSX from 'xlsx';
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -699,9 +700,9 @@ export default function BoardMode() {
                            <Target className="h-4 w-4" />
                            Key Points:
                          </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.keyPoints || "Key points to be documented"}
-                        </p>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
+                           <ReactMarkdown>{company.keyPoints || "Key points to be documented"}</ReactMarkdown>
+                         </div>
                       </div>
 
                        <div className="bg-yellow-50 p-4 rounded-lg">
@@ -709,9 +710,9 @@ export default function BoardMode() {
                            <FileText className="h-4 w-4" />
                            IPA Terms:
                          </h3>
-                        <p className="text-sm text-gray-700">
-                          {company.ipaTerms || "IPA terms to be defined"}
-                        </p>
+                         <div className="text-sm text-gray-700 prose prose-sm max-w-none">
+                           <ReactMarkdown>{company.ipaTerms || "IPA terms to be defined"}</ReactMarkdown>
+                         </div>
                       </div>
 
                        <div className="bg-orange-50 p-4 rounded-lg">
@@ -742,9 +743,9 @@ export default function BoardMode() {
                            <CheckCircle className="h-4 w-4" />
                            Validation:
                          </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.validation || "Validation details to be provided"}
-                        </p>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
+                           <ReactMarkdown>{company.validation || "Validation details to be provided"}</ReactMarkdown>
+                         </div>
                       </div>
 
                        <div className="bg-purple-50 p-4 rounded-lg">
@@ -752,9 +753,9 @@ export default function BoardMode() {
                            <GitBranch className="h-4 w-4" />
                            Post-Pilot / Co-Development:
                          </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.postPilot || "Post-pilot strategy to be developed"}
-                        </p>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
+                           <ReactMarkdown>{company.postPilot || "Post-pilot strategy to be developed"}</ReactMarkdown>
+                         </div>
                       </div>
 
                        <div className="bg-indigo-50 p-4 rounded-lg">
@@ -762,9 +763,9 @@ export default function BoardMode() {
                            <Cog className="h-4 w-4" />
                            IT Needs and Pilot:
                          </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.itNeedsPilot || "IT requirements and pilot details"}
-                        </p>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
+                           <ReactMarkdown>{company.itNeedsPilot || "IT requirements and pilot details"}</ReactMarkdown>
+                         </div>
                       </div>
                     </div>
                   </div>
