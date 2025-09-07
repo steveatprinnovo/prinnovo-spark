@@ -20,8 +20,8 @@ export type Database = {
           company_title: string
           created_at: string | null
           excel_storage_path: string | null
+          first_year_cost: number | null
           id: string
-          internal_annual_cost: number | null
           internal_champions: string | null
           ipa_terms: string | null
           it_needs_pilot: string | null
@@ -40,8 +40,8 @@ export type Database = {
           company_title: string
           created_at?: string | null
           excel_storage_path?: string | null
+          first_year_cost?: number | null
           id?: string
-          internal_annual_cost?: number | null
           internal_champions?: string | null
           ipa_terms?: string | null
           it_needs_pilot?: string | null
@@ -60,8 +60,8 @@ export type Database = {
           company_title?: string
           created_at?: string | null
           excel_storage_path?: string | null
+          first_year_cost?: number | null
           id?: string
-          internal_annual_cost?: number | null
           internal_champions?: string | null
           ipa_terms?: string | null
           it_needs_pilot?: string | null

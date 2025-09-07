@@ -13,7 +13,7 @@ export interface BoardApprovalData {
   value_impact_team: string;
   ipa_terms: string;
   referral_incentive: string;
-  internal_annual_cost: number;
+  first_year_cost: number;
   one_time_implementation_cost: number;
   annual_subscription_cost: number;
   key_points: string;
@@ -33,7 +33,7 @@ export interface CompanyData {
   valueImpactTeam: string;
   ipaTerms: string;
   referralIncentive: string;
-  internalAnnualCost: string;
+  firstYearCost: string;
   oneTimeImplementationCost: string;
   annualSubscriptionCost: string;
   keyPoints: string;
@@ -79,7 +79,7 @@ export function useBoardApprovals() {
       valueImpactTeam: record.value_impact_team,
       ipaTerms: record.ipa_terms,
       referralIncentive: record.referral_incentive,
-      internalAnnualCost: record.internal_annual_cost.toString(),
+      firstYearCost: record.first_year_cost.toString(),
       oneTimeImplementationCost: record.one_time_implementation_cost.toString(),
       annualSubscriptionCost: record.annual_subscription_cost.toString(),
       keyPoints: record.key_points,
@@ -171,7 +171,7 @@ export function useBoardApprovals() {
         value_impact_team: company.valueImpactTeam,
         ipa_terms: company.ipaTerms,
         referral_incentive: company.referralIncentive,
-        internal_annual_cost: parseFloat(company.internalAnnualCost) || 0,
+        first_year_cost: parseFloat(company.firstYearCost) || 0,
         one_time_implementation_cost: parseFloat(company.oneTimeImplementationCost) || 0,
         annual_subscription_cost: parseFloat(company.annualSubscriptionCost) || 0,
         key_points: company.keyPoints,
@@ -220,7 +220,7 @@ export function useBoardApprovals() {
       valueImpactTeam: "",
       ipaTerms: "",
       referralIncentive: "",
-      internalAnnualCost: "",
+      firstYearCost: "",
       oneTimeImplementationCost: "",
       annualSubscriptionCost: "",
       keyPoints: "",

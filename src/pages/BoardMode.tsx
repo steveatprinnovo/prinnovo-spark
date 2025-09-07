@@ -451,12 +451,12 @@ export default function BoardMode() {
                          </p>
                        </div>
 
-                       {/* Key Points Section */}
-                       <div className="bg-blue-50 p-4 rounded-lg">
-                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
-                           <Target className="h-4 w-4" />
-                           Key Points:
-                         </h3>
+                        {/* Key Points Section */}
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                            <Target className="h-4 w-4" />
+                            Key Points:
+                          </h3>
                          <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-4 [&_ul]:ml-4 [&_ol]:pl-2 [&_ul]:pl-2 whitespace-pre-wrap">
                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{company.keyPoints || "Key points to be documented"}</ReactMarkdown>
                          </div>
@@ -503,12 +503,12 @@ export default function BoardMode() {
                                {company.annualSubscriptionCost ? `$${parseFloat(company.annualSubscriptionCost).toLocaleString()}` : "$0"}
                              </span>
                            </div>
-                           <div className="border-t pt-2 flex justify-between items-center">
-                             <span className="text-sm font-bold text-gray-900">Total Annual Cost:</span>
-                             <span className="text-lg font-bold text-gray-900">
-                               {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
-                             </span>
-                           </div>
+                            <div className="border-t pt-2 flex justify-between items-center">
+                              <span className="text-sm font-bold text-gray-900">First Year Cost:</span>
+                              <span className="text-lg font-bold text-gray-900">
+                                {company.firstYearCost ? `$${parseFloat(company.firstYearCost).toLocaleString()}` : "$0"}
+                              </span>
+                            </div>
                          </div>
                        </div>
                      </div>
@@ -744,18 +744,18 @@ export default function BoardMode() {
                              </div>
                            </div>
                            
-                           <div className="space-y-2">
-                             <Label htmlFor={`internal-annual-cost-${company.id}`}>Total Annual Cost</Label>
-                             <div className="relative">
-                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                               <Input
-                                 id={`internal-annual-cost-${company.id}`}
-                                 type="number"
-                                 value={company.internalAnnualCost}
-                                 onChange={(e) => updateCompanyField(company.id, 'internalAnnualCost', e.target.value)}
-                                 placeholder="0.00"
-                                 className="pl-8 w-full"
-                               />
+                            <div className="space-y-2">
+                              <Label htmlFor={`first-year-cost-${company.id}`}>First Year Cost</Label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                                <Input
+                                  id={`first-year-cost-${company.id}`}
+                                  type="number"
+                                  value={company.firstYearCost}
+                                  onChange={(e) => updateCompanyField(company.id, 'firstYearCost', e.target.value)}
+                                  placeholder="0.00"
+                                  className="pl-8 w-full"
+                                />
                              </div>
                            </div>
                          </div>
