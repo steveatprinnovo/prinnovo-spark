@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import * as XLSX from 'xlsx';
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -700,8 +701,8 @@ export default function BoardMode() {
                            <Target className="h-4 w-4" />
                            Key Points:
                          </h3>
-                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                           <ReactMarkdown>{company.keyPoints || "Key points to be documented"}</ReactMarkdown>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-4 [&_ul]:ml-4 [&_ol]:pl-2 [&_ul]:pl-2 whitespace-pre-wrap">
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{company.keyPoints || "Key points to be documented"}</ReactMarkdown>
                          </div>
                       </div>
 
@@ -710,8 +711,8 @@ export default function BoardMode() {
                            <FileText className="h-4 w-4" />
                            IPA Terms:
                          </h3>
-                         <div className="text-sm text-gray-700 prose prose-sm max-w-none">
-                           <ReactMarkdown>{company.ipaTerms || "IPA terms to be defined"}</ReactMarkdown>
+                         <div className="text-sm text-gray-700 prose prose-sm max-w-none [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-4 [&_ul]:ml-4 [&_ol]:pl-2 [&_ul]:pl-2 whitespace-pre-wrap">
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{company.ipaTerms || "IPA terms to be defined"}</ReactMarkdown>
                          </div>
                       </div>
 
@@ -743,8 +744,8 @@ export default function BoardMode() {
                            <CheckCircle className="h-4 w-4" />
                            Validation:
                          </h3>
-                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                           <ReactMarkdown>{company.validation || "Validation details to be provided"}</ReactMarkdown>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-4 [&_ul]:ml-4 [&_ol]:pl-2 [&_ul]:pl-2 whitespace-pre-wrap">
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{company.validation || "Validation details to be provided"}</ReactMarkdown>
                          </div>
                       </div>
 
@@ -753,8 +754,8 @@ export default function BoardMode() {
                            <GitBranch className="h-4 w-4" />
                            Post-Pilot / Co-Development:
                          </h3>
-                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                           <ReactMarkdown>{company.postPilot || "Post-pilot strategy to be developed"}</ReactMarkdown>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-4 [&_ul]:ml-4 [&_ol]:pl-2 [&_ul]:pl-2 whitespace-pre-wrap">
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{company.postPilot || "Post-pilot strategy to be developed"}</ReactMarkdown>
                          </div>
                       </div>
 
@@ -763,8 +764,8 @@ export default function BoardMode() {
                            <Cog className="h-4 w-4" />
                            IT Needs and Pilot:
                          </h3>
-                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                           <ReactMarkdown>{company.itNeedsPilot || "IT requirements and pilot details"}</ReactMarkdown>
+                         <div className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-4 [&_ul]:ml-4 [&_ol]:pl-2 [&_ul]:pl-2 whitespace-pre-wrap">
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{company.itNeedsPilot || "IT requirements and pilot details"}</ReactMarkdown>
                          </div>
                       </div>
                     </div>
