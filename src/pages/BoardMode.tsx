@@ -393,7 +393,7 @@ export default function BoardMode() {
               {companies.filter(company => company.companyTitle.trim()).map((company) => (
                 <div key={company.id} className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg">
                   {/* Header */}
-                  <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6">
+                  <div className="bg-white border-b border-gray-200 p-6">
                     <div className="flex justify-between items-start">
                        <div className="flex items-start gap-6">
                          <div className="flex flex-col items-center gap-3">
@@ -420,9 +420,9 @@ export default function BoardMode() {
                            )}
                          </div>
                          <div className="flex-1">
-                           <h2 className="text-2xl font-bold text-gray-900">
-                             Partnership Review – {company.companyTitle}
-                           </h2>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              Partnership Review – {company.companyTitle}
+                            </h2>
                            <p className="text-sm text-gray-600 mt-1">Internal Champion(s): {company.internalChampions}</p>
                          </div>
                        </div>
