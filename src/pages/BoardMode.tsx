@@ -81,6 +81,22 @@ export default function BoardMode() {
     }
   }, [user, authLoading, navigate]);
 
+  // Load saved companies from localStorage on mount
+  useEffect(() => {
+    const savedCompanies = localStorage.getItem('boardModeCompanies');
+    if (savedCompanies) {
+      try {
+        const parsedCompanies = JSON.parse(savedCompanies);
+        if (Array.isArray(parsedCompanies) && parsedCompanies.length > 0) {
+          setCompanies(parsedCompanies);
+          setActiveCompanyId(parsedCompanies[0].id);
+        }
+      } catch (error) {
+        console.error('Error loading saved companies:', error);
+      }
+    }
+  }, []);
+
   const addAgendaItem = () => {
     const newItem: AgendaItem = {
       id: Date.now().toString(),
@@ -132,6 +148,21 @@ export default function BoardMode() {
     };
     setCompanies([...companies, newCompany]);
     setActiveCompanyId(newCompany.id);
+  };
+
+  const saveCompanyData = (companyId: string) => {
+    const company = companies.find(c => c.id === companyId);
+    if (!company) return;
+    
+    // Save to localStorage for persistence
+    const savedCompanies = companies.map(c => ({
+      ...c,
+      logoFile: null, // Don't save file objects to localStorage
+      excelFile: null // Don't save file objects to localStorage
+    }));
+    localStorage.setItem('boardModeCompanies', JSON.stringify(savedCompanies));
+    
+    toast.success(`${company.companyTitle || 'Company'} data saved successfully!`);
   };
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>, companyId: string) => {
@@ -801,7 +832,17 @@ export default function BoardMode() {
                 </div>
               </div>
               
-              {/* Separator line below Upload Excel */}
+              {/* Save/Update Button */}
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={() => saveCompanyData(company.id)}
+                  className="w-32"
+                >
+                  Save Changes
+                </Button>
+              </div>
+              
+              {/* Separator line below Save button */}
               <Separator />
             </div>
           ))}
