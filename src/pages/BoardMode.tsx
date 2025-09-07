@@ -72,67 +72,6 @@ export default function BoardMode() {
     }
   }, [companies, activeCompanyId]);
 
-  // Load Excel data when modal opens
-  useEffect(() => {
-    if (!showExcelModal || !activeCompanyId) return;
-    
-    const activeCompany = companies.find(c => c.id === activeCompanyId);
-    if (!activeCompany || (!activeCompany.excelFile && !activeCompany.excelUrl)) return;
-
-    const loadExcelData = async () => {
-      try {
-        let arrayBuffer: ArrayBuffer;
-        
-        if (activeCompany.excelFile) {
-          // Load from local file
-          arrayBuffer = await activeCompany.excelFile.arrayBuffer();
-        } else if (activeCompany.excelUrl) {
-          // Load from URL
-          const response = await fetch(activeCompany.excelUrl);
-          arrayBuffer = await response.arrayBuffer();
-        } else {
-          return;
-        }
-
-        const workbook = XLSX.read(arrayBuffer);
-        const sheetNames = workbook.SheetNames;
-        
-        setExcelSheets(sheetNames);
-        
-        if (sheetNames.length > 0) {
-          const firstSheet = workbook.Sheets[sheetNames[0]];
-          const range = XLSX.utils.decode_range(firstSheet['!ref'] || 'A1:A1');
-          setSheetRange(range);
-          
-          const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-          setExcelData(data as any[][]);
-          setSelectedSheet(sheetNames[0]);
-          
-          // Calculate column widths based on content
-          const widths = [];
-          for (let col = range.s.c; col <= range.e.c; col++) {
-            let maxWidth = 100;
-            for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
-              const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
-              const cellValue = firstSheet[cellAddress]?.v || '';
-              const textWidth = String(cellValue).length * 8;
-              maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
-            }
-            widths.push(maxWidth);
-          }
-          setColumnWidths(widths);
-          
-          // Store cells data for styling
-          setExcelCells(firstSheet);
-        }
-      } catch (error) {
-        console.error('Error loading Excel data:', error);
-        toast.error('Failed to load Excel file');
-      }
-    };
-
-    loadExcelData();
-  }, [showExcelModal, activeCompanyId, companies]);
 
 
   const addAgendaItem = () => {
@@ -251,49 +190,40 @@ export default function BoardMode() {
     }
   };
 
-  const handleSheetChange = async (sheetName: string) => {
+  const handleSheetChange = (sheetName: string) => {
     const activeCompany = companies.find(c => c.id === activeCompanyId);
-    if (!activeCompany || (!activeCompany.excelFile && !activeCompany.excelUrl)) return;
+    if (!activeCompany?.excelFile) return;
 
     setSelectedSheet(sheetName);
     
-    try {
-      let arrayBuffer: ArrayBuffer;
-      
-      if (activeCompany.excelFile) {
-        arrayBuffer = await activeCompany.excelFile.arrayBuffer();
-      } else if (activeCompany.excelUrl) {
-        const response = await fetch(activeCompany.excelUrl);
-        arrayBuffer = await response.arrayBuffer();
-      } else {
-        return;
-      }
-
-      const workbook = XLSX.read(arrayBuffer);
-      const sheet = workbook.Sheets[sheetName];
-      const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
-      setSheetRange(range);
-      
-      const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      setExcelData(data as any[][]);
-      
-      const widths = [];
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        let maxWidth = 100;
-        for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
-          const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
-          const cellValue = sheet[cellAddress]?.v || '';
-          const textWidth = String(cellValue).length * 8;
-          maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const arrayBuffer = e.target?.result;
+      if (arrayBuffer) {
+        const workbook = XLSX.read(arrayBuffer);
+        const sheet = workbook.Sheets[sheetName];
+        const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
+        setSheetRange(range);
+        
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        setExcelData(data as any[][]);
+        
+        const widths = [];
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          let maxWidth = 100;
+          for (let row = range.s.r; row <= Math.min(range.e.r, 100); row++) {
+            const cellAddress = XLSX.utils.encode_cell({ c: col, r: row });
+            const cellValue = sheet[cellAddress]?.v || '';
+            const textWidth = String(cellValue).length * 8;
+            maxWidth = Math.max(maxWidth, Math.min(textWidth, 300));
+          }
+          widths.push(maxWidth);
         }
-        widths.push(maxWidth);
+        setColumnWidths(widths);
+        setExcelCells(sheet);
       }
-      setColumnWidths(widths);
-      setExcelCells(sheet);
-    } catch (error) {
-      console.error('Error loading sheet:', error);
-      toast.error('Failed to load sheet data');
-    }
+    };
+    reader.readAsArrayBuffer(activeCompany.excelFile);
   };
 
   const loading = authLoading || companiesLoading;
