@@ -74,6 +74,7 @@ export default function BoardMode() {
 
   // Load Excel data when modal opens
   useEffect(() => {
+    console.log('Excel modal useEffect triggered:', showExcelModal, activeCompanyId);
     if (!showExcelModal || !activeCompanyId) return;
     
     const activeCompany = companies.find(c => c.id === activeCompanyId);
@@ -969,8 +970,8 @@ export default function BoardMode() {
 
                      {/* Excel Upload */}
                      <div className="space-y-2">
-                       <Label>Upload Excel Pro-Forma</Label>
-                       <div className="flex items-center gap-4">
+                        <Label>Upload Excel Pro-Forma</Label>
+                        <div className="flex items-center gap-4">
                           {(company.excelFile || company.excelUrl) ? (
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2 p-2 border rounded">
@@ -1024,10 +1025,11 @@ export default function BoardMode() {
                          )}
                        </div>
                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                   </div>
+                 </div>
+                ))
+                }
+               </div>
            )}
           </div>
         </div>
