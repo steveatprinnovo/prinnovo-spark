@@ -7,11 +7,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch } from "lucide-react";
+import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface AgendaItem {
@@ -75,6 +76,7 @@ export default function BoardMode() {
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [presentationMode, setPresentationMode] = useState(true);
+  const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -867,16 +869,26 @@ export default function BoardMode() {
                         />
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor={`ipa-terms-${company.id}`}>IPA Terms</Label>
-                        <Input
-                          id={`ipa-terms-${company.id}`}
-                          value={company.ipaTerms}
-                          onChange={(e) => updateCompanyField(company.id, 'ipaTerms', e.target.value)}
-                          placeholder="Enter IPA terms"
-                          className="w-full"
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2">
+                           <Label htmlFor={`ipa-terms-${company.id}`}>IPA Terms</Label>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setShowMarkdownHelp(true)}
+                             className="h-6 w-6 p-0 rounded-full border"
+                           >
+                             <HelpCircle className="h-3 w-3" />
+                           </Button>
+                         </div>
+                         <Textarea
+                           id={`ipa-terms-${company.id}`}
+                           value={company.ipaTerms}
+                           onChange={(e) => updateCompanyField(company.id, 'ipaTerms', e.target.value)}
+                           placeholder="Enter IPA terms (Markdown supported)"
+                           className="w-full min-h-[100px] resize-y"
+                         />
+                       </div>
                       
                       <div className="space-y-2">
                         <Label htmlFor={`referral-incentive-${company.id}`}>Referral Incentive</Label>
@@ -904,49 +916,89 @@ export default function BoardMode() {
                         </div>
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor={`key-points-${company.id}`}>Key Points</Label>
-                        <Input
-                          id={`key-points-${company.id}`}
-                          value={company.keyPoints}
-                          onChange={(e) => updateCompanyField(company.id, 'keyPoints', e.target.value)}
-                          placeholder="Enter key points"
-                          className="w-full"
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2">
+                           <Label htmlFor={`key-points-${company.id}`}>Key Points</Label>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setShowMarkdownHelp(true)}
+                             className="h-6 w-6 p-0 rounded-full border"
+                           >
+                             <HelpCircle className="h-3 w-3" />
+                           </Button>
+                         </div>
+                         <Textarea
+                           id={`key-points-${company.id}`}
+                           value={company.keyPoints}
+                           onChange={(e) => updateCompanyField(company.id, 'keyPoints', e.target.value)}
+                           placeholder="Enter key points (Markdown supported)"
+                           className="w-full min-h-[100px] resize-y"
+                         />
+                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor={`validation-${company.id}`}>Validation</Label>
-                        <Input
-                          id={`validation-${company.id}`}
-                          value={company.validation}
-                          onChange={(e) => updateCompanyField(company.id, 'validation', e.target.value)}
-                          placeholder="Enter validation"
-                          className="w-full"
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2">
+                           <Label htmlFor={`validation-${company.id}`}>Validation</Label>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setShowMarkdownHelp(true)}
+                             className="h-6 w-6 p-0 rounded-full border"
+                           >
+                             <HelpCircle className="h-3 w-3" />
+                           </Button>
+                         </div>
+                         <Textarea
+                           id={`validation-${company.id}`}
+                           value={company.validation}
+                           onChange={(e) => updateCompanyField(company.id, 'validation', e.target.value)}
+                           placeholder="Enter validation (Markdown supported)"
+                           className="w-full min-h-[100px] resize-y"
+                         />
+                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor={`it-needs-pilot-${company.id}`}>IT Needs and Pilot</Label>
-                        <Input
-                          id={`it-needs-pilot-${company.id}`}
-                          value={company.itNeedsPilot}
-                          onChange={(e) => updateCompanyField(company.id, 'itNeedsPilot', e.target.value)}
-                          placeholder="Enter IT needs and pilot"
-                          className="w-full"
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2">
+                           <Label htmlFor={`it-needs-pilot-${company.id}`}>IT Needs and Pilot</Label>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setShowMarkdownHelp(true)}
+                             className="h-6 w-6 p-0 rounded-full border"
+                           >
+                             <HelpCircle className="h-3 w-3" />
+                           </Button>
+                         </div>
+                         <Textarea
+                           id={`it-needs-pilot-${company.id}`}
+                           value={company.itNeedsPilot}
+                           onChange={(e) => updateCompanyField(company.id, 'itNeedsPilot', e.target.value)}
+                           placeholder="Enter IT needs and pilot (Markdown supported)"
+                           className="w-full min-h-[100px] resize-y"
+                         />
+                       </div>
                       
-                      <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor={`post-pilot-${company.id}`}>Post-Pilot and Co-Development</Label>
-                        <Input
-                          id={`post-pilot-${company.id}`}
-                          value={company.postPilot}
-                          onChange={(e) => updateCompanyField(company.id, 'postPilot', e.target.value)}
-                          placeholder="Enter post-pilot and co-development"
-                          className="w-full"
-                        />
-                      </div>
+                       <div className="space-y-2 md:col-span-2">
+                         <div className="flex items-center gap-2">
+                           <Label htmlFor={`post-pilot-${company.id}`}>Post-Pilot and Co-Development</Label>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setShowMarkdownHelp(true)}
+                             className="h-6 w-6 p-0 rounded-full border"
+                           >
+                             <HelpCircle className="h-3 w-3" />
+                           </Button>
+                         </div>
+                         <Textarea
+                           id={`post-pilot-${company.id}`}
+                           value={company.postPilot}
+                           onChange={(e) => updateCompanyField(company.id, 'postPilot', e.target.value)}
+                           placeholder="Enter post-pilot and co-development (Markdown supported)"
+                           className="w-full min-h-[100px] resize-y"
+                         />
+                       </div>
                     </div>
 
                     {/* Excel Upload */}
@@ -1106,6 +1158,83 @@ export default function BoardMode() {
                   No data available to display.
                 </div>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Markdown Help Modal */}
+        <Dialog open={showMarkdownHelp} onOpenChange={setShowMarkdownHelp}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Markdown Syntax Guide</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Headers</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    # Header 1<br/>
+                    ## Header 2<br/>
+                    ### Header 3
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Text Formatting</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    **Bold text**<br/>
+                    *Italic text*<br/>
+                    ~~Strikethrough~~<br/>
+                    `Inline code`
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Lists</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    • Unordered list item<br/>
+                    • Another item<br/>
+                    <br/>
+                    1. Ordered list item<br/>
+                    2. Another item
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Links & Images</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    [Link text](https://example.com)<br/>
+                    ![Image alt text](image-url.jpg)
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Code Blocks</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    ```<br/>
+                    Code block<br/>
+                    Multiple lines<br/>
+                    ```
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Tables</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    | Header 1 | Header 2 |<br/>
+                    |----------|----------|<br/>
+                    | Cell 1   | Cell 2   |
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Quotes</h4>
+                  <div className="bg-muted p-3 rounded text-sm font-mono">
+                    &gt; This is a quote<br/>
+                    &gt; Continued quote
+                  </div>
+                </div>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
