@@ -34,6 +34,8 @@ interface CompanyData {
   ipaTerms: string;
   referralIncentive: string;
   internalAnnualCost: string;
+  oneTimeImplementationCost: string;
+  annualSubscriptionCost: string;
   keyPoints: string;
   validation: string;
   itNeedsPilot: string;
@@ -61,6 +63,8 @@ export default function BoardMode() {
       ipaTerms: "24-month term with quarterly review milestones",
       referralIncentive: "Tiered commission structure: 2% Year 1, 1.5% Year 2",
       internalAnnualCost: "125000",
+      oneTimeImplementationCost: "50000",
+      annualSubscriptionCost: "75000",
       keyPoints: "Strong clinical outcomes, proven ROI, scalable platform",
       validation: "Pilot completed successfully with 95% provider satisfaction",
       itNeedsPilot: "Integration with Epic EHR required, 6-month implementation timeline",
@@ -146,6 +150,8 @@ export default function BoardMode() {
       ipaTerms: "",
       referralIncentive: "",
       internalAnnualCost: "",
+      oneTimeImplementationCost: "",
+      annualSubscriptionCost: "",
       keyPoints: "",
       validation: "",
       itNeedsPilot: "",
@@ -719,7 +725,7 @@ export default function BoardMode() {
                        <div className="bg-orange-50 p-4 rounded-lg">
                          <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
                            <Gift className="h-4 w-4" />
-                           Referral Incentive:
+                           External Venture Office Referral Incentive:
                          </h3>
                         <p className="text-sm text-gray-700">
                           {company.referralIncentive || "Incentive structure to be defined"}
@@ -729,11 +735,28 @@ export default function BoardMode() {
                        <div className="bg-red-50 p-4 rounded-lg">
                          <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
                            <DollarSign className="h-4 w-4" />
-                           Internal Annual Cost:
-                         </h3>
-                        <p className="text-lg font-bold text-gray-900">
-                          {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
-                        </p>
+                            Health System Cost:
+                          </h3>
+                         <div className="space-y-2">
+                           <div className="flex justify-between items-center">
+                             <span className="text-sm text-gray-600">One-Time Implementation / Training:</span>
+                             <span className="text-sm font-semibold text-gray-900">
+                               {company.oneTimeImplementationCost ? `$${parseFloat(company.oneTimeImplementationCost).toLocaleString()}` : "$0"}
+                             </span>
+                           </div>
+                           <div className="flex justify-between items-center">
+                             <span className="text-sm text-gray-600">Annual Subscription:</span>
+                             <span className="text-sm font-semibold text-gray-900">
+                               {company.annualSubscriptionCost ? `$${parseFloat(company.annualSubscriptionCost).toLocaleString()}` : "$0"}
+                             </span>
+                           </div>
+                           <div className="border-t pt-2 flex justify-between items-center">
+                             <span className="text-sm font-bold text-gray-900">Total Annual Cost:</span>
+                             <span className="text-lg font-bold text-gray-900">
+                               {company.internalAnnualCost ? `$${parseFloat(company.internalAnnualCost).toLocaleString()}` : "$0"}
+                             </span>
+                           </div>
+                         </div>
                       </div>
                     </div>
 
@@ -893,7 +916,7 @@ export default function BoardMode() {
                        </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor={`referral-incentive-${company.id}`}>Referral Incentive</Label>
+                        <Label htmlFor={`referral-incentive-${company.id}`}>External Venture Office Referral Incentive</Label>
                         <Input
                           id={`referral-incentive-${company.id}`}
                           value={company.referralIncentive}
@@ -903,20 +926,56 @@ export default function BoardMode() {
                         />
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor={`internal-annual-cost-${company.id}`}>Internal Annual Cost</Label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                          <Input
-                            id={`internal-annual-cost-${company.id}`}
-                            type="number"
-                            value={company.internalAnnualCost}
-                            onChange={(e) => updateCompanyField(company.id, 'internalAnnualCost', e.target.value)}
-                            placeholder="0.00"
-                            className="pl-8 w-full"
-                          />
-                        </div>
-                      </div>
+                       <div className="space-y-4 md:col-span-2">
+                         <Label className="text-base font-semibold">Health System Cost</Label>
+                         
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                           <div className="space-y-2">
+                             <Label htmlFor={`one-time-implementation-cost-${company.id}`}>One-Time Implementation / Training Costs</Label>
+                             <div className="relative">
+                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                               <Input
+                                 id={`one-time-implementation-cost-${company.id}`}
+                                 type="number"
+                                 value={company.oneTimeImplementationCost}
+                                 onChange={(e) => updateCompanyField(company.id, 'oneTimeImplementationCost', e.target.value)}
+                                 placeholder="0.00"
+                                 className="pl-8 w-full"
+                               />
+                             </div>
+                           </div>
+                           
+                           <div className="space-y-2">
+                             <Label htmlFor={`annual-subscription-cost-${company.id}`}>Annual Subscription Cost</Label>
+                             <div className="relative">
+                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                               <Input
+                                 id={`annual-subscription-cost-${company.id}`}
+                                 type="number"
+                                 value={company.annualSubscriptionCost}
+                                 onChange={(e) => updateCompanyField(company.id, 'annualSubscriptionCost', e.target.value)}
+                                 placeholder="0.00"
+                                 className="pl-8 w-full"
+                               />
+                             </div>
+                           </div>
+                           
+                           <div className="space-y-2">
+                             <Label htmlFor={`internal-annual-cost-${company.id}`}>Total Annual Cost</Label>
+                             <div className="relative">
+                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                               <Input
+                                 id={`internal-annual-cost-${company.id}`}
+                                 type="number"
+                                 value={company.internalAnnualCost}
+                                 onChange={(e) => updateCompanyField(company.id, 'internalAnnualCost', e.target.value)}
+                                 placeholder="0.00"
+                                 className="pl-8 w-full"
+                               />
+                             </div>
+                           </div>
+                         </div>
+                       </div>
                       
                        <div className="space-y-2">
                          <div className="flex items-center gap-2">
