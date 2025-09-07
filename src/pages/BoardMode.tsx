@@ -292,30 +292,45 @@ export default function BoardMode() {
                   <div className="col-span-1">
                     <span className="text-sm font-medium text-gray-600">{index + 1}.</span>
                   </div>
-                  <div className="col-span-5">
-                    <Input
-                      value={item.item}
-                      onChange={(e) => updateAgendaItem(item.id, 'item', e.target.value)}
-                      placeholder="Agenda item"
-                      disabled={presentationMode}
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <Input
-                      value={item.presenter}
-                      onChange={(e) => updateAgendaItem(item.id, 'presenter', e.target.value)}
-                      placeholder="Presenter"
-                      disabled={presentationMode}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Input
-                      value={item.time}
-                      onChange={(e) => updateAgendaItem(item.id, 'time', e.target.value)}
-                      placeholder="Time"
-                      disabled={presentationMode}
-                    />
-                  </div>
+                   <div className="col-span-5">
+                     {presentationMode ? (
+                       <div className="text-black font-bold py-2 px-3">
+                         {item.item || "Agenda item"}
+                       </div>
+                     ) : (
+                       <Input
+                         value={item.item}
+                         onChange={(e) => updateAgendaItem(item.id, 'item', e.target.value)}
+                         placeholder="Agenda item"
+                       />
+                     )}
+                   </div>
+                   <div className="col-span-3">
+                     {presentationMode ? (
+                       <div className="text-black font-bold py-2 px-3">
+                         {item.presenter || "Presenter"}
+                       </div>
+                     ) : (
+                       <Input
+                         value={item.presenter}
+                         onChange={(e) => updateAgendaItem(item.id, 'presenter', e.target.value)}
+                         placeholder="Presenter"
+                       />
+                     )}
+                   </div>
+                   <div className="col-span-2">
+                     {presentationMode ? (
+                       <div className="text-black font-bold py-2 px-3">
+                         {item.time || "Time"}
+                       </div>
+                     ) : (
+                       <Input
+                         value={item.time}
+                         onChange={(e) => updateAgendaItem(item.id, 'time', e.target.value)}
+                         placeholder="Time"
+                       />
+                     )}
+                   </div>
                   <div className="col-span-1">
                     {!presentationMode && (
                       <Button
