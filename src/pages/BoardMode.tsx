@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -131,6 +131,9 @@ export default function BoardMode() {
       if (signedPdfErr) throw signedPdfErr;
 
       setPdfUrl(signedPdf?.signedUrl || null);
+      if (signedPdf?.signedUrl) {
+        setShowPdfModal(true);
+      }
       toast.success("PDF uploaded successfully!");
     } catch (error) {
       console.error('Error uploading PDF:', error);
@@ -352,17 +355,27 @@ export default function BoardMode() {
 
         {/* PDF Preview Modal */}
         <Dialog open={showPdfModal} onOpenChange={setShowPdfModal}>
-          <DialogContent className="max-w-6xl w-[90vw] h-[90vh] p-6">
+          <DialogContent className="max-w-6xl w-[90vw] h-[90vh] p-4">
             <DialogHeader>
-              <DialogTitle>PDF Preview - {pdfFile?.name}</DialogTitle>
+              <DialogTitle>PDF Preview{pdfFile?.name ? ` - ${pdfFile.name}` : ""}</DialogTitle>
+              <DialogDescription className="sr-only">
+                Preview of the uploaded PDF document
+              </DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden">
-              {pdfUrl && (
-                <iframe
-                  src={pdfUrl}
-                  className="w-full h-full border rounded"
-                  title="PDF Preview"
-                />
+            <div className="h-full overflow-hidden">
+              {pdfUrl ? (
+                <object data={pdfUrl} type="application/pdf" className="w-full h-full rounded border">
+                  <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                    Your browser cannot display PDFs.
+                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="ml-2 underline">
+                      Open in a new tab
+                    </a>
+                  </div>
+                </object>
+              ) : (
+                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                  No PDF available to preview.
+                </div>
               )}
             </div>
           </DialogContent>
