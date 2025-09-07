@@ -895,15 +895,15 @@ export default function BoardMode() {
                           </div>
                         )}
                         
-                        <div className="max-h-96 overflow-auto border rounded">
-                          {excelHTML ? (
-                            <div dangerouslySetInnerHTML={{ __html: excelHTML }} />
-                          ) : (
-                            <div className="flex items-center justify-center h-32 text-gray-500">
-                              No financial data available
-                            </div>
-                          )}
-                        </div>
+                         <div className="border rounded">
+                           {excelHTML ? (
+                             <div dangerouslySetInnerHTML={{ __html: excelHTML }} />
+                           ) : (
+                             <div className="flex items-center justify-center h-32 text-gray-500">
+                               No financial data available
+                             </div>
+                           )}
+                         </div>
                       </div>
                       
                       {/* Footer */}
