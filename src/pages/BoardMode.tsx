@@ -692,16 +692,6 @@ export default function BoardMode() {
                         </p>
                       </div>
 
-                      {/* IT Needs and Pilot */}
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-                          IT Needs and Pilot:
-                        </h3>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {company.itNeedsPilot || "IT requirements and pilot details"}
-                        </p>
-                      </div>
-
                       {/* Post-Pilot / Co-Development */}
                       <div className="bg-purple-50 p-4 rounded-lg">
                         <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
@@ -709,6 +699,16 @@ export default function BoardMode() {
                         </h3>
                         <p className="text-sm text-gray-700 leading-relaxed">
                           {company.postPilot || "Post-pilot strategy to be developed"}
+                        </p>
+                      </div>
+
+                      {/* IT Needs and Pilot */}
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                          IT Needs and Pilot:
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {company.itNeedsPilot || "IT requirements and pilot details"}
                         </p>
                       </div>
 
