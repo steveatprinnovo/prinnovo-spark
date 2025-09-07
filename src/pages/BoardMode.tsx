@@ -571,9 +571,97 @@ export default function BoardMode() {
               )}
             </div>
 
+            {/* Additional Input Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="internal-champions">Internal Champion(s)</Label>
+                <Input
+                  id="internal-champions"
+                  placeholder="Enter internal champion(s)"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="value-impact-team">Value and Impact Team</Label>
+                <Input
+                  id="value-impact-team"
+                  placeholder="Enter value and impact team"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="ipa-terms">IPA Terms</Label>
+                <Input
+                  id="ipa-terms"
+                  placeholder="Enter IPA terms"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="referral-incentive">Referral Incentive</Label>
+                <Input
+                  id="referral-incentive"
+                  placeholder="Enter referral incentive"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="internal-annual-cost">Internal Annual Cost</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="internal-annual-cost"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-8 w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="key-points">Key Points</Label>
+                <Input
+                  id="key-points"
+                  placeholder="Enter key points"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="validation">Validation</Label>
+                <Input
+                  id="validation"
+                  placeholder="Enter validation"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="it-needs-pilot">IT Needs and Pilot</Label>
+                <Input
+                  id="it-needs-pilot"
+                  placeholder="Enter IT needs and pilot"
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="post-pilot">Post-Pilot and Co-Development</Label>
+                <Input
+                  id="post-pilot"
+                  placeholder="Enter post-pilot and co-development"
+                  className="w-full"
+                />
+              </div>
+            </div>
+
             {/* Excel Upload */}
             <div className="space-y-2">
-              <Label>Excel Document</Label>
+              <Label>Upload Excel Pro-Forma</Label>
               <div className="flex items-center gap-4">
                 {excelFile ? (
                   <div className="flex items-center gap-4">
