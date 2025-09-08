@@ -166,7 +166,8 @@ const Implementations = () => {
   // Calculate KPIs
   const kpiData = useMemo(() => {
     const portfolioCompanies = companies.filter(company => 
-      company["Pipeline Stage"]?.toLowerCase() === "portfolio company"
+      company["Pipeline Stage"]?.toLowerCase() === "portfolio company" ||
+      !!company["Final Portfolio Decision Date"]
     );
 
     // Helper function to calculate average days between two date fields
