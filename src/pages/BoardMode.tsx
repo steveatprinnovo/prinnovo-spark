@@ -554,7 +554,7 @@ export default function BoardMode() {
                    </div>
                    <div className="col-span-3">
                      {presentationMode ? (
-                       <div className="text-black font-bold py-2 px-3">
+                       <div className="text-black italic py-2 px-3">
                          {item.presenter || "Presenter"}
                        </div>
                      ) : (
@@ -567,7 +567,7 @@ export default function BoardMode() {
                    </div>
                    <div className="col-span-2">
                      {presentationMode ? (
-                       <div className="text-black font-bold py-2 px-3">
+                       <div className="text-black py-2 px-3">
                          {item.time || "Time"}
                        </div>
                      ) : (
