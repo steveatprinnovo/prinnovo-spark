@@ -522,20 +522,20 @@ export default function BoardMode() {
             </h2>
             
             {!presentationMode && (
-              <div className="mb-4">
-                <Label htmlFor="agenda-date">Date</Label>
+              <div className="mb-4 flex items-center gap-3">
+                <Label htmlFor="agenda-date" className="whitespace-nowrap">Date:</Label>
                 <Input
                   id="agenda-date"
                   value={agendaDate}
                   onChange={(e) => setAgendaDate(e.target.value)}
-                  className="max-w-md mt-1"
+                  className="max-w-md"
                 />
               </div>
             )}
 
             <div className="space-y-4">
               {agendaItems.map((item, index) => (
-                <div key={item.id} className="grid grid-cols-12 gap-4 items-center">
+                <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-1">
                     <span className="text-sm font-medium text-gray-600">{index + 1}.</span>
                   </div>
@@ -578,18 +578,19 @@ export default function BoardMode() {
                        />
                      )}
                    </div>
-                  <div className="col-span-1">
-                    {!presentationMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeAgendaItem(item.id)}
-                        disabled={agendaItems.length <= 1}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                   <div className="col-span-1">
+                     {!presentationMode && (
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => removeAgendaItem(item.id)}
+                         disabled={agendaItems.length <= 1}
+                         className="hover:bg-red-100 hover:text-red-600 transition-colors"
+                       >
+                         <X className="h-4 w-4" />
+                       </Button>
+                     )}
+                   </div>
                 </div>
               ))}
             </div>
@@ -597,8 +598,7 @@ export default function BoardMode() {
             {!presentationMode && (
               <Button
                 onClick={addAgendaItem}
-                variant="outline"
-                className="mt-4"
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Add Agenda Item
               </Button>
