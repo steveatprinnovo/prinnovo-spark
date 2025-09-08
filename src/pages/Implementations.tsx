@@ -34,7 +34,7 @@ const Implementations = () => {
     { id: "term-sheet", label: "Term Sheet Signed" },
     { id: "ipa", label: "IPA Signed" },
     { id: "implementation", label: "Implementation Completed" },
-    { id: "pilot", label: "Pilot Completed" }
+    { id: "pilot", label: "Pilot Completed / Portfolio Company" }
   ];
 
   // Sort companies by date priority
@@ -81,7 +81,9 @@ const Implementations = () => {
           case "implementation":
             return !company["Implementation Completion Date"];
           case "pilot":
-            return !company["Final Portfolio Decision Date"];
+            // Combined filter: show companies WITHOUT pilot date AND NOT portfolio companies
+            return !company["Final Portfolio Decision Date"] && 
+                   company["Pipeline Stage"]?.toLowerCase() !== "portfolio company";
           default:
             return false;
         }
