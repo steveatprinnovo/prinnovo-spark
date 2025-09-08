@@ -28,7 +28,11 @@ export function DashboardHeader() {
                 <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent flex items-center gap-1">
                   {location.pathname === "/board-mode" ? (
                     <>
-                      <Presentation className="h-5 w-5" />
+                      <img 
+                        src="/lovable-uploads/7ba62feb-acbf-4b79-8e35-bab2872dce29.png" 
+                        alt="Board Meeting" 
+                        className="h-5 w-5" 
+                      />
                       <ChevronDown className="h-4 w-4" />
                     </>
                   ) : (
