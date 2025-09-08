@@ -598,7 +598,7 @@ export default function BoardMode() {
             {!presentationMode && (
               <Button
                 onClick={addAgendaItem}
-                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                className="mt-4"
               >
                 Add Agenda Item
               </Button>
