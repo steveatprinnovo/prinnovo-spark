@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Home, ClipboardList, DollarSign, ChevronDown, Users } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, ChevronDown, UsersRound } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
@@ -28,7 +28,7 @@ export function DashboardHeader() {
                 <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent flex items-center gap-1">
                   {location.pathname === "/board-mode" ? (
                     <>
-                      <Users className="h-5 w-5" />
+                      <UsersRound className="h-5 w-5" />
                       <ChevronDown className="h-4 w-4" />
                     </>
                   ) : (
@@ -42,7 +42,7 @@ export function DashboardHeader() {
               <DropdownMenuContent align="start" className="bg-popover z-50">
                 <DropdownMenuItem asChild>
                   <Link to="/" className="w-full">
-                    Home Dashboard
+                    Portfolio Dashboard
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
