@@ -4,6 +4,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
+import { useStatusNotes } from "@/hooks/useStatusNotes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,13 +13,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Check, X, Filter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 const Implementations = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { companies, loading, updateCompany } = useCompanies();
+  const { statusNotes, loading: statusNotesLoading, saveStatusNote } = useStatusNotes();
+  const { toast } = useToast();
   const [editingStatus, setEditingStatus] = useState<string | null>(null);
-  const [statusValues, setStatusValues] = useState<{ [key: string]: string }>({});
+  const [editingValues, setEditingValues] = useState<{ [key: string]: string }>({});
   const [milestoneFilters, setMilestoneFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -139,20 +143,32 @@ const Implementations = () => {
   const handleStatusEditStart = (companyName: string) => {
     setEditingStatus(companyName);
     // Initialize with existing status or empty string
-    setStatusValues({ [companyName]: statusValues[companyName] || "" });
+    setEditingValues({ [companyName]: statusNotes[companyName] || "" });
   };
 
   const handleStatusEditSave = async (companyName: string) => {
-    const newStatus = statusValues[companyName];
-    // In a real app, you'd save this to a status field in the database
-    // For now, we'll just store it locally
-    setEditingStatus(null);
-    console.log(`Status update for ${companyName}: ${newStatus}`);
+    const newStatus = editingValues[companyName] || "";
+    const success = await saveStatusNote(companyName, newStatus);
+    
+    if (success) {
+      setEditingStatus(null);
+      setEditingValues({});
+      toast({
+        title: "Status updated",
+        description: `Status note for ${companyName} has been saved.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to save status note. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleStatusEditCancel = () => {
     setEditingStatus(null);
-    setStatusValues({});
+    setEditingValues({});
   };
 
   const handleMilestoneFilterChange = (milestoneId: string, checked: boolean) => {
@@ -209,7 +225,7 @@ const Implementations = () => {
   }, [companies, calculateDaysBetween]);
 
   // Show loading while checking authentication or loading data
-  if (authLoading || loading) {
+  if (authLoading || loading || statusNotesLoading) {
     return (
       <div className="min-h-screen bg-background">
         <DashboardHeader />
@@ -324,11 +340,11 @@ const Implementations = () => {
               company={company}
               index={filteredCompanies.indexOf(company) + 1}
               isEditingStatus={editingStatus === company["Company Name"]}
-              statusValue={statusValues[company["Company Name"]] || ""}
+              statusValue={editingValues[company["Company Name"]] || statusNotes[company["Company Name"]] || ""}
               onStatusEditStart={() => handleStatusEditStart(company["Company Name"])}
               onStatusEditSave={() => handleStatusEditSave(company["Company Name"])}
               onStatusEditCancel={handleStatusEditCancel}
-              onStatusChange={(value) => setStatusValues({ ...statusValues, [company["Company Name"]]: value })}
+              onStatusChange={(value) => setEditingValues({ ...editingValues, [company["Company Name"]]: value })}
               getProgressStages={getProgressStages}
               formatDate={formatDate}
               calculateDaysBetween={calculateDaysBetween}
