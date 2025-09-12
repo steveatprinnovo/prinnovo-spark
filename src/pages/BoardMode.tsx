@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import * as XLSX from 'xlsx';
 import { useBoardApprovals, type CompanyData } from "@/hooks/useBoardApprovals";
+import { useAgenda } from "@/hooks/useAgenda";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -19,12 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
-interface AgendaItem {
-  id: string;
-  item: string;
-  presenter: string;
-  time: string;
-}
+// AgendaItem interface is now imported from useAgenda hook
 
 export default function BoardMode() {
   const navigate = useNavigate();
@@ -39,12 +35,15 @@ export default function BoardMode() {
     removeCompany 
   } = useBoardApprovals();
   
+  const { 
+    agenda, 
+    loading: agendaLoading, 
+    addAgendaItem, 
+    updateAgendaItem, 
+    removeAgendaItem 
+  } = useAgenda();
+  
   const [agendaDate, setAgendaDate] = useState(format(new Date(), "MMMM dd yyyy"));
-  const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([
-    { id: "1", item: "", presenter: "", time: "" },
-    { id: "2", item: "", presenter: "", time: "" },
-    { id: "3", item: "", presenter: "", time: "" }
-  ]);
   const [activeCompanyId, setActiveCompanyId] = useState("");
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [excelCells, setExcelCells] = useState<any>({});
@@ -77,29 +76,7 @@ export default function BoardMode() {
 
 
 
-  const addAgendaItem = () => {
-    const newItem: AgendaItem = {
-      id: Date.now().toString(),
-      item: "",
-      presenter: "",
-      time: ""
-    };
-    setAgendaItems([...agendaItems, newItem]);
-  };
-
-  const updateAgendaItem = (id: string, field: keyof AgendaItem, value: string) => {
-    setAgendaItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    );
-  };
-
-  const removeAgendaItem = (id: string) => {
-    if (agendaItems.length > 1) {
-      setAgendaItems(items => items.filter(item => item.id !== id));
-    }
-  };
+  // Agenda functions are now handled by useAgenda hook
 
   const handleAddNewCompany = () => {
     const newCompany = addNewCompany();
@@ -433,7 +410,7 @@ export default function BoardMode() {
     });
   };
 
-  const loading = authLoading || companiesLoading;
+  const loading = authLoading || companiesLoading || agendaLoading;
 
   if (loading) {
     return (
@@ -534,7 +511,7 @@ export default function BoardMode() {
             )}
 
             <div className="space-y-4">
-              {agendaItems.map((item, index) => (
+              {agenda.map((item, index) => (
                 <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-1">
                     <span className="text-sm font-medium text-gray-600">{index + 1}.</span>
@@ -584,7 +561,7 @@ export default function BoardMode() {
                          variant="ghost"
                          size="sm"
                          onClick={() => removeAgendaItem(item.id)}
-                         disabled={agendaItems.length <= 1}
+                         disabled={agenda.length <= 1}
                          className="hover:bg-red-100 hover:text-red-600 transition-colors"
                        >
                          <X className="h-4 w-4" />
