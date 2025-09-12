@@ -417,7 +417,7 @@ function CompanyImplementationItem({
               className="h-9 px-3 py-2 border border-dashed border-gray-300 rounded-md bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors flex items-center justify-between text-sm"
               onClick={onStatusEditStart}
             >
-              <p className="text-xs text-gray-500 italic truncate">
+              <p className="text-xs text-gray-500 italic whitespace-pre-wrap break-words">
                 {statusValue || "Add status note..."}
               </p>
               <Pencil className="h-3 w-3 text-gray-400 flex-shrink-0 ml-2" />
