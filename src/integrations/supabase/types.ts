@@ -155,6 +155,33 @@ export type Database = {
         }
         Relationships: []
       }
+      status_notes: {
+        Row: {
+          company_name: string
+          created_at: string
+          id: string
+          status_note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          id?: string
+          status_note?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          id?: string
+          status_note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
