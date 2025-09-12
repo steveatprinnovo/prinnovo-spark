@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
-// AgendaItem interface is now imported from useAgenda hook
+// AgendaItem interface is now imported from useAgenda hook - Updated
 
 export default function BoardMode() {
   const navigate = useNavigate();

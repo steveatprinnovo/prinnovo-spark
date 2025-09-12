@@ -18,7 +18,12 @@ export function useAgenda() {
   // Load agenda items for the current user
   useEffect(() => {
     if (!user) {
-      setAgenda([]);
+      // Initialize with default agenda items if no user
+      setAgenda([
+        { id: "1", item: "", presenter: "", time: "" },
+        { id: "2", item: "", presenter: "", time: "" },
+        { id: "3", item: "", presenter: "", time: "" }
+      ]);
       setLoading(false);
       return;
     }
