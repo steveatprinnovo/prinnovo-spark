@@ -206,18 +206,21 @@ const Implementations = () => {
       {
         title: "Term Sheet Signature to IPA Signature",
         value: `${calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date")} days`,
+        monthsValue: `(${Math.round(calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date") / 30)} months)`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-accent)"
       },
       {
         title: "IPA Signature to Implementation Complete",
         value: `${calculateAverageDays("IPA Signature Date", "Implementation Completion Date")} days`,
+        monthsValue: `(${Math.round(calculateAverageDays("IPA Signature Date", "Implementation Completion Date") / 30)} months)`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-primary)"
       },
       {
         title: "Implementation Complete to Pilot Complete",
         value: `${calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date")} days`,
+        monthsValue: `(${Math.round(calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date") / 30)} months)`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-accent)"
       }
@@ -278,9 +281,16 @@ const Implementations = () => {
                   <p className="text-sm font-medium text-white/90 leading-tight">
                     {kpi.title}
                   </p>
-                  <p className="text-xl font-bold text-white">
-                    {kpi.value}
-                  </p>
+                  <div>
+                    <p className="text-xl font-bold text-white">
+                      {kpi.value}
+                    </p>
+                    {kpi.monthsValue && (
+                      <p className="text-sm text-white/80 italic">
+                        {kpi.monthsValue}
+                      </p>
+                    )}
+                  </div>
                   <p className="text-xs text-white/80">
                     {kpi.subtitle}
                   </p>
