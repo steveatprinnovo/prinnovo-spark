@@ -206,21 +206,21 @@ const Implementations = () => {
       {
         title: "Term Sheet Signature to IPA Signature",
         value: `${calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date")} days`,
-        monthsValue: `(${Math.round(calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date") / 30)} months)`,
+        monthsValue: `(~${Math.round(calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date") / 30)} months)`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-accent)"
       },
       {
         title: "IPA Signature to Implementation Complete",
         value: `${calculateAverageDays("IPA Signature Date", "Implementation Completion Date")} days`,
-        monthsValue: `(${Math.round(calculateAverageDays("IPA Signature Date", "Implementation Completion Date") / 30)} months)`,
+        monthsValue: `(~${Math.round(calculateAverageDays("IPA Signature Date", "Implementation Completion Date") / 30)} months)`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-primary)"
       },
       {
         title: "Implementation Complete to Pilot Complete",
         value: `${calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date")} days`,
-        monthsValue: `(${Math.round(calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date") / 30)} months)`,
+        monthsValue: `(~${Math.round(calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date") / 30)} months)`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-accent)"
       }
