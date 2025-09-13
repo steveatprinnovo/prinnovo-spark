@@ -204,19 +204,19 @@ const Implementations = () => {
         gradient: "var(--gradient-primary)"
       },
       {
-        title: "Term Sheet to IPA",
+        title: "Term Sheet Signature to IPA Signature",
         value: `${calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date")} days`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-accent)"
       },
       {
-        title: "IPA to Implementation",
+        title: "IPA Signature to Implementation Complete",
         value: `${calculateAverageDays("IPA Signature Date", "Implementation Completion Date")} days`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-primary)"
       },
       {
-        title: "Implementation to Pilot",
+        title: "Implementation Complete to Pilot Complete",
         value: `${calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date")} days`,
         subtitle: "Average time between milestones",
         gradient: "var(--gradient-accent)"
