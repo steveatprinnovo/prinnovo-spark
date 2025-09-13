@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import { TrendingUp } from "lucide-react";
 
 export default function Investments() {
-  const { companies, loading } = useCompanies();
+  const { companies, loading, updateCompany, refetch } = useCompanies();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   const calculatePercentageIncrease = (invested: number | null, valuation: number | null) => {
@@ -237,6 +237,9 @@ export default function Investments() {
       <UpdateValuationModal
         isOpen={isUpdateModalOpen}
         onClose={() => setIsUpdateModalOpen(false)}
+        companies={companies}
+        updateCompany={updateCompany}
+        refetch={refetch}
       />
     </div>
   );

@@ -7,12 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useCompanies } from "@/hooks/useCompanies";
+import { type Company } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 
 interface UpdateValuationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  companies: Company[];
+  updateCompany: (companyName: string, updates: Partial<Company>) => Promise<boolean>;
+  refetch: () => Promise<void>;
 }
 
 const INVESTMENT_STAGES = [
@@ -45,8 +48,7 @@ function CompanySelectItem({ company }: { company: any }) {
   );
 }
 
-export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalProps) {
-  const { companies, updateCompany, refetch } = useCompanies();
+export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany, refetch }: UpdateValuationModalProps) {
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [investmentStage, setInvestmentStage] = useState<string>("");
   const [investedAmount, setInvestedAmount] = useState<string>("");
