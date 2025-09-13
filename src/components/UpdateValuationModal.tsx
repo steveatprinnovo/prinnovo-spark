@@ -1,0 +1,296 @@
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useCompanies } from "@/hooks/useCompanies";
+
+interface UpdateValuationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const INVESTMENT_STAGES = [
+  "Committed",
+  "IPA Obligation", 
+  "Term Sheet Proposed",
+  "Operational Funding"
+];
+
+export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalProps) {
+  const { companies, updateCompany } = useCompanies();
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const [investmentStage, setInvestmentStage] = useState<string>("");
+  const [investedAmount, setInvestedAmount] = useState<string>("");
+  const [currentValuation, setCurrentValuation] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Filter companies that have investment tracker stages
+  const investmentCompanies = companies.filter(
+    company => company["Investment Tracker Stage"] !== null
+  );
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedCompany("");
+      setInvestmentStage("");
+      setInvestedAmount("");
+      setCurrentValuation("");
+    }
+  }, [isOpen]);
+
+  // Load company data when selecting existing company
+  useEffect(() => {
+    if (selectedCompany) {
+      const company = companies.find(c => c["Company Name"] === selectedCompany);
+      if (company) {
+        setInvestmentStage(company["Investment Tracker Stage"] || "");
+        setInvestedAmount(company["Invested Amount"]?.toString() || "");
+        setCurrentValuation(company["Invested Amount Valuation"]?.toString() || "");
+      }
+    }
+  }, [selectedCompany, companies]);
+
+  const handleUpdateExisting = async () => {
+    if (!selectedCompany || !investmentStage) {
+      toast.error("Please select a company and investment stage");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const company = companies.find(c => c["Company Name"] === selectedCompany);
+      if (!company) {
+        toast.error("Company not found");
+        return;
+      }
+
+      const updatedData = {
+        ...company,
+        "Investment Tracker Stage": investmentStage,
+        "Invested Amount": investedAmount ? parseFloat(investedAmount) : null,
+        "Invested Amount Valuation": currentValuation ? parseFloat(currentValuation) : null,
+      };
+
+      await updateCompany(company["Company Name"], updatedData);
+      toast.success("Investment updated successfully");
+      onClose();
+    } catch (error) {
+      console.error("Error updating investment:", error);
+      toast.error("Failed to update investment");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleAddNew = async () => {
+    if (!selectedCompany || !investmentStage) {
+      toast.error("Please select a company and investment stage");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const company = companies.find(c => c["Company Name"] === selectedCompany);
+      if (!company) {
+        toast.error("Company not found");
+        return;
+      }
+
+      const updatedData = {
+        ...company,
+        "Investment Tracker Stage": investmentStage,
+        "Invested Amount": investedAmount ? parseFloat(investedAmount) : null,
+        "Invested Amount Valuation": currentValuation ? parseFloat(currentValuation) : null,
+      };
+
+      await updateCompany(company["Company Name"], updatedData);
+      toast.success("New investment added successfully");
+      onClose();
+    } catch (error) {
+      console.error("Error adding new investment:", error);
+      toast.error("Failed to add new investment");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Get companies that don't have investment tracker stages for "Add New" tab
+  const portfolioCompanies = companies.filter(
+    company => company["Investment Tracker Stage"] === null
+  );
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Update Investment Valuations</DialogTitle>
+        </DialogHeader>
+
+        <Tabs defaultValue="update" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="update">Update Existing</TabsTrigger>
+            <TabsTrigger value="add">Add New Investment</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="update" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Update Existing Investment</CardTitle>
+                <CardDescription>
+                  Modify the investment details for an existing portfolio company
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="existing-company">Select Company</Label>
+                  <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {investmentCompanies.map((company) => (
+                        <SelectItem key={company["Company Name"]} value={company["Company Name"]}>
+                          {company["Company Name"]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="investment-stage">Investment Stage</Label>
+                  <Select value={investmentStage} onValueChange={setInvestmentStage}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select investment stage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INVESTMENT_STAGES.map((stage) => (
+                        <SelectItem key={stage} value={stage}>
+                          {stage}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="invested-amount">Invested Amount ($)</Label>
+                    <Input
+                      id="invested-amount"
+                      type="number"
+                      value={investedAmount}
+                      onChange={(e) => setInvestedAmount(e.target.value)}
+                      placeholder="Enter amount"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="current-valuation">Current Valuation ($)</Label>
+                    <Input
+                      id="current-valuation"
+                      type="number"
+                      value={currentValuation}
+                      onChange={(e) => setCurrentValuation(e.target.value)}
+                      placeholder="Enter valuation"
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleUpdateExisting}
+                  disabled={isUpdating || !selectedCompany || !investmentStage}
+                  className="w-full"
+                >
+                  {isUpdating ? "Updating..." : "Update Investment"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="add" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Investment</CardTitle>
+                <CardDescription>
+                  Add investment tracking for an existing portfolio company
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-company">Select Portfolio Company</Label>
+                  <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a portfolio company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {portfolioCompanies.map((company) => (
+                        <SelectItem key={company["Company Name"]} value={company["Company Name"]}>
+                          {company["Company Name"]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="new-investment-stage">Investment Stage</Label>
+                  <Select value={investmentStage} onValueChange={setInvestmentStage}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select investment stage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INVESTMENT_STAGES.map((stage) => (
+                        <SelectItem key={stage} value={stage}>
+                          {stage}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-invested-amount">Invested Amount ($)</Label>
+                    <Input
+                      id="new-invested-amount"
+                      type="number"
+                      value={investedAmount}
+                      onChange={(e) => setInvestedAmount(e.target.value)}
+                      placeholder="Enter amount"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-current-valuation">Current Valuation ($)</Label>
+                    <Input
+                      id="new-current-valuation"
+                      type="number"
+                      value={currentValuation}
+                      onChange={(e) => setCurrentValuation(e.target.value)}
+                      placeholder="Enter valuation"
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleAddNew}
+                  disabled={isUpdating || !selectedCompany || !investmentStage}
+                  className="w-full"
+                >
+                  {isUpdating ? "Adding..." : "Add New Investment"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -3,10 +3,14 @@ import { useCompanies } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { UpdateValuationModal } from "@/components/UpdateValuationModal";
+import { useMemo, useState } from "react";
+import { TrendingUp } from "lucide-react";
 
 export default function Investments() {
   const { companies, loading } = useCompanies();
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   const calculatePercentageIncrease = (invested: number | null, valuation: number | null) => {
     if (!invested || !valuation || invested === 0) return "N/A";
@@ -146,11 +150,20 @@ export default function Investments() {
             <h1 className="text-4xl font-bold mb-2">Hard Dollar Investment Tracker</h1>
             <p className="text-muted-foreground">Track and monitor hard dollar investment allocations and performance</p>
           </div>
-          {lastUpdated && (
-            <div className="text-sm text-muted-foreground italic">
-              Current as of {lastUpdated.toLocaleDateString()}
-            </div>
-          )}
+          <div className="flex flex-col items-end gap-3">
+            <Button
+              onClick={() => setIsUpdateModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Update Valuation
+            </Button>
+            {lastUpdated && (
+              <div className="text-sm text-muted-foreground italic">
+                Current as of {lastUpdated.toLocaleDateString()}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* KPI Cards */}
@@ -220,6 +233,11 @@ export default function Investments() {
           })}
         </div>
       </main>
+
+      <UpdateValuationModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+      />
     </div>
   );
 }
