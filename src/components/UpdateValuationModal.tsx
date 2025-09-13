@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useCompanies } from "@/hooks/useCompanies";
+import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 
 interface UpdateValuationModalProps {
   isOpen: boolean;
@@ -20,6 +21,29 @@ const INVESTMENT_STAGES = [
   "Term Sheet Proposed",
   "Operational Funding"
 ];
+
+function CompanySelectItem({ company }: { company: any }) {
+  const { logoUrl } = useCompanyLogo(company.imgurl);
+  
+  return (
+    <div className="flex items-center gap-3">
+      {logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={`${company["Company Name"]} logo`}
+          className="w-6 h-6 rounded object-contain bg-white p-0.5"
+        />
+      ) : (
+        <div className="w-6 h-6 rounded bg-muted flex items-center justify-center">
+          <span className="text-xs font-medium text-muted-foreground">
+            {company["Company Name"]?.charAt(0)}
+          </span>
+        </div>
+      )}
+      <span>{company["Company Name"]}</span>
+    </div>
+  );
+}
 
 export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalProps) {
   const { companies, updateCompany } = useCompanies();
@@ -151,12 +175,18 @@ export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalPr
                   <Label htmlFor="existing-company">Select Company</Label>
                   <Select value={selectedCompany} onValueChange={setSelectedCompany}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose a company" />
+                      <SelectValue placeholder="Choose a company">
+                        {selectedCompany && (
+                          <CompanySelectItem 
+                            company={investmentCompanies.find(c => c["Company Name"] === selectedCompany)} 
+                          />
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {investmentCompanies.map((company) => (
                         <SelectItem key={company["Company Name"]} value={company["Company Name"]}>
-                          {company["Company Name"]}
+                          <CompanySelectItem company={company} />
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -227,12 +257,18 @@ export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalPr
                   <Label htmlFor="new-company">Select Portfolio Company</Label>
                   <Select value={selectedCompany} onValueChange={setSelectedCompany}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose a portfolio company" />
+                      <SelectValue placeholder="Choose a portfolio company">
+                        {selectedCompany && (
+                          <CompanySelectItem 
+                            company={portfolioCompanies.find(c => c["Company Name"] === selectedCompany)} 
+                          />
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {portfolioCompanies.map((company) => (
                         <SelectItem key={company["Company Name"]} value={company["Company Name"]}>
-                          {company["Company Name"]}
+                          <CompanySelectItem company={company} />
                         </SelectItem>
                       ))}
                     </SelectContent>
