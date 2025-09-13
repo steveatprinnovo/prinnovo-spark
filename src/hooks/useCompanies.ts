@@ -11,6 +11,9 @@ export interface Company {
   "Current Company Valuation": number | null;
   "Current HLV Valuation": number | null;
   "Pipeline Stage": string | null;
+  "Investment Tracker Stage": string | null;
+  "Invested Amount": number | null;
+  "Invested Amount Valuation": number | null;
   "EVP Owner": string | null;
   "IPA Year": number | null;
   "Company Contact": string | null;

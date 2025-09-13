@@ -46,7 +46,7 @@ function CompanySelectItem({ company }: { company: any }) {
 }
 
 export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalProps) {
-  const { companies, updateCompany } = useCompanies();
+  const { companies, updateCompany, refetch } = useCompanies();
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [investmentStage, setInvestmentStage] = useState<string>("");
   const [investedAmount, setInvestedAmount] = useState<string>("");
@@ -102,6 +102,10 @@ export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalPr
       };
 
       await updateCompany(company["Company Name"], updatedData);
+      
+      // Refetch to ensure data consistency
+      await refetch();
+      
       toast.success("Investment updated successfully");
       onClose();
     } catch (error) {
@@ -134,6 +138,10 @@ export function UpdateValuationModal({ isOpen, onClose }: UpdateValuationModalPr
       };
 
       await updateCompany(company["Company Name"], updatedData);
+      
+      // Refetch to ensure data consistency
+      await refetch();
+      
       toast.success("New investment added successfully");
       onClose();
     } catch (error) {
