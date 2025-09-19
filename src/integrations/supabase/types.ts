@@ -122,6 +122,8 @@ export type Database = {
           "Country of Origin": string | null
           "Current Company Valuation": number | null
           "Current HLV Valuation": number | null
+          "Data Monetization Dollars": number | null
+          "Data Monetization Forecast": number | null
           "EVP Owner": string | null
           "Final Portfolio Decision Date": string | null
           "High-Level Focus Area": string | null
@@ -136,7 +138,10 @@ export type Database = {
           "IPA Year": number | null
           "Pipeline Stage": string | null
           "Specific Focus Area": string | null
+          "Target Cash Investment Return": number | null
+          "Target IPA Return": number | null
           "Term Sheet Signature Date": string | null
+          "Total Enterprise Value Captured": number | null
         }
         Insert: {
           Champions?: string | null
@@ -146,6 +151,8 @@ export type Database = {
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
           "Current HLV Valuation"?: number | null
+          "Data Monetization Dollars"?: number | null
+          "Data Monetization Forecast"?: number | null
           "EVP Owner"?: string | null
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
@@ -160,7 +167,10 @@ export type Database = {
           "IPA Year"?: number | null
           "Pipeline Stage"?: string | null
           "Specific Focus Area"?: string | null
+          "Target Cash Investment Return"?: number | null
+          "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
+          "Total Enterprise Value Captured"?: number | null
         }
         Update: {
           Champions?: string | null
@@ -170,6 +180,8 @@ export type Database = {
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
           "Current HLV Valuation"?: number | null
+          "Data Monetization Dollars"?: number | null
+          "Data Monetization Forecast"?: number | null
           "EVP Owner"?: string | null
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
@@ -184,7 +196,10 @@ export type Database = {
           "IPA Year"?: number | null
           "Pipeline Stage"?: string | null
           "Specific Focus Area"?: string | null
+          "Target Cash Investment Return"?: number | null
+          "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
+          "Total Enterprise Value Captured"?: number | null
         }
         Relationships: []
       }

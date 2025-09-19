@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Home, ClipboardList, DollarSign, ChevronDown, Presentation } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, ChevronDown, Presentation, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
@@ -86,6 +86,15 @@ export function DashboardHeader() {
             >
               <DollarSign className="h-4 w-4" />
               Investments
+            </Link>
+            <Link 
+              to="/projections" 
+              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                location.pathname === "/projections" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Projections
             </Link>
           </nav>
         </div>

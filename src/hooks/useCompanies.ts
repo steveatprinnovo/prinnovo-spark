@@ -24,6 +24,11 @@ export interface Company {
   "Term Sheet Signature Date": string | null;
   "Final Portfolio Decision Date": string | null;
   "Implementation Completion Date": string | null;
+  "Target IPA Return": number | null;
+  "Target Cash Investment Return": number | null;
+  "Data Monetization Dollars": number | null;
+  "Data Monetization Forecast": number | null;
+  "Total Enterprise Value Captured": number | null;
   imgurl: string | null;
 }
 
