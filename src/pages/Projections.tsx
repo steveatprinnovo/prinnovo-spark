@@ -286,14 +286,20 @@ const Projections = () => {
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[150px]">
-                  <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
+                  <div className="whitespace-normal break-words">
+                    <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
+                  </div>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[120px]">
-                  <SortButton field="cashInvested">Cash Invested</SortButton>
+                  <div className="whitespace-normal break-words">
+                    <SortButton field="cashInvested">Cash Invested</SortButton>
+                  </div>
                 </TableHead>
                 <TableHead className="text-center py-6 w-[180px]">
                   <div className="space-y-3">
-                    <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
+                    <div className="whitespace-normal break-words">
+                      <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
+                    </div>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -321,7 +327,9 @@ const Projections = () => {
                 </TableHead>
                 <TableHead className="text-center py-6 w-[160px]">
                   <div className="space-y-3">
-                    <SortButton field="equityValue">Equity Value Captured</SortButton>
+                    <div className="whitespace-normal break-words">
+                      <SortButton field="equityValue">Equity Value Captured</SortButton>
+                    </div>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -348,11 +356,15 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[160px]">
-                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
+                  <div className="whitespace-normal break-words">
+                    <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
+                  </div>
                 </TableHead>
                 <TableHead className="text-center py-6 w-[170px]">
                   <div className="space-y-3">
-                    <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
+                    <div className="whitespace-normal break-words">
+                      <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
+                    </div>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -379,7 +391,9 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[180px]">
-                  <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
+                  <div className="whitespace-normal break-words">
+                    <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
+                  </div>
                 </TableHead>
               </TableRow>
             </TableHeader>
