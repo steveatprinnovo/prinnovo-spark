@@ -7,10 +7,12 @@ import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Toggle } from "@/components/ui/toggle";
-import { DollarSign, Percent } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DollarSign, ChevronUp, ChevronDown } from "lucide-react";
 
 type ForecastType = "target" | "very-conservative" | "conservative" | "aggressive" | "very-aggressive";
+type SortField = "company" | "targetIpaReturn" | "cashInvested" | "targetCashReturn" | "equityValue" | "dataMonetizationDollars" | "dataMonetizationForecast" | "totalEnterpriseValue";
+type SortDirection = "asc" | "desc";
 
 const FORECAST_MULTIPLIERS: Record<ForecastType, number> = {
   "target": 1,
@@ -63,15 +65,15 @@ const CompanyRow = ({
   return (
     <TableRow>
       <TableCell className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+        <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
           {logoUrl ? (
             <img
               src={logoUrl}
               alt={`${company["Company Name"]} logo`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : (
-            <DollarSign className="w-4 h-4 text-muted-foreground" />
+            <DollarSign className="w-6 h-6 text-muted-foreground" />
           )}
         </div>
         <span className="font-medium">{company["Company Name"]}</span>
@@ -110,6 +112,8 @@ const Projections = () => {
   const [showTargetCashReturnAsPercent, setShowTargetCashReturnAsPercent] = useState(false);
   const [showEquityValueAsPercent, setShowEquityValueAsPercent] = useState(false);
   const [showDataMonetizationAsPercent, setShowDataMonetizationAsPercent] = useState(false);
+  const [sortField, setSortField] = useState<SortField>("company");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -118,10 +122,87 @@ const Projections = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Filter companies that have investment tracking data
+  // Filter and sort companies that have investment tracking data
   const projectionsCompanies = useMemo(() => {
-    return companies.filter(company => company["Investment Tracker Stage"]);
-  }, [companies]);
+    const filtered = companies.filter(company => company["Investment Tracker Stage"]);
+    const multiplier = FORECAST_MULTIPLIERS[forecast];
+    
+    return filtered.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+      
+      switch (sortField) {
+        case "company":
+          aValue = a["Company Name"];
+          bValue = b["Company Name"];
+          break;
+        case "targetIpaReturn":
+          aValue = (a["Target IPA Return"] || 0) * multiplier;
+          bValue = (b["Target IPA Return"] || 0) * multiplier;
+          break;
+        case "cashInvested":
+          aValue = a["Invested Amount"] || 0;
+          bValue = b["Invested Amount"] || 0;
+          break;
+        case "targetCashReturn":
+          aValue = (a["Target Cash Investment Return"] || 0) * multiplier;
+          bValue = (b["Target Cash Investment Return"] || 0) * multiplier;
+          break;
+        case "equityValue":
+          aValue = a["Current HLV Valuation"] || 0;
+          bValue = b["Current HLV Valuation"] || 0;
+          break;
+        case "dataMonetizationDollars":
+          aValue = a["Data Monetization Dollars"] || 0;
+          bValue = b["Data Monetization Dollars"] || 0;
+          break;
+        case "dataMonetizationForecast":
+          aValue = (a["Data Monetization Forecast"] || 0) * multiplier;
+          bValue = (b["Data Monetization Forecast"] || 0) * multiplier;
+          break;
+        case "totalEnterpriseValue":
+          aValue = (a["Current HLV Valuation"] || 0) + (a["Data Monetization Dollars"] || 0);
+          bValue = (b["Current HLV Valuation"] || 0) + (b["Data Monetization Dollars"] || 0);
+          break;
+        default:
+          return 0;
+      }
+      
+      if (sortField === "company") {
+        // String comparison
+        const result = aValue.localeCompare(bValue);
+        return sortDirection === "asc" ? result : -result;
+      } else {
+        // Numeric comparison
+        const result = aValue - bValue;
+        return sortDirection === "asc" ? result : -result;
+      }
+    });
+  }, [companies, forecast, sortField, sortDirection]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection(field === "company" ? "asc" : "desc"); // Default to desc for numbers, asc for text
+    }
+  };
+
+  const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <Button
+      variant="ghost"
+      className="h-auto p-0 font-medium justify-start hover:bg-transparent"
+      onClick={() => handleSort(field)}
+    >
+      {children}
+      {sortField === field && (
+        sortDirection === "asc" ? 
+          <ChevronUp className="ml-1 h-4 w-4" /> : 
+          <ChevronDown className="ml-1 h-4 w-4" />
+      )}
+    </Button>
+  );
 
   // Calculate portfolio totals
   const portfolioTotals = useMemo(() => {
@@ -201,50 +282,72 @@ const Projections = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Company</TableHead>
-                <TableHead>Target IPA Return</TableHead>
-                <TableHead>Cash Invested</TableHead>
                 <TableHead>
-                  <div className="flex items-center gap-2">
-                    Target Cash Investment Return
-                    <Toggle
-                      pressed={showTargetCashReturnAsPercent}
-                      onPressedChange={setShowTargetCashReturnAsPercent}
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                    >
-                      {showTargetCashReturnAsPercent ? <Percent className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
-                    </Toggle>
+                  <SortButton field="company">Company</SortButton>
+                </TableHead>
+                <TableHead>
+                  <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
+                </TableHead>
+                <TableHead>
+                  <SortButton field="cashInvested">Cash Invested</SortButton>
+                </TableHead>
+                <TableHead>
+                  <div className="space-y-2">
+                    <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
+                    <div className="flex items-center justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => setShowTargetCashReturnAsPercent(!showTargetCashReturnAsPercent)}
+                      >
+                        <span className={showTargetCashReturnAsPercent ? "text-muted-foreground" : "text-primary font-semibold"}>$</span>
+                        <span className="mx-1">|</span>
+                        <span className={showTargetCashReturnAsPercent ? "text-primary font-semibold" : "text-muted-foreground"}>%</span>
+                      </Button>
+                    </div>
                   </div>
                 </TableHead>
                 <TableHead>
-                  <div className="flex items-center gap-2">
-                    Equity Value Captured
-                    <Toggle
-                      pressed={showEquityValueAsPercent}
-                      onPressedChange={setShowEquityValueAsPercent}
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                    >
-                      {showEquityValueAsPercent ? <Percent className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
-                    </Toggle>
+                  <div className="space-y-2">
+                    <SortButton field="equityValue">Equity Value Captured</SortButton>
+                    <div className="flex items-center justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => setShowEquityValueAsPercent(!showEquityValueAsPercent)}
+                      >
+                        <span className={showEquityValueAsPercent ? "text-muted-foreground" : "text-primary font-semibold"}>$</span>
+                        <span className="mx-1">|</span>
+                        <span className={showEquityValueAsPercent ? "text-primary font-semibold" : "text-muted-foreground"}>%</span>
+                      </Button>
+                    </div>
                   </div>
                 </TableHead>
-                <TableHead>Data Monetization Dollars</TableHead>
                 <TableHead>
-                  <div className="flex items-center gap-2">
-                    Data Monetization Forecast
-                    <Toggle
-                      pressed={showDataMonetizationAsPercent}
-                      onPressedChange={setShowDataMonetizationAsPercent}
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                    >
-                      {showDataMonetizationAsPercent ? <Percent className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
-                    </Toggle>
+                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
+                </TableHead>
+                <TableHead>
+                  <div className="space-y-2">
+                    <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
+                    <div className="flex items-center justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => setShowDataMonetizationAsPercent(!showDataMonetizationAsPercent)}
+                      >
+                        <span className={showDataMonetizationAsPercent ? "text-muted-foreground" : "text-primary font-semibold"}>$</span>
+                        <span className="mx-1">|</span>
+                        <span className={showDataMonetizationAsPercent ? "text-primary font-semibold" : "text-muted-foreground"}>%</span>
+                      </Button>
+                    </div>
                   </div>
                 </TableHead>
-                <TableHead>Total Enterprise Value Captured</TableHead>
+                <TableHead>
+                  <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
