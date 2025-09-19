@@ -285,15 +285,15 @@ const Projections = () => {
                 <TableHead className="text-center py-4 w-[200px]">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[130px]">
+                <TableHead className="text-center py-4 w-[150px]">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[120px]">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[160px]">
+                <TableHead className="text-center py-6 w-[180px]">
                   <div className="space-y-3">
-                    <SortButton field="targetCashReturn">Target Cash Return</SortButton>
+                    <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -319,9 +319,9 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[140px]">
+                <TableHead className="text-center py-6 w-[160px]">
                   <div className="space-y-3">
-                    <SortButton field="equityValue">Equity Value</SortButton>
+                    <SortButton field="equityValue">Equity Value Captured</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -347,12 +347,12 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[140px]">
-                  <SortButton field="dataMonetizationDollars">Data Mon. $</SortButton>
+                <TableHead className="text-center py-4 w-[160px]">
+                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[140px]">
+                <TableHead className="text-center py-6 w-[170px]">
                   <div className="space-y-3">
-                    <SortButton field="dataMonetizationForecast">Data Mon. Forecast</SortButton>
+                    <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -378,8 +378,8 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[150px]">
-                  <SortButton field="totalEnterpriseValue">Total Enterprise Value</SortButton>
+                <TableHead className="text-center py-4 w-[180px]">
+                  <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -397,29 +397,29 @@ const Projections = () => {
               
               {/* Portfolio Totals Row */}
               <TableRow className="bg-muted/50 font-semibold">
-                <TableCell>Portfolio Total</TableCell>
-                <TableCell>{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
-                <TableCell>{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
-                <TableCell>
+                <TableCell className="text-left">Portfolio Total</TableCell>
+                <TableCell className="text-center">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
+                <TableCell className="text-center">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
+                <TableCell className="text-center">
                   {showTargetCashReturnAsPercent && portfolioTotals.targetCashReturn > 0
                     ? formatPercentage((portfolioTotals.cashInvested / portfolioTotals.targetCashReturn) * 100)
                     : formatCurrency(portfolioTotals.targetCashReturn)
                   }
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-center">
                   {showEquityValueAsPercent && portfolioTotals.targetIpaReturn > 0
                     ? formatPercentage((portfolioTotals.equityValue / portfolioTotals.targetIpaReturn) * 100)
                     : formatCurrency(portfolioTotals.equityValue)
                   }
                 </TableCell>
-                <TableCell>{formatCurrency(portfolioTotals.dataMonetizationDollars)}</TableCell>
-                <TableCell>
+                <TableCell className="text-center">{formatCurrency(portfolioTotals.dataMonetizationDollars)}</TableCell>
+                <TableCell className="text-center">
                   {showDataMonetizationAsPercent && portfolioTotals.dataMonetizationForecast > 0
                     ? formatPercentage((portfolioTotals.dataMonetizationDollars / portfolioTotals.dataMonetizationForecast) * 100)
                     : formatCurrency(portfolioTotals.dataMonetizationForecast)
                   }
                 </TableCell>
-                <TableCell>{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
+                <TableCell className="text-center">{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
