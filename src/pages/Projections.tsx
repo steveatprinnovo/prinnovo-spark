@@ -78,28 +78,28 @@ const CompanyRow = ({
         </div>
         <span className="font-medium">{company["Company Name"]}</span>
       </TableCell>
-      <TableCell>{formatCurrency(targetIpaReturn)}</TableCell>
-      <TableCell>{formatCurrency(company["Invested Amount"])}</TableCell>
-      <TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(targetIpaReturn)}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(company["Invested Amount"])}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">
         {showTargetCashReturnAsPercent && company["Current Company Valuation"] && targetCashReturn > 0
           ? formatPercentage((company["Current Company Valuation"] / targetCashReturn) * 100)
           : formatCurrency(targetCashReturn)
         }
       </TableCell>
-      <TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">
         {showEquityValueAsPercent && targetIpaReturn > 0
           ? formatPercentage((equityValue / targetIpaReturn) * 100)
           : formatCurrency(equityValue)
         }
       </TableCell>
-      <TableCell>{formatCurrency(dataMonetizationDollars)}</TableCell>
-      <TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(dataMonetizationDollars)}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">
         {showDataMonetizationAsPercent && dataMonetizationForecast > 0
           ? formatPercentage((dataMonetizationDollars / dataMonetizationForecast) * 100)
           : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
-      <TableCell>{formatCurrency(totalEnterpriseValue)}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(totalEnterpriseValue)}</TableCell>
     </TableRow>
   );
 };
@@ -192,7 +192,7 @@ const Projections = () => {
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <Button
       variant="ghost"
-      className="h-auto p-0 font-medium justify-start hover:bg-transparent"
+      className="h-auto p-0 font-medium justify-center hover:bg-transparent hover:text-blue-500 transition-colors"
       onClick={() => handleSort(field)}
     >
       {children}
@@ -282,70 +282,103 @@ const Projections = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>
+                <TableHead className="text-center py-4">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead>
+                <TableHead className="text-center py-4">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
-                <TableHead>
+                <TableHead className="text-center py-4">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead>
-                  <div className="space-y-2">
+                <TableHead className="text-center py-6">
+                  <div className="space-y-3">
                     <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
-                    <div className="flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => setShowTargetCashReturnAsPercent(!showTargetCashReturnAsPercent)}
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        className={`px-2 py-1 text-xs rounded transition-all ${
+                          !showTargetCashReturnAsPercent 
+                            ? "bg-green-100 text-green-700 border border-green-300" 
+                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                        }`}
+                        onClick={() => setShowTargetCashReturnAsPercent(false)}
                       >
-                        <span className={showTargetCashReturnAsPercent ? "text-muted-foreground" : "text-primary font-semibold"}>$</span>
-                        <span className="mx-1">|</span>
-                        <span className={showTargetCashReturnAsPercent ? "text-primary font-semibold" : "text-muted-foreground"}>%</span>
-                      </Button>
+                        $
+                      </button>
+                      <span className="text-muted-foreground">|</span>
+                      <button
+                        className={`px-2 py-1 text-xs rounded transition-all ${
+                          showTargetCashReturnAsPercent 
+                            ? "bg-green-100 text-green-700 border border-green-300" 
+                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                        }`}
+                        onClick={() => setShowTargetCashReturnAsPercent(true)}
+                      >
+                        %
+                      </button>
                     </div>
                   </div>
                 </TableHead>
-                <TableHead>
-                  <div className="space-y-2">
+                <TableHead className="text-center py-6">
+                  <div className="space-y-3">
                     <SortButton field="equityValue">Equity Value Captured</SortButton>
-                    <div className="flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => setShowEquityValueAsPercent(!showEquityValueAsPercent)}
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        className={`px-2 py-1 text-xs rounded transition-all ${
+                          !showEquityValueAsPercent 
+                            ? "bg-green-100 text-green-700 border border-green-300" 
+                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                        }`}
+                        onClick={() => setShowEquityValueAsPercent(false)}
                       >
-                        <span className={showEquityValueAsPercent ? "text-muted-foreground" : "text-primary font-semibold"}>$</span>
-                        <span className="mx-1">|</span>
-                        <span className={showEquityValueAsPercent ? "text-primary font-semibold" : "text-muted-foreground"}>%</span>
-                      </Button>
+                        $
+                      </button>
+                      <span className="text-muted-foreground">|</span>
+                      <button
+                        className={`px-2 py-1 text-xs rounded transition-all ${
+                          showEquityValueAsPercent 
+                            ? "bg-green-100 text-green-700 border border-green-300" 
+                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                        }`}
+                        onClick={() => setShowEquityValueAsPercent(true)}
+                      >
+                        %
+                      </button>
                     </div>
                   </div>
                 </TableHead>
-                <TableHead>
+                <TableHead className="text-center py-4">
                   <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
                 </TableHead>
-                <TableHead>
-                  <div className="space-y-2">
+                <TableHead className="text-center py-6">
+                  <div className="space-y-3">
                     <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
-                    <div className="flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => setShowDataMonetizationAsPercent(!showDataMonetizationAsPercent)}
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        className={`px-2 py-1 text-xs rounded transition-all ${
+                          !showDataMonetizationAsPercent 
+                            ? "bg-green-100 text-green-700 border border-green-300" 
+                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                        }`}
+                        onClick={() => setShowDataMonetizationAsPercent(false)}
                       >
-                        <span className={showDataMonetizationAsPercent ? "text-muted-foreground" : "text-primary font-semibold"}>$</span>
-                        <span className="mx-1">|</span>
-                        <span className={showDataMonetizationAsPercent ? "text-primary font-semibold" : "text-muted-foreground"}>%</span>
-                      </Button>
+                        $
+                      </button>
+                      <span className="text-muted-foreground">|</span>
+                      <button
+                        className={`px-2 py-1 text-xs rounded transition-all ${
+                          showDataMonetizationAsPercent 
+                            ? "bg-green-100 text-green-700 border border-green-300" 
+                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                        }`}
+                        onClick={() => setShowDataMonetizationAsPercent(true)}
+                      >
+                        %
+                      </button>
                     </div>
                   </div>
                 </TableHead>
-                <TableHead>
+                <TableHead className="text-center py-4">
                   <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
