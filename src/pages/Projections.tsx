@@ -192,15 +192,17 @@ const Projections = () => {
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <Button
       variant="ghost"
-      className="h-auto p-0 font-medium justify-center hover:bg-transparent hover:text-blue-500 transition-colors"
+      className="h-auto p-1 font-medium justify-center hover:bg-transparent hover:text-blue-500 transition-colors whitespace-normal text-center min-h-0 leading-tight"
       onClick={() => handleSort(field)}
     >
-      {children}
-      {sortField === field && (
-        sortDirection === "asc" ? 
-          <ChevronUp className="ml-1 h-4 w-4" /> : 
-          <ChevronDown className="ml-1 h-4 w-4" />
-      )}
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs leading-tight">{children}</span>
+        {sortField === field && (
+          sortDirection === "asc" ? 
+            <ChevronUp className="h-3 w-3" /> : 
+            <ChevronDown className="h-3 w-3" />
+        )}
+      </div>
     </Button>
   );
 
@@ -286,20 +288,14 @@ const Projections = () => {
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[150px]">
-                  <div className="whitespace-normal break-words">
-                    <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
-                  </div>
+                  <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[120px]">
-                  <div className="whitespace-normal break-words">
-                    <SortButton field="cashInvested">Cash Invested</SortButton>
-                  </div>
+                  <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
                 <TableHead className="text-center py-6 w-[180px]">
-                  <div className="space-y-3">
-                    <div className="whitespace-normal break-words">
-                      <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
-                    </div>
+                  <div className="space-y-2">
+                    <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -326,10 +322,8 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="text-center py-6 w-[160px]">
-                  <div className="space-y-3">
-                    <div className="whitespace-normal break-words">
-                      <SortButton field="equityValue">Equity Value Captured</SortButton>
-                    </div>
+                  <div className="space-y-2">
+                    <SortButton field="equityValue">Equity Value Captured</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -356,15 +350,11 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[160px]">
-                  <div className="whitespace-normal break-words">
-                    <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
-                  </div>
+                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
                 </TableHead>
                 <TableHead className="text-center py-6 w-[170px]">
-                  <div className="space-y-3">
-                    <div className="whitespace-normal break-words">
-                      <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
-                    </div>
+                  <div className="space-y-2">
+                    <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -391,9 +381,7 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="text-center py-4 w-[180px]">
-                  <div className="whitespace-normal break-words">
-                    <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
-                  </div>
+                  <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
             </TableHeader>
