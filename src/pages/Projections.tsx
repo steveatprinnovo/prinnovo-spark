@@ -64,8 +64,8 @@ const CompanyRow = ({
 
   return (
     <TableRow>
-      <TableCell className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
+      <TableCell className="flex items-center gap-3 text-left">
+        <div className="w-8 h-8 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -73,33 +73,33 @@ const CompanyRow = ({
               className="w-full h-full object-contain"
             />
           ) : (
-            <DollarSign className="w-6 h-6 text-muted-foreground" />
+            <DollarSign className="w-4 h-4 text-muted-foreground" />
           )}
         </div>
-        <span className="font-medium">{company["Company Name"]}</span>
+        <span className="font-medium text-sm truncate">{company["Company Name"]}</span>
       </TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(targetIpaReturn)}</TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(company["Invested Amount"])}</TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">{formatCurrency(targetIpaReturn)}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">{formatCurrency(company["Invested Amount"])}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">
         {showTargetCashReturnAsPercent && company["Current Company Valuation"] && targetCashReturn > 0
           ? formatPercentage((company["Current Company Valuation"] / targetCashReturn) * 100)
           : formatCurrency(targetCashReturn)
         }
       </TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">
         {showEquityValueAsPercent && targetIpaReturn > 0
           ? formatPercentage((equityValue / targetIpaReturn) * 100)
           : formatCurrency(equityValue)
         }
       </TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(dataMonetizationDollars)}</TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">{formatCurrency(dataMonetizationDollars)}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">
         {showDataMonetizationAsPercent && dataMonetizationForecast > 0
           ? formatPercentage((dataMonetizationDollars / dataMonetizationForecast) * 100)
           : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
-      <TableCell className="hover:bg-blue-50 transition-colors">{formatCurrency(totalEnterpriseValue)}</TableCell>
+      <TableCell className="hover:bg-blue-50 transition-colors text-center text-sm">{formatCurrency(totalEnterpriseValue)}</TableCell>
     </TableRow>
   );
 };
@@ -278,22 +278,22 @@ const Projections = () => {
           </div>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
+        <div className="overflow-x-auto">
+          <Table className="min-w-full table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center py-4">
+                <TableHead className="text-center py-4 w-[200px]">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4">
+                <TableHead className="text-center py-4 w-[130px]">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4">
+                <TableHead className="text-center py-4 w-[120px]">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6">
+                <TableHead className="text-center py-6 w-[160px]">
                   <div className="space-y-3">
-                    <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
+                    <SortButton field="targetCashReturn">Target Cash Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -319,9 +319,9 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-6">
+                <TableHead className="text-center py-6 w-[140px]">
                   <div className="space-y-3">
-                    <SortButton field="equityValue">Equity Value Captured</SortButton>
+                    <SortButton field="equityValue">Equity Value</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -347,12 +347,12 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4">
-                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
+                <TableHead className="text-center py-4 w-[140px]">
+                  <SortButton field="dataMonetizationDollars">Data Mon. $</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6">
+                <TableHead className="text-center py-6 w-[140px]">
                   <div className="space-y-3">
-                    <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
+                    <SortButton field="dataMonetizationForecast">Data Mon. Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
@@ -378,8 +378,8 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4">
-                  <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
+                <TableHead className="text-center py-4 w-[150px]">
+                  <SortButton field="totalEnterpriseValue">Total Enterprise Value</SortButton>
                 </TableHead>
               </TableRow>
             </TableHeader>
