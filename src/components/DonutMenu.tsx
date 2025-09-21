@@ -10,6 +10,11 @@ const navigationItems = [
   { path: "/projections", icon: TrendingUp, label: "Projections" },
 ];
 
+const modeItems = [
+  { path: "/", label: "Portfolio Dashboard" },
+  { path: "/board-mode", label: "Board Mode" },
+];
+
 export function DonutMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -36,50 +41,56 @@ export function DonutMenu() {
         />
       )}
 
-      {/* Donut Menu */}
+      {/* Menu Container */}
       {isOpen && (
-        <div className="absolute top-0 left-0 z-40">
-          <div className="relative w-64 h-64">
-            {/* Center circle */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-background border-2 border-border rounded-full z-10" />
-            
-            {/* Navigation items positioned in a circle */}
-            {navigationItems.map((item, index) => {
-              const angle = (index * 90) - 45; // Start from top-right, 90 degrees apart
-              const radian = (angle * Math.PI) / 180;
-              const radius = 80;
-              const x = Math.cos(radian) * radius;
-              const y = Math.sin(radian) * radius;
-              
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <div
-                  key={item.path}
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                  }}
-                >
-                  <Link to={item.path} onClick={() => setIsOpen(false)}>
-                    <Button
-                      variant={isActive ? "default" : "outline"}
-                      size="sm"
-                      className={`w-16 h-16 rounded-full flex flex-col items-center justify-center gap-1 p-2 ${
-                        isActive 
-                          ? "bg-primary text-primary-foreground shadow-lg" 
-                          : "bg-background hover:bg-accent"
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span className="text-xs font-medium leading-tight text-center">
-                        {item.label}
-                      </span>
-                    </Button>
+        <div className="absolute top-12 left-0 z-40 bg-background border border-border rounded-lg shadow-lg p-4 w-64">
+          {/* Mode Selection */}
+          <div className="mb-4 pb-3 border-b border-border">
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Mode</h3>
+            <div className="space-y-1">
+              {modeItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                    className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:bg-accent text-foreground"
+                    }`}
+                  >
+                    {item.label}
                   </Link>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Navigation</h3>
+            <div className="space-y-1">
+              {navigationItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:bg-accent text-foreground"
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

@@ -26,39 +26,42 @@ export function DashboardHeader() {
               alt="Healthliant Ventures" 
               className="h-8 w-auto"
             />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent flex items-center gap-1">
-                  {location.pathname === "/board-mode" ? (
-                    <>
-                      <img 
-                        src="/lovable-uploads/7ba62feb-acbf-4b79-8e35-bab2872dce29.png" 
-                        alt="Board Meeting" 
-                        className="h-5 w-5" 
-                      />
-                      <ChevronDown className="h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
+            {/* Desktop only - Portfolio/Board Mode dropdown */}
+            {!isMobile && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent flex items-center gap-1">
+                    {location.pathname === "/board-mode" ? (
+                      <>
+                        <img 
+                          src="/lovable-uploads/7ba62feb-acbf-4b79-8e35-bab2872dce29.png" 
+                          alt="Board Meeting" 
+                          className="h-5 w-5" 
+                        />
+                        <ChevronDown className="h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        Portfolio Dashboard
+                        <ChevronDown className="h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-popover z-50">
+                  <DropdownMenuItem asChild>
+                    <Link to="/" className="w-full">
                       Portfolio Dashboard
-                      <ChevronDown className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-popover z-50">
-                <DropdownMenuItem asChild>
-                  <Link to="/" className="w-full">
-                    Portfolio Dashboard
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/board-mode" className="w-full">
-                    Board Mode
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/board-mode" className="w-full">
+                      Board Mode
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
           
           {/* Navigation - Desktop vs Mobile/Tablet */}
