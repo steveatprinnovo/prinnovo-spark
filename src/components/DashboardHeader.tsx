@@ -30,7 +30,7 @@ export function DashboardHeader() {
             {!isMobile && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent flex items-center gap-1">
+                  <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent hover:text-primary flex items-center gap-1 transition-colors">
                     {location.pathname === "/board-mode" ? (
                       <>
                         <img 
