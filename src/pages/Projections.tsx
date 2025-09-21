@@ -124,7 +124,7 @@ const Projections = () => {
 
   // Filter and sort companies that have investment tracking data
   const projectionsCompanies = useMemo(() => {
-    const filtered = companies.filter(company => company["Investment Tracker Stage"]);
+    const filtered = companies.filter(company => company["Target IPA Return"]);
     const multiplier = FORECAST_MULTIPLIERS[forecast];
     
     return filtered.sort((a, b) => {
