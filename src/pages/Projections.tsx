@@ -325,16 +325,16 @@ const Projections = () => {
           <Table className="min-w-full table-fixed table-container">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center py-4 w-[200px] column-1 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-4 w-[200px] column-1 hover:bg-blue-50 transition-colors">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[150px] column-2 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-4 w-[150px] column-2 hover:bg-blue-50 transition-colors">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[120px] column-3 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-4 w-[120px] column-3 hover:bg-blue-50 transition-colors">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[180px] column-4 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-6 w-[180px] column-4 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
                     <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -362,7 +362,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[160px] column-5 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-6 w-[160px] column-5 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
                     <SortButton field="equityValue">Equity Value Captured</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -390,10 +390,10 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[160px] column-6 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-4 w-[160px] column-6 hover:bg-blue-50 transition-colors">
                   <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[170px] column-7 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-6 w-[170px] column-7 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
                     <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -421,7 +421,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[180px] column-8 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-10 bg-background text-center py-4 w-[180px] column-8 hover:bg-blue-50 transition-colors">
                   <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
