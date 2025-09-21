@@ -8,10 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DonutMenu } from "./DonutMenu";
 
 export function DashboardHeader() {
   const { signOut, user } = useAuth();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   return (
     <div className="border-b bg-card">
@@ -58,45 +61,51 @@ export function DashboardHeader() {
             </DropdownMenu>
           </div>
           
-          {/* Navigation Links */}
-          <nav className="flex items-center space-x-6">
-            <Link 
-              to="/" 
-              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                location.pathname === "/" ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Link>
-            <Link 
-              to="/implementations" 
-              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                location.pathname === "/implementations" ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <ClipboardList className="h-4 w-4" />
-              Implementations
-            </Link>
-            <Link 
-              to="/investments" 
-              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                location.pathname === "/investments" ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <DollarSign className="h-4 w-4" />
-              Investments
-            </Link>
-            <Link 
-              to="/projections" 
-              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                location.pathname === "/projections" ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <TrendingUp className="h-4 w-4" />
-              Projections
-            </Link>
-          </nav>
+          {/* Navigation - Desktop vs Mobile/Tablet */}
+          {!isMobile ? (
+            /* Desktop Navigation Links */
+            <nav className="flex items-center space-x-6">
+              <Link 
+                to="/" 
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname === "/" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <Home className="h-4 w-4" />
+                Home
+              </Link>
+              <Link 
+                to="/implementations" 
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname === "/implementations" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <ClipboardList className="h-4 w-4" />
+                Implementations
+              </Link>
+              <Link 
+                to="/investments" 
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname === "/investments" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <DollarSign className="h-4 w-4" />
+                Investments
+              </Link>
+              <Link 
+                to="/projections" 
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname === "/projections" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <TrendingUp className="h-4 w-4" />
+                Projections
+              </Link>
+            </nav>
+          ) : (
+            /* Mobile/Tablet Donut Menu */
+            <DonutMenu />
+          )}
         </div>
         <div className="ml-auto flex items-center space-x-4">
           <span className="text-sm text-muted-foreground">
