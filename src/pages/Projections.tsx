@@ -64,7 +64,7 @@ const CompanyRow = ({
 
   return (
     <TableRow>
-      <TableCell className="flex items-center gap-3 text-left hover-col-1 transition-colors">
+      <TableCell className="flex items-center gap-3 text-left cell-1 transition-colors">
         <div className="w-8 h-8 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
           {logoUrl ? (
             <img
@@ -78,28 +78,28 @@ const CompanyRow = ({
         </div>
         <span className="font-medium text-sm truncate">{company["Company Name"]}</span>
       </TableCell>
-      <TableCell className="hover-col-2 transition-colors text-center text-sm">{formatCurrency(targetIpaReturn)}</TableCell>
-      <TableCell className="hover-col-3 transition-colors text-center text-sm">{formatCurrency(company["Invested Amount"])}</TableCell>
-      <TableCell className="hover-col-4 transition-colors text-center text-sm">
+      <TableCell className="cell-2 transition-colors text-center text-sm">{formatCurrency(targetIpaReturn)}</TableCell>
+      <TableCell className="cell-3 transition-colors text-center text-sm">{formatCurrency(company["Invested Amount"])}</TableCell>
+      <TableCell className="cell-4 transition-colors text-center text-sm">
         {showTargetCashReturnAsPercent && company["Current Company Valuation"] && targetCashReturn > 0
           ? formatPercentage((company["Current Company Valuation"] / targetCashReturn) * 100)
           : formatCurrency(targetCashReturn)
         }
       </TableCell>
-      <TableCell className="hover-col-5 transition-colors text-center text-sm">
+      <TableCell className="cell-5 transition-colors text-center text-sm">
         {showEquityValueAsPercent && targetIpaReturn > 0
           ? formatPercentage((equityValue / targetIpaReturn) * 100)
           : formatCurrency(equityValue)
         }
       </TableCell>
-      <TableCell className="hover-col-6 transition-colors text-center text-sm">{formatCurrency(dataMonetizationDollars)}</TableCell>
-      <TableCell className="hover-col-7 transition-colors text-center text-sm">
+      <TableCell className="cell-6 transition-colors text-center text-sm">{formatCurrency(dataMonetizationDollars)}</TableCell>
+      <TableCell className="cell-7 transition-colors text-center text-sm">
         {showDataMonetizationAsPercent && dataMonetizationForecast > 0
           ? formatPercentage((dataMonetizationDollars / dataMonetizationForecast) * 100)
           : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
-      <TableCell className="hover-col-8 transition-colors text-center text-sm">{formatCurrency(totalEnterpriseValue)}</TableCell>
+      <TableCell className="cell-8 transition-colors text-center text-sm">{formatCurrency(totalEnterpriseValue)}</TableCell>
     </TableRow>
   );
 };
@@ -281,19 +281,60 @@ const Projections = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <Table className="min-w-full table-fixed [&_th:hover]:bg-blue-50 [&_th:hover~th]:bg-transparent [&_th:nth-child(1):hover~th]:bg-transparent [&_th:nth-child(2):hover~*_th:not(:nth-child(2))]:bg-transparent [&_th:nth-child(3):hover~*_th:not(:nth-child(3))]:bg-transparent [&_th:nth-child(4):hover~*_th:not(:nth-child(4))]:bg-transparent [&_th:nth-child(5):hover~*_th:not(:nth-child(5))]:bg-transparent [&_th:nth-child(6):hover~*_th:not(:nth-child(6))]:bg-transparent [&_th:nth-child(7):hover~*_th:not(:nth-child(7))]:bg-transparent [&_th:nth-child(8):hover~*_th:not(:nth-child(8))]:bg-transparent [&_.column-hover-1:hover_.hover-col-1]:bg-blue-50 [&_.column-hover-2:hover_.hover-col-2]:bg-blue-50 [&_.column-hover-3:hover_.hover-col-3]:bg-blue-50 [&_.column-hover-4:hover_.hover-col-4]:bg-blue-50 [&_.column-hover-5:hover_.hover-col-5]:bg-blue-50 [&_.column-hover-6:hover_.hover-col-6]:bg-blue-50 [&_.column-hover-7:hover_.hover-col-7]:bg-blue-50 [&_.column-hover-8:hover_.hover-col-8]:bg-blue-50">
+          <style>{`
+            .table-container:hover .column-1:hover ~ tbody .cell-1,
+            .table-container .column-1:hover ~ tbody .cell-1,
+            .table-container .column-1:hover,
+            .table-container:has(.column-1:hover) .cell-1 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-2:hover ~ tbody .cell-2,
+            .table-container .column-2:hover ~ tbody .cell-2,
+            .table-container .column-2:hover,
+            .table-container:has(.column-2:hover) .cell-2 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-3:hover ~ tbody .cell-3,
+            .table-container .column-3:hover ~ tbody .cell-3,
+            .table-container .column-3:hover,
+            .table-container:has(.column-3:hover) .cell-3 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-4:hover ~ tbody .cell-4,
+            .table-container .column-4:hover ~ tbody .cell-4,
+            .table-container .column-4:hover,
+            .table-container:has(.column-4:hover) .cell-4 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-5:hover ~ tbody .cell-5,
+            .table-container .column-5:hover ~ tbody .cell-5,
+            .table-container .column-5:hover,
+            .table-container:has(.column-5:hover) .cell-5 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-6:hover ~ tbody .cell-6,
+            .table-container .column-6:hover ~ tbody .cell-6,
+            .table-container .column-6:hover,
+            .table-container:has(.column-6:hover) .cell-6 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-7:hover ~ tbody .cell-7,
+            .table-container .column-7:hover ~ tbody .cell-7,
+            .table-container .column-7:hover,
+            .table-container:has(.column-7:hover) .cell-7 { background-color: rgb(239 246 255) !important; }
+            
+            .table-container:hover .column-8:hover ~ tbody .cell-8,
+            .table-container .column-8:hover ~ tbody .cell-8,
+            .table-container .column-8:hover,
+            .table-container:has(.column-8:hover) .cell-8 { background-color: rgb(239 246 255) !important; }
+          `}</style>
+          <Table className="min-w-full table-fixed table-container">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center py-4 w-[200px] column-hover-1 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-4 w-[200px] column-1 hover:bg-blue-50 transition-colors">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[150px] column-hover-2 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-4 w-[150px] column-2 hover:bg-blue-50 transition-colors">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[120px] column-hover-3 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-4 w-[120px] column-3 hover:bg-blue-50 transition-colors">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[180px] column-hover-4 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-6 w-[180px] column-4 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
                     <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -321,7 +362,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[160px] column-hover-5 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-6 w-[160px] column-5 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
                     <SortButton field="equityValue">Equity Value Captured</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -349,10 +390,10 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[160px] column-hover-6 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-4 w-[160px] column-6 hover:bg-blue-50 transition-colors">
                   <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
                 </TableHead>
-                <TableHead className="text-center py-6 w-[170px] column-hover-7 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-6 w-[170px] column-7 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
                     <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -380,7 +421,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="text-center py-4 w-[180px] column-hover-8 hover:bg-blue-50 transition-colors">
+                <TableHead className="text-center py-4 w-[180px] column-8 hover:bg-blue-50 transition-colors">
                   <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
@@ -399,29 +440,29 @@ const Projections = () => {
               
               {/* Portfolio Totals Row */}
               <TableRow className="bg-muted/50 font-semibold">
-                <TableCell className="text-left hover-col-1 transition-colors">Portfolio Total</TableCell>
-                <TableCell className="text-center hover-col-2 transition-colors">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
-                <TableCell className="text-center hover-col-3 transition-colors">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
-                <TableCell className="text-center hover-col-4 transition-colors">
+                <TableCell className="text-left cell-1 transition-colors">Portfolio Total</TableCell>
+                <TableCell className="text-center cell-2 transition-colors">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
+                <TableCell className="text-center cell-3 transition-colors">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
+                <TableCell className="text-center cell-4 transition-colors">
                   {showTargetCashReturnAsPercent && portfolioTotals.targetCashReturn > 0
                     ? formatPercentage((portfolioTotals.cashInvested / portfolioTotals.targetCashReturn) * 100)
                     : formatCurrency(portfolioTotals.targetCashReturn)
                   }
                 </TableCell>
-                <TableCell className="text-center hover-col-5 transition-colors">
+                <TableCell className="text-center cell-5 transition-colors">
                   {showEquityValueAsPercent && portfolioTotals.targetIpaReturn > 0
                     ? formatPercentage((portfolioTotals.equityValue / portfolioTotals.targetIpaReturn) * 100)
                     : formatCurrency(portfolioTotals.equityValue)
                   }
                 </TableCell>
-                <TableCell className="text-center hover-col-6 transition-colors">{formatCurrency(portfolioTotals.dataMonetizationDollars)}</TableCell>
-                <TableCell className="text-center hover-col-7 transition-colors">
+                <TableCell className="text-center cell-6 transition-colors">{formatCurrency(portfolioTotals.dataMonetizationDollars)}</TableCell>
+                <TableCell className="text-center cell-7 transition-colors">
                   {showDataMonetizationAsPercent && portfolioTotals.dataMonetizationForecast > 0
                     ? formatPercentage((portfolioTotals.dataMonetizationDollars / portfolioTotals.dataMonetizationForecast) * 100)
                     : formatCurrency(portfolioTotals.dataMonetizationForecast)
                   }
                 </TableCell>
-                <TableCell className="text-center hover-col-8 transition-colors">{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
+                <TableCell className="text-center cell-8 transition-colors">{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
