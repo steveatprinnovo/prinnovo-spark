@@ -43,7 +43,7 @@ export function DonutMenu() {
 
       {/* Menu Container */}
       {isOpen && (
-        <div className="absolute top-12 left-0 z-40 bg-background border border-border rounded-lg shadow-lg p-4 w-64">
+        <div className="absolute top-12 left-0 z-40 bg-background border border-border rounded-lg shadow-lg p-4 w-64 -ml-6">
           {/* Mode Selection */}
           <div className="mb-4 pb-3 border-b border-border">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Mode</h3>
