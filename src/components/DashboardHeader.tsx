@@ -110,20 +110,23 @@ export function DashboardHeader() {
             <DonutMenu />
           )}
         </div>
-        <div className="ml-auto flex items-center space-x-4">
-          <span className="text-sm text-muted-foreground">
-            {user?.email}
-          </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={signOut}
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
-        </div>
+        {/* Desktop only - User section */}
+        {!isMobile && (
+          <div className="ml-auto flex items-center space-x-4">
+            <span className="text-sm text-muted-foreground">
+              {user?.email}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={signOut}
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
