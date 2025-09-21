@@ -84,7 +84,7 @@ const CompanyRow = ({
         {showTargetCashReturnAsPercent
           ? targetCashReturn > 0
             ? formatPercentage(((company["Invested Amount"] || 0) / targetCashReturn) * 100)
-            : "0%"
+            : "0.00%"
           : formatCurrency(targetCashReturn)
         }
       </TableCell>
@@ -99,7 +99,7 @@ const CompanyRow = ({
         {showDataMonetizationAsPercent
           ? dataMonetizationForecast > 0
             ? formatPercentage((dataMonetizationDollars / dataMonetizationForecast) * 100)
-            : "0%"
+            : "0.00%"
           : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
@@ -454,7 +454,7 @@ const Projections = () => {
                   {showTargetCashReturnAsPercent
                     ? portfolioTotals.targetCashReturn > 0
                       ? formatPercentage((portfolioTotals.cashInvested / portfolioTotals.targetCashReturn) * 100)
-                      : "0%"
+                      : "0.00%"
                     : formatCurrency(portfolioTotals.targetCashReturn)
                   }
                 </TableCell>
@@ -469,7 +469,7 @@ const Projections = () => {
                   {showDataMonetizationAsPercent
                     ? portfolioTotals.dataMonetizationForecast > 0
                       ? formatPercentage((portfolioTotals.dataMonetizationDollars / portfolioTotals.dataMonetizationForecast) * 100)
-                      : "0%"
+                      : "0.00%"
                     : formatCurrency(portfolioTotals.dataMonetizationForecast)
                   }
                 </TableCell>
