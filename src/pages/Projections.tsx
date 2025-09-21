@@ -322,13 +322,13 @@ const Projections = () => {
             .table-container .column-8:hover,
             .table-container:has(.column-8:hover) .cell-8 { background-color: rgb(239 246 255) !important; }
           `}</style>
-          <Table className="min-w-full table-fixed table-container">
-            <TableHeader className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <Table className="min-w-full table-fixed table-container border-separate border-spacing-0">
+            <TableHeader>
               <TableRow>
                 <TableHead className="sticky top-0 z-20 bg-background text-center py-4 w-[200px] column-1 hover:bg-blue-50 transition-colors">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-background text-center py-4 w=[150px] column-2 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-background text-center py-4 w-[150px] column-2 hover:bg-blue-50 transition-colors">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
                 <TableHead className="sticky top-0 z-20 bg-background text-center py-4 w-[120px] column-3 hover:bg-blue-50 transition-colors">
