@@ -280,8 +280,11 @@ const Projections = () => {
           </div>
         </div>
 
-        <div className="relative overflow-x-auto overflow-y-auto max-h-[70vh]">
+        <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto max-h-[70vh]">
           <style>{`
+            /* Ensure sticky headers work: neutralize inner shadcn Table wrapper overflow */
+            .projections-table-wrapper > div { overflow: visible !important; }
+
             .table-container:hover .column-1:hover ~ tbody .cell-1,
             .table-container .column-1:hover ~ tbody .cell-1,
             .table-container .column-1:hover,
