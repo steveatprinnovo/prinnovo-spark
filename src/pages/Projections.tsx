@@ -81,11 +81,13 @@ const CompanyRow = ({
       <TableCell className="cell-2 transition-colors text-center text-sm">{formatCurrency(targetIpaReturn)}</TableCell>
       <TableCell className="cell-3 transition-colors text-center text-sm">{formatCurrency(company["Invested Amount"])}</TableCell>
       <TableCell className="cell-4 transition-colors text-center text-sm">
-        {showTargetCashReturnAsPercent
-          ? targetCashReturn > 0
-            ? formatPercentage(((company["Invested Amount"] || 0) / targetCashReturn) * 100)
-            : "0.00%"
-          : formatCurrency(targetCashReturn)
+        {(company["Invested Amount"] || 0) === 0
+          ? "N/A"
+          : showTargetCashReturnAsPercent
+            ? targetCashReturn > 0
+              ? formatPercentage(((company["Invested Amount"] || 0) / targetCashReturn) * 100)
+              : "0.00%"
+            : formatCurrency(targetCashReturn)
         }
       </TableCell>
       <TableCell className="cell-5 transition-colors text-center text-sm">
@@ -94,13 +96,17 @@ const CompanyRow = ({
           : formatCurrency(equityValue)
         }
       </TableCell>
-      <TableCell className="cell-6 transition-colors text-center text-sm">{formatCurrency(dataMonetizationDollars)}</TableCell>
+      <TableCell className="cell-6 transition-colors text-center text-sm">
+        {dataMonetizationForecast === 0 ? "N/A" : formatCurrency(dataMonetizationDollars)}
+      </TableCell>
       <TableCell className="cell-7 transition-colors text-center text-sm">
-        {showDataMonetizationAsPercent
-          ? dataMonetizationForecast > 0
-            ? formatPercentage((dataMonetizationDollars / dataMonetizationForecast) * 100)
-            : "0.00%"
-          : formatCurrency(dataMonetizationForecast)
+        {dataMonetizationForecast === 0
+          ? "N/A"
+          : showDataMonetizationAsPercent
+            ? dataMonetizationForecast > 0
+              ? formatPercentage((dataMonetizationDollars / dataMonetizationForecast) * 100)
+              : "0.00%"
+            : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
       <TableCell className="cell-8 transition-colors text-center text-sm">{formatCurrency(totalEnterpriseValue)}</TableCell>
@@ -451,11 +457,13 @@ const Projections = () => {
                 <TableCell className="text-center cell-2 transition-colors">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
                 <TableCell className="text-center cell-3 transition-colors">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
                 <TableCell className="text-center cell-4 transition-colors">
-                  {showTargetCashReturnAsPercent
-                    ? portfolioTotals.targetCashReturn > 0
-                      ? formatPercentage((portfolioTotals.cashInvested / portfolioTotals.targetCashReturn) * 100)
-                      : "0.00%"
-                    : formatCurrency(portfolioTotals.targetCashReturn)
+                  {portfolioTotals.cashInvested === 0
+                    ? "N/A"
+                    : showTargetCashReturnAsPercent
+                      ? portfolioTotals.targetCashReturn > 0
+                        ? formatPercentage((portfolioTotals.cashInvested / portfolioTotals.targetCashReturn) * 100)
+                        : "0.00%"
+                      : formatCurrency(portfolioTotals.targetCashReturn)
                   }
                 </TableCell>
                 <TableCell className="text-center cell-5 transition-colors">
@@ -464,13 +472,17 @@ const Projections = () => {
                     : formatCurrency(portfolioTotals.equityValue)
                   }
                 </TableCell>
-                <TableCell className="text-center cell-6 transition-colors">{formatCurrency(portfolioTotals.dataMonetizationDollars)}</TableCell>
+                <TableCell className="text-center cell-6 transition-colors">
+                  {portfolioTotals.dataMonetizationForecast === 0 ? "N/A" : formatCurrency(portfolioTotals.dataMonetizationDollars)}
+                </TableCell>
                 <TableCell className="text-center cell-7 transition-colors">
-                  {showDataMonetizationAsPercent
-                    ? portfolioTotals.dataMonetizationForecast > 0
-                      ? formatPercentage((portfolioTotals.dataMonetizationDollars / portfolioTotals.dataMonetizationForecast) * 100)
-                      : "0.00%"
-                    : formatCurrency(portfolioTotals.dataMonetizationForecast)
+                  {portfolioTotals.dataMonetizationForecast === 0
+                    ? "N/A"
+                    : showDataMonetizationAsPercent
+                      ? portfolioTotals.dataMonetizationForecast > 0
+                        ? formatPercentage((portfolioTotals.dataMonetizationDollars / portfolioTotals.dataMonetizationForecast) * 100)
+                        : "0.00%"
+                      : formatCurrency(portfolioTotals.dataMonetizationForecast)
                   }
                 </TableCell>
                 <TableCell className="text-center cell-8 transition-colors">{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
