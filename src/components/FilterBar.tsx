@@ -52,6 +52,10 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
       .filter((owner): owner is string => owner !== null)
   )).sort();
 
+  const getEvpOwnerCount = (owner: string) => {
+    return companies.filter(company => company["EVP Owner"] === owner).length;
+  };
+
   const pipelineStages = Array.from(new Set(
     companies
       .map(company => company["Pipeline Stage"])
@@ -224,7 +228,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
             <SelectContent>
               {evpOwners.map((owner) => (
                 <SelectItem key={owner} value={owner}>
-                  {owner}
+                  {owner} ({getEvpOwnerCount(owner)})
                 </SelectItem>
               ))}
             </SelectContent>

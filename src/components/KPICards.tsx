@@ -10,10 +10,10 @@ const kpiData = [
     gradient: "var(--gradient-primary)"
   },
   {
-    label: "Direct Investment",
+    label: "Direct Cash Investment",
     value: "$4,087,500",
     icon: DollarSign,
-    description: "Total amount directly invested to date",
+    description: "Non-IPA cash purchases of company equity",
     gradient: "var(--gradient-accent)"
   },
   {

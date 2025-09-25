@@ -14,7 +14,7 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
   
   // Calculate counts from data
   const implementationCount = companies.filter(company => 
-    company["Pipeline Stage"] === "Implementation"
+    company["Pipeline Stage"] === "Implementation" || company["Pipeline Stage"] === "IT Implementation"
   ).length;
   
   const pilotCount = companies.filter(company => 
@@ -22,12 +22,12 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
   ).length;
   
   const portfolioCount = companies.filter(company => 
-    company["Pipeline Stage"] === "Portfolio Company"
+    company["Pipeline Stage"] === "Portfolio Company" || company["Pipeline Stage"] === "Validated Company"
   ).length;
 
   const handleStageClick = (stageName: string) => {
-    // Only make Implementation, Pilot, and Portfolio Company clickable
-    if (["Implementation", "Pilot", "Portfolio Company"].includes(stageName)) {
+    // Only make IT Implementation, Pilot, and Validated Company clickable
+    if (["IT Implementation", "Pilot", "Validated Company"].includes(stageName)) {
       const newFilters = { ...filters };
       // If already filtering by this stage, clear the filter
       if (newFilters.pipelineStage === stageName) {
@@ -43,9 +43,9 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
     { name: "Qualified Leads", count: hasActiveFilters ? 0 : 54, isClickable: false },
     { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : 4, isClickable: false },
     { name: "IPA Negotiations", count: hasActiveFilters ? 0 : 4, isClickable: false },
-    { name: "Implementation", count: implementationCount, isClickable: true },
+    { name: "IT Implementation", count: implementationCount, isClickable: true },
     { name: "Pilot", count: pilotCount, isClickable: true },
-    { name: "Portfolio Company", count: portfolioCount, isClickable: true },
+    { name: "Validated Company", count: portfolioCount, isClickable: true },
   ];
 
   return (
@@ -59,7 +59,7 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
             <div className="flex flex-col items-center gap-2 min-w-[120px] pt-2">
               <div 
                 className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 ${
-                  stage.name === "Portfolio Company" 
+                  stage.name === "Validated Company" 
                     ? "bg-green-500/10 border-2 border-green-500" 
                     : "bg-primary/10 border-2 border-primary"
                 } ${
@@ -68,7 +68,7 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
                     : ""
                 } ${
                   filters.pipelineStage === stage.name
-                    ? stage.name === "Portfolio Company"
+                    ? stage.name === "Validated Company"
                       ? "ring-2 ring-offset-2 ring-green-500"
                       : "ring-2 ring-offset-2 ring-primary"
                     : ""
@@ -76,7 +76,7 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
                 onClick={() => handleStageClick(stage.name)}
               >
                 <span className={`text-xl font-bold ${
-                  stage.name === "Portfolio Company" ? "text-green-600" : "text-primary"
+                  stage.name === "Validated Company" ? "text-green-600" : "text-primary"
                 }`}>{stage.count}</span>
               </div>
               <span className="text-sm text-muted-foreground text-center leading-tight">
