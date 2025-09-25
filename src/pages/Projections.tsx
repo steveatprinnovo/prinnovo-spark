@@ -404,7 +404,7 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[160px] column-6 hover:bg-blue-50 transition-colors">
-                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars</SortButton>
+                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars Earned</SortButton>
                 </TableHead>
                 <TableHead className="sticky top-0 z-20 bg-muted text-center py-6 w-[170px] column-7 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
