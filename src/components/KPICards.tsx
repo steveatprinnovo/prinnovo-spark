@@ -13,7 +13,7 @@ const kpiData = [
     label: "Direct Investment",
     value: "$4,087,500",
     icon: DollarSign,
-    description: "Direct Cash Investment",
+    description: "Total amount directly invested to date",
     gradient: "var(--gradient-accent)"
   },
   {
