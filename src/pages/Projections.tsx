@@ -124,6 +124,7 @@ const Projections = () => {
   const [showDataMonetizationAsPercent, setShowDataMonetizationAsPercent] = useState(false);
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -132,9 +133,29 @@ const Projections = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Get unique venture offices with company counts
+  const ventureOfficeOptions = useMemo(() => {
+    const offices = companies.reduce((acc, company) => {
+      if (company["Target IPA Return"] && company.venture_office) {
+        acc[company.venture_office] = (acc[company.venture_office] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(offices).map(([office, count]) => ({
+      value: office,
+      label: office,
+      count
+    }));
+  }, [companies]);
+
   // Filter and sort companies that have investment tracking data
   const projectionsCompanies = useMemo(() => {
-    const filtered = companies.filter(company => company["Target IPA Return"]);
+    const filtered = companies.filter(company => {
+      if (!company["Target IPA Return"]) return false;
+      if (selectedVentureOffice === "all") return true;
+      return company.venture_office === selectedVentureOffice;
+    });
     const multiplier = FORECAST_MULTIPLIERS[forecast];
     
     return filtered.sort((a, b) => {
@@ -188,7 +209,7 @@ const Projections = () => {
         return sortDirection === "asc" ? result : -result;
       }
     });
-  }, [companies, forecast, sortField, sortDirection]);
+  }, [companies, forecast, sortField, sortDirection, selectedVentureOffice]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -274,19 +295,45 @@ const Projections = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Projections</h1>
           
-          <div className="w-64">
-            <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="target">Target Forecast</SelectItem>
-                <SelectItem value="very-conservative">Very Conservative</SelectItem>
-                <SelectItem value="conservative">Conservative</SelectItem>
-                <SelectItem value="aggressive">Aggressive</SelectItem>
-                <SelectItem value="very-aggressive">Very Aggressive</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex gap-4">
+            <div className="w-64">
+              <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Venture Office" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All ({companies.filter(c => c["Target IPA Return"]).length})</SelectItem>
+                  {ventureOfficeOptions.map((office) => (
+                    <SelectItem key={office.value} value={office.value}>
+                      <div className="flex items-center gap-2">
+                        {office.label === "Healthliant Ventures" && (
+                          <img 
+                            src="/lovable-uploads/7ba62feb-acbf-4b79-8e35-bab2872dce29.png" 
+                            alt="Healthliant Ventures" 
+                            className="w-4 h-4 object-contain"
+                          />
+                        )}
+                        <span>{office.label} ({office.count})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-64">
+              <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="target">Target Forecast</SelectItem>
+                  <SelectItem value="very-conservative">Very Conservative</SelectItem>
+                  <SelectItem value="conservative">Conservative</SelectItem>
+                  <SelectItem value="aggressive">Aggressive</SelectItem>
+                  <SelectItem value="very-aggressive">Very Aggressive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 

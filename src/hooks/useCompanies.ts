@@ -30,6 +30,7 @@ export interface Company {
   "Data Monetization Forecast": number | null;
   "Total Enterprise Value Captured": number | null;
   imgurl: string | null;
+  venture_office: string | null;
 }
 
 export function useCompanies() {
