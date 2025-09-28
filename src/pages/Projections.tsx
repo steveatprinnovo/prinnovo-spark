@@ -308,7 +308,7 @@ const Projections = () => {
                       <div className="flex items-center gap-2">
                         {office.label === "Healthliant Ventures" && (
                           <img 
-                            src="/lovable-uploads/7ba62feb-acbf-4b79-8e35-bab2872dce29.png" 
+                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
                             alt="Healthliant Ventures" 
                             className="w-4 h-4 object-contain"
                           />
