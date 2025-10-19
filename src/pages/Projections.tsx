@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,15 @@ interface CompanyRowProps {
   showDataMonetizationAsPercent: boolean;
 }
 
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return "No date available";
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
 const CompanyRow = ({ 
   company, 
   forecast, 
@@ -79,7 +89,18 @@ const CompanyRow = ({
         </div>
         <span className="font-medium text-sm truncate">{company["Company Name"]}</span>
       </TableCell>
-      <TableCell className="cell-2 transition-colors text-center text-sm">{formatCurrency(targetIpaReturn)}</TableCell>
+      <TableCell className="cell-2 transition-colors text-center text-sm">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">{formatCurrency(targetIpaReturn)}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">IPA Signed: {formatDate(company["IPA Signature Date"])}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
       <TableCell className="cell-3 transition-colors text-center text-sm">{formatCurrency(company["Invested Amount"])}</TableCell>
       <TableCell className="cell-4 transition-colors text-center text-sm">
         {(company["Invested Amount"] || 0) === 0
