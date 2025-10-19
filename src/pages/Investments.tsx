@@ -46,13 +46,15 @@ export default function Investments() {
       return true;
     });
 
-    // Find last updated timestamp from Invested Amount Valuation Date
+    // Find the most recent Invested Amount Valuation Date
     const valuationDates = validCompanies
       .map(c => c["Invested Amount Valuation Date"])
-      .filter((date): date is string => date !== null);
+      .filter((date): date is string => date !== null && date !== undefined);
     
     const lastUpdated = valuationDates.length > 0 
-      ? new Date(Math.max(...valuationDates.map(d => new Date(d).getTime())))
+      ? valuationDates.reduce((latest, current) => {
+          return new Date(current) > new Date(latest) ? current : latest;
+        })
       : null;
 
     // Group companies by Investment Tracker Stage and sort
@@ -186,7 +188,7 @@ export default function Investments() {
             </Button>
             {lastUpdated && (
               <div className="text-sm text-muted-foreground italic">
-                Current as of {lastUpdated.toLocaleDateString()}
+                Current as of {new Date(lastUpdated).toLocaleDateString()}
               </div>
             )}
           </div>
