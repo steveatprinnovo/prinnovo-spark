@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
+import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -174,6 +176,7 @@ const Projections = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading } = useCompanies();
   const [forecast, setForecast] = useState<ForecastType>("target");
   const [showTargetCashReturnAsPercent, setShowTargetCashReturnAsPercent] = useState(false);
@@ -181,10 +184,15 @@ const Projections = () => {
   const [showDataMonetizationAsPercent, setShowDataMonetizationAsPercent] = useState(false);
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
+
+  // Get unique venture offices
+  const ventureOffices = useMemo(() => 
+    Array.from(new Set(companies.filter(c => c["Target IPA Return"]).map(c => c.venture_office).filter(Boolean))) as string[],
+    [companies]
+  );
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -415,13 +423,17 @@ const Projections = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
+      {/* Venture Office Selector Modal for Admins */}
+      {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
+      
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Projections</h1>
           
           <div className="flex gap-4">
-            <div className="w-64">
-              <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+            {isAdmin && (
+              <div className="w-64">
+                <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Venture Office" />
                 </SelectTrigger>
@@ -443,7 +455,8 @@ const Projections = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+              </div>
+            )}
             <div className="w-64">
               <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
                 <SelectTrigger>
