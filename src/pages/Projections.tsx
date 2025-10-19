@@ -101,7 +101,18 @@ const CompanyRow = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="cell-3 transition-colors text-center text-sm">{formatCurrency(company["Invested Amount"])}</TableCell>
+      <TableCell className="cell-3 transition-colors text-center text-sm">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">{formatCurrency(company["Invested Amount"])}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Invested: {formatDate(company["Invested Amount Date"])}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
       <TableCell className="cell-4 transition-colors text-center text-sm">
         {(company["Invested Amount"] || 0) === 0
           ? "N/A"
