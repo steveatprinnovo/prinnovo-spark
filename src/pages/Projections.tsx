@@ -489,11 +489,11 @@ const Projections = () => {
                   </div>
                 </TableHead>
                 <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[160px] column-6 hover:bg-blue-50 transition-colors">
-                  <SortButton field="dataMonetizationDollars">Data Monetization Dollars Earned</SortButton>
+                  <SortButton field="dataMonetizationDollars">Short Term Revenue Dollars Earned</SortButton>
                 </TableHead>
                 <TableHead className="sticky top-0 z-20 bg-muted text-center py-6 w-[170px] column-7 hover:bg-blue-50 transition-colors">
                   <div className="space-y-2">
-                    <SortButton field="dataMonetizationForecast">Data Monetization Forecast</SortButton>
+                    <SortButton field="dataMonetizationForecast">Short Term Revenue Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
