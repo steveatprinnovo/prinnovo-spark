@@ -2,8 +2,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Building2, DollarSign, TrendingUp } from "lucide-react";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 
-export function KPICards() {
-  const { details } = useVentureOfficeDetails();
+interface KPICardsProps {
+  selectedVentureOffice?: string;
+}
+
+export function KPICards({ selectedVentureOffice }: KPICardsProps) {
+  const { details } = useVentureOfficeDetails(selectedVentureOffice);
 
   const kpiData = [
     {

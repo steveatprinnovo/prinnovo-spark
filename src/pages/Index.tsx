@@ -152,7 +152,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
           {/* Left: KPI Cards - Smaller and vertically distributed */}
           <div className="w-auto">
-            <KPICards />
+            <KPICards selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} />
           </div>
           
           {/* Right: Interactive Map - Expanded 10% to the left */}
@@ -169,7 +169,7 @@ const Index = () => {
         <Separator className="my-6" />
         
         {/* Pipeline Stages */}
-        <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} />
+        <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} />
         
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />

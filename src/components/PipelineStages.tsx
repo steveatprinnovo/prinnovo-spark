@@ -7,10 +7,11 @@ interface PipelineStagesProps {
   companies: Company[];
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
+  selectedVentureOffice?: string;
 }
 
-export function PipelineStages({ companies, filters, onFilterChange }: PipelineStagesProps) {
-  const { details } = useVentureOfficeDetails();
+export function PipelineStages({ companies, filters, onFilterChange, selectedVentureOffice }: PipelineStagesProps) {
+  const { details } = useVentureOfficeDetails(selectedVentureOffice);
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
   
