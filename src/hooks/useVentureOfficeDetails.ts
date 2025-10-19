@@ -23,7 +23,10 @@ export function useVentureOfficeDetails(selectedOffice?: string) {
 
   useEffect(() => {
     const fetchDetails = async () => {
+      console.log('useVentureOfficeDetails - officeToFetch:', officeToFetch);
+      
       if (!officeToFetch) {
+        console.log('useVentureOfficeDetails - no office to fetch');
         setDetails(null);
         setLoading(false);
         return;
@@ -32,9 +35,13 @@ export function useVentureOfficeDetails(selectedOffice?: string) {
       try {
         // If "all" is selected, aggregate all offices
         if (officeToFetch === "all") {
+          console.log('useVentureOfficeDetails - fetching all offices for aggregation');
           const { data, error } = await supabase
             .from('venture_office_detail' as any)
             .select('*');
+
+          console.log('useVentureOfficeDetails - all offices data:', data);
+          console.log('useVentureOfficeDetails - all offices error:', error);
 
           if (error) {
             console.error('Error fetching venture office details:', error);
@@ -51,15 +58,20 @@ export function useVentureOfficeDetails(selectedOffice?: string) {
               "Prinnovo Health Ownership": null,
               "Venture Office Logo": null,
             };
+            console.log('useVentureOfficeDetails - aggregated:', aggregated);
             setDetails(aggregated);
           }
         } else {
           // Fetch specific office
+          console.log('useVentureOfficeDetails - fetching specific office:', officeToFetch);
           const { data, error } = await supabase
             .from('venture_office_detail' as any)
             .select('*')
             .eq('Venture Office Name', officeToFetch)
             .maybeSingle();
+
+          console.log('useVentureOfficeDetails - specific office data:', data);
+          console.log('useVentureOfficeDetails - specific office error:', error);
 
           if (error) {
             console.error('Error fetching venture office details:', error);
