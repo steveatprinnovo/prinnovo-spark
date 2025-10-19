@@ -5,12 +5,14 @@ import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
+import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DollarSign, ChevronUp, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 type ForecastType = "target" | "very-conservative" | "conservative" | "aggressive" | "very-aggressive";
 type SortField = "company" | "targetIpaReturn" | "cashInvested" | "targetCashReturn" | "equityValue" | "dataMonetizationDollars" | "dataMonetizationForecast" | "totalEnterpriseValue";
@@ -62,7 +64,27 @@ const CompanyRow = ({
   showEquityValueAsPercent, 
   showDataMonetizationAsPercent 
 }: CompanyRowProps) => {
-  const { logoUrl } = useCompanyLogo(company.imgurl);
+  const isPrinnovoHealth = company["Company Name"] === "Prinnovo Health";
+  const { logoUrl: regularLogoUrl } = useCompanyLogo(company.imgurl);
+  const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (isPrinnovoHealth) {
+      const fetchPrinnovoLogo = async () => {
+        const { data } = await supabase.storage
+          .from('Company Logos')
+          .getPublicUrl('prinnovo-logo.png');
+        
+        if (data?.publicUrl) {
+          setPrinnovoLogoUrl(data.publicUrl);
+        }
+      };
+      
+      fetchPrinnovoLogo();
+    }
+  }, [isPrinnovoHealth]);
+  
+  const logoUrl = isPrinnovoHealth ? prinnovoLogoUrl : regularLogoUrl;
   const multiplier = FORECAST_MULTIPLIERS[forecast];
   
   const targetIpaReturn = (company["Target IPA Return"] || 0) * multiplier;
@@ -159,6 +181,9 @@ const Projections = () => {
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
+  const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
+  
+  const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -166,6 +191,21 @@ const Projections = () => {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
+
+  // Fetch Prinnovo Health logo
+  useEffect(() => {
+    const fetchPrinnovoLogo = async () => {
+      const { data } = await supabase.storage
+        .from('Company Logos')
+        .getPublicUrl('prinnovo-logo.png');
+      
+      if (data?.publicUrl) {
+        setPrinnovoLogoUrl(data.publicUrl);
+      }
+    };
+    
+    fetchPrinnovoLogo();
+  }, []);
 
   // Get unique venture offices with company counts
   const ventureOfficeOptions = useMemo(() => {
@@ -194,9 +234,54 @@ const Projections = () => {
       if (selectedVentureOffice === "all") return true;
       return company.venture_office === selectedVentureOffice;
     });
+    
+    // Check if we need to add Prinnovo Health
+    const shouldAddPrinnovo = ventureOfficeDetails?.["Prinnovo Health Ownership"] === "Yes";
+    
+    let companiesWithPrinnovo = [...filtered];
+    
+    if (shouldAddPrinnovo && filtered.length > 0) {
+      // Calculate sum of all values × 0.02
+      const prinnovoData: Company = {
+        "Company Name": "Prinnovo Health",
+        "Target IPA Return": filtered.reduce((sum, c) => sum + (c["Target IPA Return"] || 0), 0) * 0.02,
+        "Invested Amount": filtered.reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0) * 0.02,
+        "Target Cash Investment Return": filtered.reduce((sum, c) => sum + (c["Target Cash Investment Return"] || 0), 0) * 0.02,
+        "Current HLV Valuation": filtered.reduce((sum, c) => sum + (c["Current HLV Valuation"] || 0), 0) * 0.02,
+        "Current Company Valuation": filtered.reduce((sum, c) => sum + (c["Current Company Valuation"] || 0), 0) * 0.02,
+        "Data Monetization Dollars": filtered.reduce((sum, c) => sum + (c["Data Monetization Dollars"] || 0), 0) * 0.02,
+        "Data Monetization Forecast": filtered.reduce((sum, c) => sum + (c["Data Monetization Forecast"] || 0), 0) * 0.02,
+        "Total Enterprise Value Captured": filtered.reduce((sum, c) => sum + (c["Total Enterprise Value Captured"] || 0), 0) * 0.02,
+        imgurl: "prinnovo-logo.png",
+        venture_office: selectedVentureOffice,
+        "Company Description": null,
+        "HLV Ownership Percentage": null,
+        "Intro Origin": null,
+        Champions: null,
+        "EVP Owner": null,
+        "Company Contact": null,
+        "Specific Focus Area": null,
+        "High-Level Focus Area": null,
+        "Country of Origin": null,
+        "Pipeline Stage": null,
+        "Investment Tracker Stage": null,
+        "Final Portfolio Decision Date": null,
+        "Implementation Completion Date": null,
+        "IPA Signature Date": null,
+        "Term Sheet Signature Date": null,
+        "IPA Year": null,
+        "Invested Amount Valuation Date": null,
+        "Invested Amount Date": null,
+        "Invested Amount Valuation": null,
+        "Invested Amount Round": null,
+      };
+      
+      companiesWithPrinnovo.push(prinnovoData);
+    }
+    
     const multiplier = FORECAST_MULTIPLIERS[forecast];
     
-    return filtered.sort((a, b) => {
+    return companiesWithPrinnovo.sort((a, b) => {
       let aValue: any;
       let bValue: any;
       
@@ -247,7 +332,7 @@ const Projections = () => {
         return sortDirection === "asc" ? result : -result;
       }
     });
-  }, [companies, forecast, sortField, sortDirection, selectedVentureOffice, isAdmin, ventureOffice]);
+  }, [companies, forecast, sortField, sortDirection, selectedVentureOffice, isAdmin, ventureOffice, ventureOfficeDetails]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
