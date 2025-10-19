@@ -52,6 +52,16 @@ export default function Investments() {
     }
   }, [user, authLoading, navigate]);
 
+  // Helper functions defined before useMemo
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const calculatePercentageIncrease = (invested: number | null, valuation: number | null) => {
     if (!invested || !valuation || invested === 0) return "N/A";
     const increase = ((valuation - invested) / invested) * 100;
@@ -176,15 +186,6 @@ export default function Investments() {
 
     return { groupedCompanies: grouped, kpiData: kpis, lastUpdated };
   }, [companies, isAdmin, ventureOffice, ventureOfficeDetails, selectedVentureOffice]);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   if (authLoading || authzLoading || loading) {
     return (
