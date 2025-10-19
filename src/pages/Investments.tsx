@@ -3,6 +3,7 @@ import { useCompanies } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
+import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ export default function Investments() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { details: ventureOfficeDetails } = useVentureOfficeDetails();
   const { companies, loading, updateCompany, refetch } = useCompanies();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
@@ -98,7 +100,7 @@ export default function Investments() {
     });
 
     // Calculate KPIs
-    const totalAllocated = 10000000;
+    const totalAllocated = ventureOfficeDetails?.["Investment Allotment"] || 10000000;
     
     const committedSum = validCompanies
       .filter(c => c["Investment Tracker Stage"] === "Committed")
@@ -135,19 +137,19 @@ export default function Investments() {
       {
         title: "Total After Currently Invested Through 2025",
         value: totalAllocated - committedSum,
-        subtitle: "out of $10,000,000 allocated",
+        subtitle: `out of ${formatCurrency(totalAllocated)} allocated`,
         gradient: "var(--gradient-accent)"
       },
       {
         title: "Total After IPA Commitments Through 2025",
         value: totalAllocated - committedSum - ipaObligationSum,
-        subtitle: "out of $10,000,000 allocated",
+        subtitle: `out of ${formatCurrency(totalAllocated)} allocated`,
         gradient: "var(--gradient-primary)"
       },
       {
         title: "Total After Term Sheets Proposed Through 2025",
         value: totalAllocated - committedSum - ipaObligationSum - termSheetSum,
-        subtitle: "out of $10,000,000 allocated",
+        subtitle: `out of ${formatCurrency(totalAllocated)} allocated`,
         gradient: "var(--gradient-accent)"
       },
       {
@@ -159,7 +161,7 @@ export default function Investments() {
     ];
 
     return { groupedCompanies: grouped, kpiData: kpis, lastUpdated };
-  }, [companies, isAdmin, ventureOffice]);
+  }, [companies, isAdmin, ventureOffice, ventureOfficeDetails]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

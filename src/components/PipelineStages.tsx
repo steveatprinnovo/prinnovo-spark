@@ -1,6 +1,7 @@
 import { Company } from "@/hooks/useCompanies";
 import { FilterState } from "@/components/FilterBar";
 import { ChevronRight } from "lucide-react";
+import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 
 interface PipelineStagesProps {
   companies: Company[];
@@ -9,6 +10,7 @@ interface PipelineStagesProps {
 }
 
 export function PipelineStages({ companies, filters, onFilterChange }: PipelineStagesProps) {
+  const { details } = useVentureOfficeDetails();
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
   
@@ -40,9 +42,9 @@ export function PipelineStages({ companies, filters, onFilterChange }: PipelineS
   };
 
   const stages = [
-    { name: "Qualified Leads", count: hasActiveFilters ? 0 : 54, isClickable: false },
-    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : 4, isClickable: false },
-    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : 4, isClickable: false },
+    { name: "Qualified Leads", count: hasActiveFilters ? 0 : (details?.["Qualified Leads"] || 0), isClickable: false },
+    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : (details?.["Term Sheet Negotiations"] || 0), isClickable: false },
+    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : (details?.["IPA Negotiations"] || 0), isClickable: false },
     { name: "IT Implementation", count: implementationCount, isClickable: true },
     { name: "Pilot", count: pilotCount, isClickable: true },
     { name: "Validated Company", count: portfolioCount, isClickable: true },

@@ -1,31 +1,33 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, DollarSign, TrendingUp } from "lucide-react";
-
-const kpiData = [
-  {
-    label: "Companies Evaluated",
-    value: "900",
-    icon: Building2,
-    description: "Companies evaluated to date",
-    gradient: "var(--gradient-primary)"
-  },
-  {
-    label: "Direct Cash Investment",
-    value: "$4,087,500",
-    icon: DollarSign,
-    description: "Non-IPA cash purchases of company equity",
-    gradient: "var(--gradient-accent)"
-  },
-  {
-    label: "Portfolio Value",
-    value: "$17,985,975",
-    icon: TrendingUp,
-    description: "Total portfolio investment value",
-    gradient: "var(--gradient-primary)"
-  }
-];
+import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 
 export function KPICards() {
+  const { details } = useVentureOfficeDetails();
+
+  const kpiData = [
+    {
+      label: "Companies Evaluated",
+      value: details?.["Companies Evaluated"]?.toString() || "0",
+      icon: Building2,
+      description: "Companies evaluated to date",
+      gradient: "var(--gradient-primary)"
+    },
+    {
+      label: "Direct Cash Investment",
+      value: "$4,087,500",
+      icon: DollarSign,
+      description: "Non-IPA cash purchases of company equity",
+      gradient: "var(--gradient-accent)"
+    },
+    {
+      label: "Portfolio Value",
+      value: "$17,985,975",
+      icon: TrendingUp,
+      description: "Total portfolio investment value",
+      gradient: "var(--gradient-primary)"
+    }
+  ];
   return (
     <div className="flex flex-col justify-between h-[500px] max-w-xs gap-4 mr-10">{/* Added total 40px margin-right for spacing */}
       {kpiData.map((kpi, index) => {
