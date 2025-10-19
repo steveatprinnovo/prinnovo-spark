@@ -12,6 +12,7 @@ import { CountryMap } from "@/components/CountryMap";
 import { PipelineStages } from "@/components/PipelineStages";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Index = () => {
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { companies, loading } = useCompanies();
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
   const [filters, setFilters] = useState<FilterState>({
     ipaYear: "",
     countryOfOrigin: "",
@@ -40,6 +42,10 @@ const Index = () => {
       if (!isAdmin && ventureOffice && company.venture_office !== ventureOffice) {
         return false;
       }
+      // Admin venture office filter
+      if (isAdmin && selectedVentureOffice !== "all" && company.venture_office !== selectedVentureOffice) {
+        return false;
+      }
       if (filters.ipaYear && company["IPA Year"]?.toString() !== filters.ipaYear) {
         return false;
       }
@@ -57,7 +63,7 @@ const Index = () => {
       }
       return true;
     }).sort((a, b) => a["Company Name"].localeCompare(b["Company Name"]));
-  }, [companies, filters, isAdmin, ventureOffice]);
+  }, [companies, filters, isAdmin, ventureOffice, selectedVentureOffice]);
 
   const handleCountryClick = (country: string) => {
     if (filters.countryOfOrigin === country) {
@@ -101,6 +107,36 @@ const Index = () => {
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-6">
+        {/* Admin Venture Office Selector */}
+        {isAdmin && (
+          <div className="flex justify-end">
+            <div className="w-64">
+              <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Select Venture Office" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  <SelectItem value="all">All ({companies.length})</SelectItem>
+                  {Array.from(new Set(companies.map(c => c.venture_office).filter(Boolean))).map((office) => (
+                    <SelectItem key={office} value={office!}>
+                      <div className="flex items-center gap-2">
+                        {office === "Healthliant Ventures" && (
+                          <img 
+                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
+                            alt="Healthliant Ventures" 
+                            className="w-4 h-4 object-contain"
+                          />
+                        )}
+                        <span>{office} ({companies.filter(c => c.venture_office === office).length})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+        
         {/* Top Section: KPIs and Map */}
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
           {/* Left: KPI Cards - Smaller and vertically distributed */}

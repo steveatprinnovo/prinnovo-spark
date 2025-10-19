@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Check, X, Filter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Implementations = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const Implementations = () => {
   const [editingValues, setEditingValues] = useState<{ [key: string]: string }>({});
   const [milestoneFilters, setMilestoneFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -47,9 +49,13 @@ const Implementations = () => {
   const sortedCompanies = useMemo(() => {
     // Filter by venture office first
     const ventureOfficeFiltered = companies.filter(company => {
-      if (isAdmin) return true;
-      if (!ventureOffice) return true;
-      return company.venture_office === ventureOffice;
+      if (!isAdmin && ventureOffice) {
+        return company.venture_office === ventureOffice;
+      }
+      if (isAdmin && selectedVentureOffice !== "all") {
+        return company.venture_office === selectedVentureOffice;
+      }
+      return true;
     });
     
     return [...ventureOfficeFiltered].sort((a, b) => {
@@ -78,7 +84,7 @@ const Implementations = () => {
 
       return 0;
     });
-  }, [companies, isAdmin, ventureOffice]);
+  }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
 
   // Filter companies by selected milestones (show companies WITHOUT these milestones - AND logic)
   const filteredCompanies = useMemo(() => {
@@ -272,6 +278,34 @@ const Implementations = () => {
       <div className="container mx-auto p-6 space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
+          
+          {/* Admin Venture Office Selector */}
+          {isAdmin && (
+            <div className="w-64">
+              <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Select Venture Office" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  <SelectItem value="all">All ({companies.length})</SelectItem>
+                  {Array.from(new Set(companies.map(c => c.venture_office).filter(Boolean))).map((office) => (
+                    <SelectItem key={office} value={office!}>
+                      <div className="flex items-center gap-2">
+                        {office === "Healthliant Ventures" && (
+                          <img 
+                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
+                            alt="Healthliant Ventures" 
+                            className="w-4 h-4 object-contain"
+                          />
+                        )}
+                        <span>{office} ({companies.filter(c => c.venture_office === office).length})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* KPI Cards */}

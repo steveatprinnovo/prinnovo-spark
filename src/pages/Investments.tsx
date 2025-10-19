@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { UpdateValuationModal } from "@/components/UpdateValuationModal";
 import { useMemo, useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function formatISODate(dateString: string | null | undefined, locale: string = "en-US", options?: Intl.DateTimeFormatOptions) {
   if (!dateString) return "";
@@ -34,6 +35,7 @@ export default function Investments() {
   const { details: ventureOfficeDetails } = useVentureOfficeDetails();
   const { companies, loading, updateCompany, refetch } = useCompanies();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -56,6 +58,10 @@ export default function Investments() {
       if (company["Investment Tracker Stage"] === null) return false;
       // Filter by venture office (if user is not admin)
       if (!isAdmin && ventureOffice && company.venture_office !== ventureOffice) {
+        return false;
+      }
+      // Admin venture office filter
+      if (isAdmin && selectedVentureOffice !== "all" && company.venture_office !== selectedVentureOffice) {
         return false;
       }
       return true;
@@ -161,7 +167,7 @@ export default function Investments() {
     ];
 
     return { groupedCompanies: grouped, kpiData: kpis, lastUpdated };
-  }, [companies, isAdmin, ventureOffice, ventureOfficeDetails]);
+  }, [companies, isAdmin, ventureOffice, ventureOfficeDetails, selectedVentureOffice]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -193,19 +199,48 @@ export default function Investments() {
             <h1 className="text-4xl font-bold mb-2">Hard Dollar Investment Tracker</h1>
             <p className="text-muted-foreground">Track and monitor hard dollar investment allocations and performance</p>
           </div>
-          <div className="flex flex-col items-end gap-3">
-            <Button
-              onClick={() => setIsUpdateModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <TrendingUp className="h-4 w-4" />
-              Update Valuation
-            </Button>
-            {lastUpdated && (
-              <div className="text-sm text-muted-foreground italic">
-                Current as of {formatISODate(lastUpdated)}
+          <div className="flex items-end gap-4">
+            {/* Admin Venture Office Selector */}
+            {isAdmin && (
+              <div className="w-64">
+                <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select Venture Office" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    <SelectItem value="all">All ({companies.filter(c => c["Investment Tracker Stage"]).length})</SelectItem>
+                    {Array.from(new Set(companies.filter(c => c["Investment Tracker Stage"]).map(c => c.venture_office).filter(Boolean))).map((office) => (
+                      <SelectItem key={office} value={office!}>
+                        <div className="flex items-center gap-2">
+                          {office === "Healthliant Ventures" && (
+                            <img 
+                              src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
+                              alt="Healthliant Ventures" 
+                              className="w-4 h-4 object-contain"
+                            />
+                          )}
+                          <span>{office} ({companies.filter(c => c["Investment Tracker Stage"] && c.venture_office === office).length})</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
+            <div className="flex flex-col items-end gap-3">
+              <Button
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Update Valuation
+              </Button>
+              {lastUpdated && (
+                <div className="text-sm text-muted-foreground italic">
+                  Current as of {formatISODate(lastUpdated)}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
