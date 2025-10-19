@@ -48,18 +48,24 @@ export function useCompanies() {
   const fetchCompanies = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('Company Detail')
         .select('*');
 
       if (error) {
+        console.error('Supabase error fetching companies:', error);
         throw error;
       }
 
+      console.log('Successfully fetched companies:', data?.length || 0);
       setCompanies((data as Company[]) || []);
     } catch (err: any) {
-      setError(err.message);
-      toast.error(`Failed to load companies: ${err.message}`);
+      const errorMessage = err.message || 'Unknown error occurred';
+      console.error('Error in fetchCompanies:', err);
+      setError(errorMessage);
+      toast.error(`Failed to load companies: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
