@@ -1,8 +1,10 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
+import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
@@ -32,10 +34,16 @@ export default function Investments() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { details: ventureOfficeDetails } = useVentureOfficeDetails();
   const { companies, loading, updateCompany, refetch } = useCompanies();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
+
+  // Get unique venture offices
+  const ventureOffices = useMemo(() => 
+    Array.from(new Set(companies.filter(c => c["Investment Tracker Stage"]).map(c => c.venture_office).filter(Boolean))) as string[],
+    [companies]
+  );
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -193,6 +201,9 @@ export default function Investments() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
+      {/* Venture Office Selector Modal for Admins */}
+      {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
+      
       <main className="container mx-auto px-6 py-8">
         <div className="mb-8 flex justify-between items-end">
           <div>
@@ -203,7 +214,7 @@ export default function Investments() {
             {/* Admin Venture Office Selector */}
             {isAdmin && (
               <div className="w-64">
-                <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+                <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Select Venture Office" />
                   </SelectTrigger>

@@ -5,9 +5,11 @@ import { KPICards } from "@/components/KPICards";
 import { FilterBar, FilterState } from "@/components/FilterBar";
 import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
+import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
+import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { CountryMap } from "@/components/CountryMap";
 import { PipelineStages } from "@/components/PipelineStages";
 import { Separator } from "@/components/ui/separator";
@@ -18,9 +20,9 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading } = useCompanies();
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
   const [filters, setFilters] = useState<FilterState>({
     ipaYear: "",
     countryOfOrigin: "",
@@ -28,6 +30,12 @@ const Index = () => {
     evpOwner: "",
     pipelineStage: ""
   });
+
+  // Get unique venture offices
+  const ventureOffices = useMemo(() => 
+    Array.from(new Set(companies.map(c => c.venture_office).filter(Boolean))) as string[],
+    [companies]
+  );
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -106,12 +114,15 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
+      {/* Venture Office Selector Modal for Admins */}
+      {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
+      
       <div className="container mx-auto p-6 space-y-6">
         {/* Admin Venture Office Selector */}
         {isAdmin && (
           <div className="flex justify-end">
             <div className="w-64">
-              <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+              <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select Venture Office" />
                 </SelectTrigger>

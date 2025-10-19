@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
+import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useStatusNotes } from "@/hooks/useStatusNotes";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +23,7 @@ const Implementations = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading, updateCompany } = useCompanies();
   const { statusNotes, loading: statusNotesLoading, saveStatusNote } = useStatusNotes();
   const { toast } = useToast();
@@ -28,7 +31,12 @@ const Implementations = () => {
   const [editingValues, setEditingValues] = useState<{ [key: string]: string }>({});
   const [milestoneFilters, setMilestoneFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedVentureOffice, setSelectedVentureOffice] = useState<string>("all");
+
+  // Get unique venture offices
+  const ventureOffices = useMemo(() => 
+    Array.from(new Set(companies.map(c => c.venture_office).filter(Boolean))) as string[],
+    [companies]
+  );
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -275,6 +283,9 @@ const Implementations = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
+      {/* Venture Office Selector Modal for Admins */}
+      {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
+      
       <div className="container mx-auto p-6 space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
@@ -282,7 +293,7 @@ const Implementations = () => {
           {/* Admin Venture Office Selector */}
           {isAdmin && (
             <div className="w-64">
-              <Select value={selectedVentureOffice} onValueChange={setSelectedVentureOffice}>
+              <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select Venture Office" />
                 </SelectTrigger>
