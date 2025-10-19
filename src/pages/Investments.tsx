@@ -4,6 +4,7 @@ import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { UpdateValuationModal } from "@/components/UpdateValuationModal";
 import { useMemo, useState } from "react";
 import { TrendingUp } from "lucide-react";
@@ -26,8 +27,14 @@ export default function Investments() {
       company => company["Investment Tracker Stage"] !== null
     );
 
-    // Find last updated timestamp from Invested Amount Valuation
-    const lastUpdated = companies.some(c => c["Invested Amount Valuation"]) ? new Date() : null;
+    // Find last updated timestamp from Invested Amount Valuation Date
+    const valuationDates = validCompanies
+      .map(c => c["Invested Amount Valuation Date"])
+      .filter((date): date is string => date !== null);
+    
+    const lastUpdated = valuationDates.length > 0 
+      ? new Date(Math.max(...valuationDates.map(d => new Date(d).getTime())))
+      : null;
 
     // Group companies by Investment Tracker Stage and sort
     const grouped = validCompanies.reduce((acc, company) => {
@@ -310,7 +317,26 @@ function CompanyRow({ company }: { company: any }) {
         {company["Invested Amount Round"] || "N/A"}
       </TableCell>
       <TableCell className="text-right font-medium">
-        {formatCurrency(company["Invested Amount Valuation"])}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">
+                {formatCurrency(company["Invested Amount Valuation"])}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {company["Invested Amount Valuation Date"]
+                  ? `As of ${new Date(company["Invested Amount Valuation Date"]).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}`
+                  : "No valuation date available"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </TableCell>
       <TableCell className="text-right font-medium">
         <span className={`${

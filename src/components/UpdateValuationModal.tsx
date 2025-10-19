@@ -52,7 +52,9 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [investmentStage, setInvestmentStage] = useState<string>("");
   const [investedAmount, setInvestedAmount] = useState<string>("");
+  const [investedAmountDate, setInvestedAmountDate] = useState<string>("");
   const [currentValuation, setCurrentValuation] = useState<string>("");
+  const [valuationDate, setValuationDate] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Filter companies that have investment tracker stages
@@ -66,7 +68,9 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
       setSelectedCompany("");
       setInvestmentStage("");
       setInvestedAmount("");
+      setInvestedAmountDate("");
       setCurrentValuation("");
+      setValuationDate("");
     }
   }, [isOpen]);
 
@@ -77,7 +81,9 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
       if (company) {
         setInvestmentStage(company["Investment Tracker Stage"] || "");
         setInvestedAmount(company["Invested Amount"]?.toString() || "");
+        setInvestedAmountDate(company["Invested Amount Date"] || "");
         setCurrentValuation(company["Invested Amount Valuation"]?.toString() || "");
+        setValuationDate(company["Invested Amount Valuation Date"] || "");
       }
     }
   }, [selectedCompany, companies]);
@@ -100,7 +106,9 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
         ...company,
         "Investment Tracker Stage": investmentStage,
         "Invested Amount": investedAmount ? parseFloat(investedAmount) : null,
+        "Invested Amount Date": investedAmountDate || null,
         "Invested Amount Valuation": currentValuation ? parseFloat(currentValuation) : null,
+        "Invested Amount Valuation Date": valuationDate || null,
       };
 
       await updateCompany(company["Company Name"], updatedData);
@@ -136,7 +144,9 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
         ...company,
         "Investment Tracker Stage": investmentStage,
         "Invested Amount": investedAmount ? parseFloat(investedAmount) : null,
+        "Invested Amount Date": investedAmountDate || null,
         "Invested Amount Valuation": currentValuation ? parseFloat(currentValuation) : null,
+        "Invested Amount Valuation Date": valuationDate || null,
       };
 
       await updateCompany(company["Company Name"], updatedData);
@@ -232,6 +242,18 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="invested-amount-date">Invested Amount Date</Label>
+                    <Input
+                      id="invested-amount-date"
+                      type="date"
+                      value={investedAmountDate}
+                      onChange={(e) => setInvestedAmountDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="current-valuation">Current Valuation ($)</Label>
                     <Input
                       id="current-valuation"
@@ -239,6 +261,16 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                       value={currentValuation}
                       onChange={(e) => setCurrentValuation(e.target.value)}
                       placeholder="Enter valuation"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="valuation-date">Valuation Date</Label>
+                    <Input
+                      id="valuation-date"
+                      type="date"
+                      value={valuationDate}
+                      onChange={(e) => setValuationDate(e.target.value)}
                     />
                   </div>
                 </div>
@@ -314,6 +346,18 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="new-invested-amount-date">Invested Amount Date</Label>
+                    <Input
+                      id="new-invested-amount-date"
+                      type="date"
+                      value={investedAmountDate}
+                      onChange={(e) => setInvestedAmountDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="new-current-valuation">Current Valuation ($)</Label>
                     <Input
                       id="new-current-valuation"
@@ -321,6 +365,16 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                       value={currentValuation}
                       onChange={(e) => setCurrentValuation(e.target.value)}
                       placeholder="Enter valuation"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-valuation-date">Valuation Date</Label>
+                    <Input
+                      id="new-valuation-date"
+                      type="date"
+                      value={valuationDate}
+                      onChange={(e) => setValuationDate(e.target.value)}
                     />
                   </div>
                 </div>
