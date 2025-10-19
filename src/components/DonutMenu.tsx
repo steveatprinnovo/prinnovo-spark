@@ -11,10 +11,6 @@ const navigationItems = [
   { path: "/projections", icon: TrendingUp, label: "Projections" },
 ];
 
-const modeItems = [
-  { path: "/", label: "Portfolio Dashboard" },
-  { path: "/board-mode", label: "Board Mode" },
-];
 
 export function DonutMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,30 +42,6 @@ export function DonutMenu() {
       {/* Menu Container */}
       {isOpen && (
         <div className="fixed top-20 right-4 z-40 bg-background border border-border rounded-lg shadow-lg p-4 w-64">
-          {/* Mode Selection */}
-          <div className="mb-4 pb-3 border-b border-border">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Mode</h3>
-            <div className="space-y-1">
-              {modeItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                    className={`block px-3 py-2 rounded-md text-sm transition-colors ${
-                      isActive 
-                        ? "bg-primary text-primary-foreground" 
-                        : "hover:bg-accent text-foreground"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Navigation */}
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Navigation</h3>

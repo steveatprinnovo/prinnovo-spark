@@ -1,13 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Home, ClipboardList, DollarSign, ChevronDown, Presentation, TrendingUp } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
 
@@ -26,41 +20,9 @@ export function DashboardHeader() {
               alt="Healthliant Ventures" 
               className="h-8 w-auto"
             />
-            {/* Desktop only - Portfolio/Board Mode dropdown */}
+            {/* Desktop only - Portfolio title */}
             {!isMobile && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-lg font-semibold p-0 h-auto hover:bg-transparent hover:text-primary flex items-center gap-1 transition-colors">
-                    {location.pathname === "/board-mode" ? (
-                      <>
-                        <img 
-                          src="/lovable-uploads/7ba62feb-acbf-4b79-8e35-bab2872dce29.png" 
-                          alt="Board Meeting" 
-                          className="h-5 w-5" 
-                        />
-                        <ChevronDown className="h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        Portfolio Dashboard
-                        <ChevronDown className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-popover z-50">
-                  <DropdownMenuItem asChild>
-                    <Link to="/" className="w-full">
-                      Portfolio Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/board-mode" className="w-full">
-                      Board Mode
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <h1 className="text-lg font-semibold">Portfolio Dashboard</h1>
             )}
           </div>
           
