@@ -287,6 +287,45 @@ export type Database = {
         }
         Relationships: []
       }
+      venture_office_detail: {
+        Row: {
+          "Companies Evaluated": number | null
+          created_at: string
+          id: number
+          "Investment Allotment": number | null
+          "IPA Negotiations": number | null
+          "Prinnovo Health Ownership": string | null
+          "Qualified Leads": number | null
+          "Term Sheet Negotiations": number | null
+          "Venture Office Logo": string | null
+          "Venture Office Name": string | null
+        }
+        Insert: {
+          "Companies Evaluated"?: number | null
+          created_at?: string
+          id?: number
+          "Investment Allotment"?: number | null
+          "IPA Negotiations"?: number | null
+          "Prinnovo Health Ownership"?: string | null
+          "Qualified Leads"?: number | null
+          "Term Sheet Negotiations"?: number | null
+          "Venture Office Logo"?: string | null
+          "Venture Office Name"?: string | null
+        }
+        Update: {
+          "Companies Evaluated"?: number | null
+          created_at?: string
+          id?: number
+          "Investment Allotment"?: number | null
+          "IPA Negotiations"?: number | null
+          "Prinnovo Health Ownership"?: string | null
+          "Qualified Leads"?: number | null
+          "Term Sheet Negotiations"?: number | null
+          "Venture Office Logo"?: string | null
+          "Venture Office Name"?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
