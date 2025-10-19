@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserAuth } from "@/hooks/useUserAuth";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -117,6 +118,7 @@ const CompanyRow = ({
 const Projections = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { companies, loading } = useCompanies();
   const [forecast, setForecast] = useState<ForecastType>("target");
   const [showTargetCashReturnAsPercent, setShowTargetCashReturnAsPercent] = useState(false);
@@ -153,6 +155,10 @@ const Projections = () => {
   const projectionsCompanies = useMemo(() => {
     const filtered = companies.filter(company => {
       if (!company["Target IPA Return"]) return false;
+      // Filter by venture office (if user is not admin)
+      if (!isAdmin && ventureOffice && company.venture_office !== ventureOffice) {
+        return false;
+      }
       if (selectedVentureOffice === "all") return true;
       return company.venture_office === selectedVentureOffice;
     });
@@ -209,7 +215,7 @@ const Projections = () => {
         return sortDirection === "asc" ? result : -result;
       }
     });
-  }, [companies, forecast, sortField, sortDirection, selectedVentureOffice]);
+  }, [companies, forecast, sortField, sortDirection, selectedVentureOffice, isAdmin, ventureOffice]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -269,7 +275,7 @@ const Projections = () => {
   }, [projectionsCompanies, forecast]);
 
   // Show loading while checking authentication or loading data
-  if (authLoading || loading) {
+  if (authLoading || authzLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <DashboardHeader />

@@ -132,7 +132,10 @@ export type Database = {
           "Implementation Completion Date": string | null
           "Intro Origin": string | null
           "Invested Amount": number | null
+          "Invested Amount Date": string | null
+          "Invested Amount Round": string | null
           "Invested Amount Valuation": number | null
+          "Invested Amount Valuation Date": string | null
           "Investment Tracker Stage": string | null
           "IPA Signature Date": string | null
           "IPA Year": number | null
@@ -142,6 +145,7 @@ export type Database = {
           "Target IPA Return": number | null
           "Term Sheet Signature Date": string | null
           "Total Enterprise Value Captured": number | null
+          venture_office: string | null
         }
         Insert: {
           Champions?: string | null
@@ -161,7 +165,10 @@ export type Database = {
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
           "Invested Amount"?: number | null
+          "Invested Amount Date"?: string | null
+          "Invested Amount Round"?: string | null
           "Invested Amount Valuation"?: number | null
+          "Invested Amount Valuation Date"?: string | null
           "Investment Tracker Stage"?: string | null
           "IPA Signature Date"?: string | null
           "IPA Year"?: number | null
@@ -171,6 +178,7 @@ export type Database = {
           "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
           "Total Enterprise Value Captured"?: number | null
+          venture_office?: string | null
         }
         Update: {
           Champions?: string | null
@@ -190,7 +198,10 @@ export type Database = {
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
           "Invested Amount"?: number | null
+          "Invested Amount Date"?: string | null
+          "Invested Amount Round"?: string | null
           "Invested Amount Valuation"?: number | null
+          "Invested Amount Valuation Date"?: string | null
           "Investment Tracker Stage"?: string | null
           "IPA Signature Date"?: string | null
           "IPA Year"?: number | null
@@ -200,6 +211,7 @@ export type Database = {
           "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
           "Total Enterprise Value Captured"?: number | null
+          venture_office?: string | null
         }
         Relationships: []
       }
@@ -230,15 +242,67 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_venture_offices: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+          venture_office: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+          venture_office: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          venture_office?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_venture_office: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -365,6 +429,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

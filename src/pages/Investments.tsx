@@ -1,6 +1,10 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserAuth } from "@/hooks/useUserAuth";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -10,8 +14,18 @@ import { useMemo, useState } from "react";
 import { TrendingUp } from "lucide-react";
 
 export default function Investments() {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { companies, loading, updateCompany, refetch } = useCompanies();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
 
   const calculatePercentageIncrease = (invested: number | null, valuation: number | null) => {
     if (!invested || !valuation || invested === 0) return "N/A";
@@ -22,10 +36,15 @@ export default function Investments() {
   const { groupedCompanies, kpiData, lastUpdated } = useMemo(() => {
     if (!companies.length) return { groupedCompanies: {}, kpiData: [], lastUpdated: null };
 
-    // Filter out companies with null Investment Tracker Stage
-    const validCompanies = companies.filter(
-      company => company["Investment Tracker Stage"] !== null
-    );
+    // Filter out companies with null Investment Tracker Stage and apply venture office filter
+    const validCompanies = companies.filter(company => {
+      if (company["Investment Tracker Stage"] === null) return false;
+      // Filter by venture office (if user is not admin)
+      if (!isAdmin && ventureOffice && company.venture_office !== ventureOffice) {
+        return false;
+      }
+      return true;
+    });
 
     // Find last updated timestamp from Invested Amount Valuation Date
     const valuationDates = validCompanies
@@ -125,7 +144,7 @@ export default function Investments() {
     ];
 
     return { groupedCompanies: grouped, kpiData: kpis, lastUpdated };
-  }, [companies]);
+  }, [companies, isAdmin, ventureOffice]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -136,7 +155,7 @@ export default function Investments() {
     }).format(amount);
   };
 
-  if (loading) {
+  if (authLoading || authzLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <DashboardHeader />

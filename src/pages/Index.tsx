@@ -7,6 +7,7 @@ import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserAuth } from "@/hooks/useUserAuth";
 import { CountryMap } from "@/components/CountryMap";
 import { PipelineStages } from "@/components/PipelineStages";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { companies, loading } = useCompanies();
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [filters, setFilters] = useState<FilterState>({
@@ -34,6 +36,10 @@ const Index = () => {
 
   const filteredCompanies = useMemo(() => {
     return companies.filter(company => {
+      // Filter by venture office (if user is not admin)
+      if (!isAdmin && ventureOffice && company.venture_office !== ventureOffice) {
+        return false;
+      }
       if (filters.ipaYear && company["IPA Year"]?.toString() !== filters.ipaYear) {
         return false;
       }
@@ -51,7 +57,7 @@ const Index = () => {
       }
       return true;
     }).sort((a, b) => a["Company Name"].localeCompare(b["Company Name"]));
-  }, [companies, filters]);
+  }, [companies, filters, isAdmin, ventureOffice]);
 
   const handleCountryClick = (country: string) => {
     if (filters.countryOfOrigin === country) {
@@ -64,7 +70,7 @@ const Index = () => {
   };
 
   // Show loading while checking authentication or loading data
-  if (authLoading || loading) {
+  if (authLoading || authzLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <DashboardHeader />

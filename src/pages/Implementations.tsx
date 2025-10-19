@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserAuth } from "@/hooks/useUserAuth";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useStatusNotes } from "@/hooks/useStatusNotes";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 const Implementations = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { companies, loading, updateCompany } = useCompanies();
   const { statusNotes, loading: statusNotesLoading, saveStatusNote } = useStatusNotes();
   const { toast } = useToast();
@@ -43,7 +45,14 @@ const Implementations = () => {
 
   // Sort companies by date priority
   const sortedCompanies = useMemo(() => {
-    return [...companies].sort((a, b) => {
+    // Filter by venture office first
+    const ventureOfficeFiltered = companies.filter(company => {
+      if (isAdmin) return true;
+      if (!ventureOffice) return true;
+      return company.venture_office === ventureOffice;
+    });
+    
+    return [...ventureOfficeFiltered].sort((a, b) => {
       // Helper function to convert date string to Date object, return null if invalid
       const parseDate = (dateStr: string | null) => {
         if (!dateStr) return null;
@@ -69,7 +78,7 @@ const Implementations = () => {
 
       return 0;
     });
-  }, [companies]);
+  }, [companies, isAdmin, ventureOffice]);
 
   // Filter companies by selected milestones (show companies WITHOUT these milestones - AND logic)
   const filteredCompanies = useMemo(() => {
@@ -228,7 +237,7 @@ const Implementations = () => {
   }, [companies, calculateDaysBetween]);
 
   // Show loading while checking authentication or loading data
-  if (authLoading || loading || statusNotesLoading) {
+  if (authLoading || authzLoading || loading || statusNotesLoading) {
     return (
       <div className="min-h-screen bg-background">
         <DashboardHeader />
