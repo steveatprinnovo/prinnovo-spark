@@ -49,6 +49,7 @@ function CompanySelectItem({ company }: { company: any }) {
 }
 
 export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany, refetch }: UpdateValuationModalProps) {
+  const [activeTab, setActiveTab] = useState<string>("update");
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [investmentStage, setInvestmentStage] = useState<string>("");
   const [investedAmount, setInvestedAmount] = useState<string>("");
@@ -65,6 +66,7 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
   // Reset form when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
+      setActiveTab("update");
       setSelectedCompany("");
       setInvestmentStage("");
       setInvestedAmount("");
@@ -73,6 +75,17 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
       setValuationDate("");
     }
   }, [isOpen]);
+
+  // Reset form when switching tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSelectedCompany("");
+    setInvestmentStage("");
+    setInvestedAmount("");
+    setInvestedAmountDate("");
+    setCurrentValuation("");
+    setValuationDate("");
+  };
 
   // Load company data when selecting existing company
   useEffect(() => {
@@ -176,7 +189,7 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
           <DialogTitle>Update Investment Valuations</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="update" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="update">Update Existing</TabsTrigger>
             <TabsTrigger value="add">Add New Investment</TabsTrigger>
