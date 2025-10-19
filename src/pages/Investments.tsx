@@ -217,6 +217,8 @@ export default function Investments() {
                       <TableRow>
                         <TableHead>Company</TableHead>
                         <TableHead className="text-right">Invested Amount</TableHead>
+                        <TableHead className="text-right">Invested Amount Date</TableHead>
+                        <TableHead className="text-right">Invested Amount Round</TableHead>
                         <TableHead className="text-right">Current Valuation</TableHead>
                         <TableHead className="text-right">% Gain</TableHead>
                       </TableRow>
@@ -294,6 +296,18 @@ function CompanyRow({ company }: { company: any }) {
       </TableCell>
       <TableCell className="text-right font-medium">
         {formatCurrency(company["Invested Amount"])}
+      </TableCell>
+      <TableCell className="text-right">
+        {company["Invested Amount Date"] 
+          ? new Date(company["Invested Amount Date"]).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric', 
+              year: 'numeric' 
+            })
+          : "N/A"}
+      </TableCell>
+      <TableCell className="text-right">
+        {company["Invested Amount Round"] || "N/A"}
       </TableCell>
       <TableCell className="text-right font-medium">
         {formatCurrency(company["Invested Amount Valuation"])}
