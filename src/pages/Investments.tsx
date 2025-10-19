@@ -13,6 +13,19 @@ import { UpdateValuationModal } from "@/components/UpdateValuationModal";
 import { useMemo, useState } from "react";
 import { TrendingUp } from "lucide-react";
 
+function formatISODate(dateString: string | null | undefined, locale: string = "en-US", options?: Intl.DateTimeFormatOptions) {
+  if (!dateString) return "";
+  const parts = dateString.split("-");
+  if (parts.length !== 3) return dateString;
+  const [yearStr, monthStr, dayStr] = parts;
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  if (!year || !month || !day) return dateString;
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString(locale, options ?? { month: "short", day: "numeric", year: "numeric" });
+}
+
 export default function Investments() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -188,7 +201,7 @@ export default function Investments() {
             </Button>
             {lastUpdated && (
               <div className="text-sm text-muted-foreground italic">
-                Current as of {new Date(lastUpdated).toLocaleDateString()}
+                Current as of {formatISODate(lastUpdated)}
               </div>
             )}
           </div>
@@ -348,11 +361,7 @@ function CompanyRow({ company }: { company: any }) {
             <TooltipContent>
               <p>
                 {company["Invested Amount Valuation Date"]
-                  ? `As of ${new Date(company["Invested Amount Valuation Date"]).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}`
+                  ? `As of ${formatISODate(company["Invested Amount Valuation Date"])}`
                   : "No valuation date available"}
               </p>
             </TooltipContent>
