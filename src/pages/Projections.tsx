@@ -71,12 +71,12 @@ const CompanyRow = ({
   useEffect(() => {
     if (isPrinnovoHealth) {
       const fetchPrinnovoLogo = async () => {
-        const { data } = await supabase.storage
+        const { data, error } = await supabase.storage
           .from('Company Logos')
-          .getPublicUrl('prinnovo-logo.png');
+          .createSignedUrl('prinnovo-logo.png', 60 * 60 * 24); // 24 hour expiry
         
-        if (data?.publicUrl) {
-          setPrinnovoLogoUrl(data.publicUrl);
+        if (data?.signedUrl && !error) {
+          setPrinnovoLogoUrl(data.signedUrl);
         }
       };
       
