@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, ChevronUp, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -460,7 +461,14 @@ const Projections = () => {
           </div>
         </div>
 
-        <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto h-[calc(100vh-200px)]">
+        <Tabs defaultValue="revenues" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="revenues">Revenues</TabsTrigger>
+            <TabsTrigger value="costs">Costs</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="revenues">
+            <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto h-[calc(100vh-250px)]">
           <style>{`
             /* Ensure sticky headers work: neutralize inner shadcn Table wrapper overflow */
             .projections-table-wrapper > div { overflow: visible !important; }
@@ -659,7 +667,15 @@ const Projections = () => {
               </TableRow>
             </TableBody>
           </Table>
-        </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="costs">
+            <div className="p-8 text-center text-muted-foreground">
+              Costs data will be displayed here
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
