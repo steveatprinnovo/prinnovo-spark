@@ -545,24 +545,24 @@ function CompanyRow({ company }: { company: any }) {
       {/* Expandable Details for Multiple Rounds */}
       {hasMultipleRounds && isOpen && (
         <TableRow>
-          <TableCell colSpan={6} className="bg-muted/30 p-0">
+          <TableCell colSpan={6} className="bg-muted/50 p-0">
             <div className="px-6 py-4">
-              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Investment Round Details</h4>
-              <div className="space-y-3">
+              <h4 className="text-sm font-semibold mb-3 text-foreground">
+                {company["Company Name"]} Investment Round Details ({rounds.length})
+              </h4>
+              <div className="space-y-2">
                 {rounds.map((round) => (
                   <div 
                     key={round.round}
-                    className="flex items-center justify-between p-3 bg-background rounded-md border border-border"
+                    className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-6 items-center p-3 bg-background/80 rounded-md border border-border"
                   >
-                    <div className="flex-1">
+                    <div className="flex items-center gap-3 pl-8">
                       <span className="font-medium">{round.name || `Round ${round.round}`}</span>
                     </div>
-                    <div className="flex-1 text-right">
-                      <span className="text-muted-foreground text-sm">Invested: </span>
+                    <div className="text-right min-w-[140px]">
                       <span className="font-medium">{formatCurrency(round.amount)}</span>
                     </div>
-                    <div className="flex-1 text-right">
-                      <span className="text-muted-foreground text-sm">Date: </span>
+                    <div className="text-right min-w-[140px]">
                       <span>
                         {round.date 
                           ? new Date(round.date).toLocaleDateString('en-US', { 
@@ -573,9 +573,16 @@ function CompanyRow({ company }: { company: any }) {
                           : "N/A"}
                       </span>
                     </div>
-                    <div className="flex-1 text-right">
-                      <span className="text-muted-foreground text-sm">Valuation: </span>
+                    <div className="text-right min-w-[140px]">
+                      <span className="font-medium italic text-muted-foreground">Multiple</span>
+                    </div>
+                    <div className="text-right min-w-[140px]">
                       <span className="font-medium">{formatCurrency(round.valuation)}</span>
+                    </div>
+                    <div className="text-right min-w-[100px]">
+                      <span className="text-muted-foreground">
+                        {calculatePercentageIncrease(round.amount, round.valuation)}
+                      </span>
                     </div>
                   </div>
                 ))}
