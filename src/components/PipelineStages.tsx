@@ -29,14 +29,23 @@ export function PipelineStages({ companies, filters, onFilterChange, selectedVen
   ).length;
 
   const handleStageClick = (stageName: string) => {
+    // Map display names to database values
+    const stageMapping: { [key: string]: string } = {
+      "IT Implementation": "Implementation",
+      "Validated Company": "Portfolio Company",
+      "Pilot": "Pilot"
+    };
+
     // Only make IT Implementation, Pilot, and Validated Company clickable
     if (["IT Implementation", "Pilot", "Validated Company"].includes(stageName)) {
       const newFilters = { ...filters };
+      const dbValue = stageMapping[stageName];
+      
       // If already filtering by this stage, clear the filter
-      if (newFilters.pipelineStage === stageName) {
+      if (newFilters.pipelineStage === dbValue) {
         newFilters.pipelineStage = "";
       } else {
-        newFilters.pipelineStage = stageName;
+        newFilters.pipelineStage = dbValue;
       }
       onFilterChange(newFilters);
     }
@@ -70,7 +79,9 @@ export function PipelineStages({ companies, filters, onFilterChange, selectedVen
                     ? "cursor-pointer hover:scale-105 hover:shadow-md" 
                     : ""
                 } ${
-                  filters.pipelineStage === stage.name
+                  (stage.name === "IT Implementation" && filters.pipelineStage === "Implementation") ||
+                  (stage.name === "Validated Company" && filters.pipelineStage === "Portfolio Company") ||
+                  (stage.name === "Pilot" && filters.pipelineStage === "Pilot")
                     ? stage.name === "Validated Company"
                       ? "ring-2 ring-offset-2 ring-green-500"
                       : "ring-2 ring-offset-2 ring-primary"
