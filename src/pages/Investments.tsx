@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { UpdateValuationModal } from "@/components/UpdateValuationModal";
 import { useMemo, useState } from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, ChevronRight, ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 function formatISODate(dateString: string | null | undefined, locale: string = "en-US", options?: Intl.DateTimeFormatOptions) {
   if (!dateString) return "";
@@ -85,9 +86,13 @@ export default function Investments() {
       return true;
     });
 
-    // Find the most recent Invested Amount Valuation Date
+    // Find the most recent Invested Amount Valuation Date across all rounds
     const valuationDates = validCompanies
-      .map(c => c["Invested Amount Valuation Date"])
+      .flatMap(c => [
+        c["Invested Amount Valuation Date"],
+        c["Invested Amount Valuation Date 2"],
+        c["Invested Amount Valuation Date 3"]
+      ])
       .filter((date): date is string => date !== null && date !== undefined);
     
     const lastUpdated = valuationDates.length > 0 
@@ -104,11 +109,29 @@ export default function Investments() {
       return acc;
     }, {} as Record<string, typeof companies>);
 
+    // Helper to get most recent round for a company
+    const getMostRecentRound = (company: any) => {
+      const rounds = [
+        { amount: company["Invested Amount"], valuation: company["Invested Amount Valuation"], date: company["Invested Amount Valuation Date"] },
+        { amount: company["Invested Amount 2"], valuation: company["Invested Amount Valuation 2"], date: company["Invested Amount Valuation Date 2"] },
+        { amount: company["Invested Amount 3"], valuation: company["Invested Amount Valuation 3"], date: company["Invested Amount Valuation Date 3"] }
+      ].filter(r => r.amount || r.valuation);
+      
+      return rounds.reduce((latest, current) => {
+        if (!latest.date) return current;
+        if (!current.date) return latest;
+        return new Date(current.date) > new Date(latest.date) ? current : latest;
+      }, rounds[0] || { amount: null, valuation: null, date: null });
+    };
+
     // Sort each group by % Gain (highest to lowest), then by Invested Amount (high to low)
     Object.keys(grouped).forEach(stage => {
       grouped[stage].sort((a, b) => {
-        const aGain = calculatePercentageIncrease(a["Invested Amount"], a["Invested Amount Valuation"]);
-        const bGain = calculatePercentageIncrease(b["Invested Amount"], b["Invested Amount Valuation"]);
+        const aMostRecent = getMostRecentRound(a);
+        const bMostRecent = getMostRecentRound(b);
+        
+        const aGain = calculatePercentageIncrease(aMostRecent.amount, aMostRecent.valuation);
+        const bGain = calculatePercentageIncrease(bMostRecent.amount, bMostRecent.valuation);
         
         // Convert percentage strings to numbers for sorting
         const aGainNum = aGain === "N/A" ? -Infinity : parseFloat(aGain.replace(/[+%]/g, ''));
@@ -118,36 +141,61 @@ export default function Investments() {
           return bGainNum - aGainNum; // Sort by gain descending
         }
         
-        // If gains are equal, sort by invested amount descending
-        return (b["Invested Amount"] || 0) - (a["Invested Amount"] || 0);
+        // If gains are equal, sort by total invested amount descending
+        const aTotalInvested = (a["Invested Amount"] || 0) + (a["Invested Amount 2"] || 0) + (a["Invested Amount 3"] || 0);
+        const bTotalInvested = (b["Invested Amount"] || 0) + (b["Invested Amount 2"] || 0) + (b["Invested Amount 3"] || 0);
+        return bTotalInvested - aTotalInvested;
       });
     });
 
     // Calculate KPIs
     const totalAllocated = ventureOfficeDetails?.["Investment Allotment"] || 10000000;
     
+    // Helper to sum all rounds for a company
+    const getTotalInvestedForCompany = (company: any) => {
+      return (company["Invested Amount"] || 0) + 
+             (company["Invested Amount 2"] || 0) + 
+             (company["Invested Amount 3"] || 0);
+    };
+
     const committedSum = validCompanies
       .filter(c => c["Investment Tracker Stage"] === "Committed")
-      .reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0);
+      .reduce((sum, c) => sum + getTotalInvestedForCompany(c), 0);
 
     const ipaObligationSum = validCompanies
       .filter(c => c["Investment Tracker Stage"] === "IPA Obligation")
-      .reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0);
+      .reduce((sum, c) => sum + getTotalInvestedForCompany(c), 0);
 
     const termSheetSum = validCompanies
       .filter(c => c["Investment Tracker Stage"] === "Term Sheet Proposed")
-      .reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0);
+      .reduce((sum, c) => sum + getTotalInvestedForCompany(c), 0);
 
     const operationalSum = validCompanies
       .filter(c => c["Investment Tracker Stage"] === "Operational Funding")
-      .reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0);
+      .reduce((sum, c) => sum + getTotalInvestedForCompany(c), 0);
 
-    // Calculate portfolio value (sum of all Invested Amount Valuations)
+    // Calculate portfolio value (sum of most recent valuations)
     const portfolioValue = validCompanies
-      .reduce((sum, c) => sum + (c["Invested Amount Valuation"] || 0), 0);
+      .reduce((sum, c) => {
+        const rounds = [
+          { valuation: c["Invested Amount Valuation"], date: c["Invested Amount Valuation Date"] },
+          { valuation: c["Invested Amount Valuation 2"], date: c["Invested Amount Valuation Date 2"] },
+          { valuation: c["Invested Amount Valuation 3"], date: c["Invested Amount Valuation Date 3"] }
+        ].filter(r => r.valuation);
+        
+        if (rounds.length === 0) return sum;
+        
+        const mostRecent = rounds.reduce((latest, current) => {
+          if (!latest.date) return current;
+          if (!current.date) return latest;
+          return new Date(current.date) > new Date(latest.date) ? current : latest;
+        });
+        
+        return sum + (mostRecent.valuation || 0);
+      }, 0);
 
     const totalInvested = validCompanies
-      .reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0);
+      .reduce((sum, c) => sum + getTotalInvestedForCompany(c), 0);
 
     const portfolioGain = totalInvested > 0 ? ((portfolioValue - totalInvested) / totalInvested) * 100 : 0;
 
@@ -339,6 +387,7 @@ export default function Investments() {
 
 function CompanyRow({ company }: { company: any }) {
   const { logoUrl } = useCompanyLogo(company.imgurl);
+  const [isOpen, setIsOpen] = useState(false);
 
   const formatCurrency = (amount: number | null) => {
     if (!amount) return "N/A";
@@ -356,76 +405,183 @@ function CompanyRow({ company }: { company: any }) {
     return `${increase > 0 ? '+' : ''}${increase.toFixed(1)}%`;
   };
 
+  // Collect all rounds with data
+  const rounds = [
+    {
+      round: 1,
+      name: company["Invested Amount Round"],
+      amount: company["Invested Amount"],
+      date: company["Invested Amount Date"],
+      valuation: company["Invested Amount Valuation"],
+      valuationDate: company["Invested Amount Valuation Date"]
+    },
+    {
+      round: 2,
+      name: company["Invested Amount Round 2"],
+      amount: company["Invested Amount 2"],
+      date: company["Invested Amount Date 2"],
+      valuation: company["Invested Amount Valuation 2"],
+      valuationDate: company["Invested Amount Valuation Date 2"]
+    },
+    {
+      round: 3,
+      name: company["Invested Amount Round 3"],
+      amount: company["Invested Amount 3"],
+      date: company["Invested Amount Date 3"],
+      valuation: company["Invested Amount Valuation 3"],
+      valuationDate: company["Invested Amount Valuation Date 3"]
+    }
+  ].filter(r => r.amount || r.valuation);
+
+  const hasMultipleRounds = rounds.length > 1;
+
+  // Calculate aggregated data
+  const totalInvestedAmount = rounds.reduce((sum, r) => sum + (r.amount || 0), 0);
+  
+  // Find the most recent round (by valuation date)
+  const mostRecentRound = rounds.reduce((latest, current) => {
+    if (!latest.valuationDate) return current;
+    if (!current.valuationDate) return latest;
+    return new Date(current.valuationDate) > new Date(latest.valuationDate) ? current : latest;
+  }, rounds[0]);
+
+  const displayInvestedAmount = hasMultipleRounds ? totalInvestedAmount : (rounds[0]?.amount || null);
+  const displayDate = hasMultipleRounds ? "Multiple" : rounds[0]?.date;
+  const displayRound = hasMultipleRounds ? "Multiple" : rounds[0]?.name;
+  const displayValuation = mostRecentRound?.valuation || null;
+  const displayValuationDate = mostRecentRound?.valuationDate;
+
   const percentageIncrease = calculatePercentageIncrease(
-    company["Invested Amount"],
-    company["Invested Amount Valuation"]
+    mostRecentRound?.amount || null,
+    mostRecentRound?.valuation || null
   );
 
   const isPositive = percentageIncrease !== "N/A" && percentageIncrease.startsWith('+');
   const isNegative = percentageIncrease !== "N/A" && percentageIncrease.startsWith('-');
 
   return (
-    <TableRow className="hover:bg-muted/50">
-      <TableCell>
-        <div className="flex items-center gap-3">
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={`${company["Company Name"]} logo`}
-              className="w-10 h-10 rounded object-contain bg-white p-1"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
-              <span className="text-xs font-medium text-muted-foreground">
-                {company["Company Name"]?.charAt(0)}
-              </span>
-            </div>
-          )}
-          <span className="font-medium">{company["Company Name"]}</span>
-        </div>
-      </TableCell>
-      <TableCell className="text-right font-medium">
-        {formatCurrency(company["Invested Amount"])}
-      </TableCell>
-      <TableCell className="text-right">
-        {company["Invested Amount Date"] 
-          ? new Date(company["Invested Amount Date"]).toLocaleDateString('en-US', { 
+    <>
+      <TableRow className="hover:bg-muted/50">
+        <TableCell>
+          <div className="flex items-center gap-3">
+            {hasMultipleRounds && (
+              <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+            )}
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={`${company["Company Name"]} logo`}
+                className="w-10 h-10 rounded object-contain bg-white p-1"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {company["Company Name"]?.charAt(0)}
+                </span>
+              </div>
+            )}
+            <span className="font-medium">{company["Company Name"]}</span>
+          </div>
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          {formatCurrency(displayInvestedAmount)}
+        </TableCell>
+        <TableCell className="text-right">
+          {displayDate === "Multiple" ? (
+            <span className="text-muted-foreground italic">Multiple</span>
+          ) : displayDate ? (
+            new Date(displayDate).toLocaleDateString('en-US', { 
               month: 'short', 
               day: 'numeric', 
               year: 'numeric' 
             })
-          : "N/A"}
-      </TableCell>
-      <TableCell className="text-right">
-        {company["Invested Amount Round"] || "N/A"}
-      </TableCell>
-      <TableCell className="text-right font-medium">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">
-                {formatCurrency(company["Invested Amount Valuation"])}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                {company["Invested Amount Valuation Date"]
-                  ? `As of ${formatISODate(company["Invested Amount Valuation Date"])}`
-                  : "No valuation date available"}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </TableCell>
-      <TableCell className="text-right font-medium">
-        <span className={`${
-          isPositive ? 'text-green-600' : 
-          isNegative ? 'text-red-600' : 
-          'text-muted-foreground'
-        }`}>
-          {percentageIncrease}
-        </span>
-      </TableCell>
-    </TableRow>
+          ) : "N/A"}
+        </TableCell>
+        <TableCell className="text-right">
+          {displayRound === "Multiple" ? (
+            <span className="text-muted-foreground italic">Multiple</span>
+          ) : displayRound || "N/A"}
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-help">
+                  {formatCurrency(displayValuation)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {displayValuationDate
+                    ? `As of ${formatISODate(displayValuationDate)}`
+                    : "No valuation date available"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          <span className={`${
+            isPositive ? 'text-green-600' : 
+            isNegative ? 'text-red-600' : 
+            'text-muted-foreground'
+          }`}>
+            {percentageIncrease}
+          </span>
+        </TableCell>
+      </TableRow>
+      
+      {/* Expandable Details for Multiple Rounds */}
+      {hasMultipleRounds && isOpen && (
+        <TableRow>
+          <TableCell colSpan={6} className="bg-muted/30 p-0">
+            <div className="px-6 py-4">
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Investment Round Details</h4>
+              <div className="space-y-3">
+                {rounds.map((round) => (
+                  <div 
+                    key={round.round}
+                    className="flex items-center justify-between p-3 bg-background rounded-md border border-border"
+                  >
+                    <div className="flex-1">
+                      <span className="font-medium">{round.name || `Round ${round.round}`}</span>
+                    </div>
+                    <div className="flex-1 text-right">
+                      <span className="text-muted-foreground text-sm">Invested: </span>
+                      <span className="font-medium">{formatCurrency(round.amount)}</span>
+                    </div>
+                    <div className="flex-1 text-right">
+                      <span className="text-muted-foreground text-sm">Date: </span>
+                      <span>
+                        {round.date 
+                          ? new Date(round.date).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            })
+                          : "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex-1 text-right">
+                      <span className="text-muted-foreground text-sm">Valuation: </span>
+                      <span className="font-medium">{formatCurrency(round.valuation)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 }
