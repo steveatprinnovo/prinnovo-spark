@@ -345,12 +345,14 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                         )}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
-                      {investmentCompanies.map((company) => (
-                        <SelectItem key={company["Company Name"]} value={company["Company Name"]}>
-                          <CompanySelectItem company={company} />
-                        </SelectItem>
-                      ))}
+                    <SelectContent className="bg-popover z-50">
+                      {investmentCompanies
+                        .sort((a, b) => a["Company Name"].localeCompare(b["Company Name"]))
+                        .map((company) => (
+                          <SelectItem key={company["Company Name"]} value={company["Company Name"]}>
+                            <CompanySelectItem company={company} />
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
