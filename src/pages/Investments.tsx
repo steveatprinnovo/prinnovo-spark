@@ -554,27 +554,29 @@ function CompanyRow({ company }: { company: any }) {
                 {rounds.map((round) => (
                   <div 
                     key={round.round}
-                    className="grid grid-cols-[1fr_auto_auto_auto] gap-6 items-center p-3 bg-background/80 rounded-md border border-border"
+                    className="flex items-center p-3 bg-background/80 rounded-md border border-border"
                   >
-                    <div className="flex items-center gap-3 pl-8">
+                    {/* Round name - matches Company column width */}
+                    <div className="flex items-center gap-3 pl-8" style={{ width: '300px' }}>
                       <span className="font-medium">{round.name || `Round ${round.round}`}</span>
                     </div>
-                    <div className="text-right min-w-[140px]">
-                      <span className="font-medium">{formatCurrency(round.amount)}</span>
+                    {/* Invested Amount - matches table column */}
+                    <div className="text-right font-medium" style={{ width: '180px' }}>
+                      {formatCurrency(round.amount)}
                     </div>
-                    <div className="text-right min-w-[140px]">
-                      <span>
-                        {round.date 
-                          ? new Date(round.date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            })
-                          : "N/A"}
-                      </span>
+                    {/* Invested Amount Date - matches table column */}
+                    <div className="text-right" style={{ width: '180px' }}>
+                      {round.date 
+                        ? new Date(round.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })
+                        : "N/A"}
                     </div>
-                    <div className="text-right min-w-[140px]">
-                      <span className="font-medium">{formatCurrency(round.valuation)}</span>
+                    {/* Current Valuation - matches table column, skip the "Round" column */}
+                    <div className="text-right font-medium ml-auto" style={{ width: '180px' }}>
+                      {formatCurrency(round.valuation)}
                     </div>
                   </div>
                 ))}
