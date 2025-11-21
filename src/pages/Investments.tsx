@@ -287,18 +287,20 @@ export default function Investments() {
                 </Select>
               </div>
             )}
-            <Button
-              onClick={() => setIsUpdateModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <TrendingUp className="h-4 w-4" />
-              Update Valuation
-            </Button>
-            {lastUpdated && (
-              <div className="text-sm text-muted-foreground italic">
-                Current as of {formatISODate(lastUpdated)}
-              </div>
-            )}
+            <div className="flex items-center gap-4">
+              {lastUpdated && (
+                <div className="text-sm text-muted-foreground italic">
+                  Current as of {formatISODate(lastUpdated)}
+                </div>
+              )}
+              <Button
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Update Valuation
+              </Button>
+            </div>
           </div>
         </div>
 
