@@ -464,18 +464,20 @@ function CompanyRow({ company }: { company: any }) {
       <TableRow className="hover:bg-muted/50">
         <TableCell>
           <div className="flex items-center gap-3">
-            {hasMultipleRounds && (
-              <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                {isOpen ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
-            )}
+            <div className="w-4 flex items-center justify-center shrink-0">
+              {hasMultipleRounds && (
+                <button 
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+              )}
+            </div>
             {logoUrl ? (
               <img
                 src={logoUrl}
