@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { type Company } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
+import { Plus, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface UpdateValuationModalProps {
   isOpen: boolean;
@@ -59,6 +61,8 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
   const [currentValuation, setCurrentValuation] = useState<string>("");
   const [valuationDate, setValuationDate] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roundToDelete, setRoundToDelete] = useState<string | null>(null);
 
   // Filter companies that have investment tracker stages
   const investmentCompanies = companies.filter(
@@ -131,21 +135,73 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
     if (!company) return [];
 
     const rounds = [];
-    if (company["Invested Amount Round"]) rounds.push({ value: "1", label: company["Invested Amount Round"] });
-    if (company["Invested Amount Round 2"]) rounds.push({ value: "2", label: company["Invested Amount Round 2"] });
-    if (company["Invested Amount Round 3"]) rounds.push({ value: "3", label: company["Invested Amount Round 3"] });
+    if (company["Invested Amount Round"]) rounds.push({ value: "1", label: company["Invested Amount Round"], canDelete: true });
+    if (company["Invested Amount Round 2"]) rounds.push({ value: "2", label: company["Invested Amount Round 2"], canDelete: true });
+    if (company["Invested Amount Round 3"]) rounds.push({ value: "3", label: company["Invested Amount Round 3"], canDelete: true });
 
     // Add option for next available round
     if (rounds.length < 3) {
-      rounds.push({ value: String(rounds.length + 1), label: "Add New Round" });
+      rounds.push({ value: String(rounds.length + 1), label: "Add New Round", canDelete: false, isNew: true });
     }
 
     // If no rounds exist, show Round 1
     if (rounds.length === 0) {
-      rounds.push({ value: "1", label: "Round 1" });
+      rounds.push({ value: "1", label: "Round 1", canDelete: false });
     }
 
     return rounds;
+  };
+
+  const handleDeleteRound = async (roundValue: string) => {
+    if (!selectedCompany) return;
+
+    const company = companies.find(c => c["Company Name"] === selectedCompany);
+    if (!company) return;
+
+    setIsUpdating(true);
+    try {
+      const updatedData: any = { ...company };
+
+      // Clear the data for the specified round
+      if (roundValue === "1") {
+        updatedData["Invested Amount Round"] = null;
+        updatedData["Invested Amount"] = null;
+        updatedData["Invested Amount Date"] = null;
+        updatedData["Invested Amount Valuation"] = null;
+        updatedData["Invested Amount Valuation Date"] = null;
+      } else if (roundValue === "2") {
+        updatedData["Invested Amount Round 2"] = null;
+        updatedData["Invested Amount 2"] = null;
+        updatedData["Invested Amount Date 2"] = null;
+        updatedData["Invested Amount Valuation 2"] = null;
+        updatedData["Invested Amount Valuation Date 2"] = null;
+      } else if (roundValue === "3") {
+        updatedData["Invested Amount Round 3"] = null;
+        updatedData["Invested Amount 3"] = null;
+        updatedData["Invested Amount Date 3"] = null;
+        updatedData["Invested Amount Valuation 3"] = null;
+        updatedData["Invested Amount Valuation Date 3"] = null;
+      }
+
+      await updateCompany(company["Company Name"], updatedData);
+      await refetch();
+      
+      toast.success("Investment round deleted successfully");
+      
+      // Reset to first available round
+      const availableRounds = getAvailableRounds();
+      if (availableRounds.length > 0) {
+        setSelectedRound(availableRounds[0].value);
+      }
+      
+      setDeleteDialogOpen(false);
+      setRoundToDelete(null);
+    } catch (error) {
+      console.error("Error deleting round:", error);
+      toast.error("Failed to delete investment round");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleUpdateExisting = async () => {
@@ -264,8 +320,8 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="update">Update Existing</TabsTrigger>
-            <TabsTrigger value="add">Add New Investment</TabsTrigger>
+            <TabsTrigger value="update">Update Existing Company Investment</TabsTrigger>
+            <TabsTrigger value="add">Add New Company Investment</TabsTrigger>
           </TabsList>
 
           <TabsContent value="update" className="space-y-4">
@@ -318,18 +374,37 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                 {selectedCompany && (
                   <div className="space-y-2">
                     <Label htmlFor="investment-round">Investment Round</Label>
-                    <Select value={selectedRound} onValueChange={setSelectedRound}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select investment round" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableRounds().map((round) => (
-                          <SelectItem key={round.value} value={round.value}>
-                            {round.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                      <Select value={selectedRound} onValueChange={setSelectedRound}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select investment round" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          {getAvailableRounds().map((round) => (
+                            <SelectItem key={round.value} value={round.value}>
+                              <div className="flex items-center gap-2">
+                                {round.isNew && <Plus className="h-4 w-4 text-primary" />}
+                                <span>{round.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {getAvailableRounds().find(r => r.value === selectedRound)?.canDelete && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            setRoundToDelete(selectedRound);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -508,6 +583,26 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Investment Round</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this investment round? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => roundToDelete && handleDeleteRound(roundToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
