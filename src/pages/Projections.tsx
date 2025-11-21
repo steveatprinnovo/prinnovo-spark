@@ -283,6 +283,16 @@ const Projections = () => {
         "Invested Amount Date": null,
         "Invested Amount Valuation": null,
         "Invested Amount Round": null,
+        "Invested Amount Round 2": null,
+        "Invested Amount 2": null,
+        "Invested Amount Date 2": null,
+        "Invested Amount Valuation 2": null,
+        "Invested Amount Valuation Date 2": null,
+        "Invested Amount Round 3": null,
+        "Invested Amount 3": null,
+        "Invested Amount Date 3": null,
+        "Invested Amount Valuation 3": null,
+        "Invested Amount Valuation Date 3": null,
       };
       
       companiesWithPrinnovo.push(prinnovoData);

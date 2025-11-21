@@ -17,6 +17,16 @@ export interface Company {
   "Invested Amount Date": string | null;
   "Invested Amount Valuation Date": string | null;
   "Invested Amount Round": string | null;
+  "Invested Amount Round 2": string | null;
+  "Invested Amount 2": number | null;
+  "Invested Amount Date 2": string | null;
+  "Invested Amount Valuation 2": number | null;
+  "Invested Amount Valuation Date 2": string | null;
+  "Invested Amount Round 3": string | null;
+  "Invested Amount 3": number | null;
+  "Invested Amount Date 3": string | null;
+  "Invested Amount Valuation 3": number | null;
+  "Invested Amount Valuation Date 3": string | null;
   "EVP Owner": string | null;
   "IPA Year": number | null;
   "Company Contact": string | null;

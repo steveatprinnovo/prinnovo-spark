@@ -52,6 +52,8 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
   const [activeTab, setActiveTab] = useState<string>("update");
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [investmentStage, setInvestmentStage] = useState<string>("");
+  const [selectedRound, setSelectedRound] = useState<string>("1");
+  const [roundName, setRoundName] = useState<string>("");
   const [investedAmount, setInvestedAmount] = useState<string>("");
   const [investedAmountDate, setInvestedAmountDate] = useState<string>("");
   const [currentValuation, setCurrentValuation] = useState<string>("");
@@ -69,6 +71,8 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
       setActiveTab("update");
       setSelectedCompany("");
       setInvestmentStage("");
+      setSelectedRound("1");
+      setRoundName("");
       setInvestedAmount("");
       setInvestedAmountDate("");
       setCurrentValuation("");
@@ -81,25 +85,68 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
     setActiveTab(value);
     setSelectedCompany("");
     setInvestmentStage("");
+    setSelectedRound("1");
+    setRoundName("");
     setInvestedAmount("");
     setInvestedAmountDate("");
     setCurrentValuation("");
     setValuationDate("");
   };
 
-  // Load company data when selecting existing company
+  // Load company data when selecting existing company or changing round
   useEffect(() => {
     if (selectedCompany) {
       const company = companies.find(c => c["Company Name"] === selectedCompany);
       if (company) {
         setInvestmentStage(company["Investment Tracker Stage"] || "");
-        setInvestedAmount(company["Invested Amount"]?.toString() || "");
-        setInvestedAmountDate(company["Invested Amount Date"] || "");
-        setCurrentValuation(company["Invested Amount Valuation"]?.toString() || "");
-        setValuationDate(company["Invested Amount Valuation Date"] || "");
+        
+        // Load data based on selected round
+        if (selectedRound === "1") {
+          setRoundName(company["Invested Amount Round"] || "");
+          setInvestedAmount(company["Invested Amount"]?.toString() || "");
+          setInvestedAmountDate(company["Invested Amount Date"] || "");
+          setCurrentValuation(company["Invested Amount Valuation"]?.toString() || "");
+          setValuationDate(company["Invested Amount Valuation Date"] || "");
+        } else if (selectedRound === "2") {
+          setRoundName(company["Invested Amount Round 2"] || "");
+          setInvestedAmount(company["Invested Amount 2"]?.toString() || "");
+          setInvestedAmountDate(company["Invested Amount Date 2"] || "");
+          setCurrentValuation(company["Invested Amount Valuation 2"]?.toString() || "");
+          setValuationDate(company["Invested Amount Valuation Date 2"] || "");
+        } else if (selectedRound === "3") {
+          setRoundName(company["Invested Amount Round 3"] || "");
+          setInvestedAmount(company["Invested Amount 3"]?.toString() || "");
+          setInvestedAmountDate(company["Invested Amount Date 3"] || "");
+          setCurrentValuation(company["Invested Amount Valuation 3"]?.toString() || "");
+          setValuationDate(company["Invested Amount Valuation Date 3"] || "");
+        }
       }
     }
-  }, [selectedCompany, companies]);
+  }, [selectedCompany, selectedRound, companies]);
+
+  // Get available rounds for the selected company
+  const getAvailableRounds = () => {
+    if (!selectedCompany) return [];
+    const company = companies.find(c => c["Company Name"] === selectedCompany);
+    if (!company) return [];
+
+    const rounds = [];
+    if (company["Invested Amount Round"]) rounds.push({ value: "1", label: company["Invested Amount Round"] });
+    if (company["Invested Amount Round 2"]) rounds.push({ value: "2", label: company["Invested Amount Round 2"] });
+    if (company["Invested Amount Round 3"]) rounds.push({ value: "3", label: company["Invested Amount Round 3"] });
+
+    // Add option for next available round
+    if (rounds.length < 3) {
+      rounds.push({ value: String(rounds.length + 1), label: "Add New Round" });
+    }
+
+    // If no rounds exist, show Round 1
+    if (rounds.length === 0) {
+      rounds.push({ value: "1", label: "Round 1" });
+    }
+
+    return rounds;
+  };
 
   const handleUpdateExisting = async () => {
     if (!selectedCompany || !investmentStage) {
@@ -107,22 +154,48 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
       return;
     }
 
+    // Check if round name is provided when adding a new round
+    const company = companies.find(c => c["Company Name"] === selectedCompany);
+    if (!company) {
+      toast.error("Company not found");
+      return;
+    }
+
+    const availableRounds = getAvailableRounds();
+    const isNewRound = availableRounds.find(r => r.value === selectedRound)?.label === "Add New Round";
+    
+    if (isNewRound && !roundName.trim()) {
+      toast.error("Please enter a name for the investment round");
+      return;
+    }
+
     setIsUpdating(true);
     try {
-      const company = companies.find(c => c["Company Name"] === selectedCompany);
-      if (!company) {
-        toast.error("Company not found");
-        return;
-      }
-
-      const updatedData = {
+      const updatedData: any = {
         ...company,
         "Investment Tracker Stage": investmentStage,
-        "Invested Amount": investedAmount ? parseFloat(investedAmount) : null,
-        "Invested Amount Date": investedAmountDate || null,
-        "Invested Amount Valuation": currentValuation ? parseFloat(currentValuation) : null,
-        "Invested Amount Valuation Date": valuationDate || null,
       };
+
+      // Update the correct round based on selection
+      if (selectedRound === "1") {
+        updatedData["Invested Amount Round"] = roundName || null;
+        updatedData["Invested Amount"] = investedAmount ? parseFloat(investedAmount) : null;
+        updatedData["Invested Amount Date"] = investedAmountDate || null;
+        updatedData["Invested Amount Valuation"] = currentValuation ? parseFloat(currentValuation) : null;
+        updatedData["Invested Amount Valuation Date"] = valuationDate || null;
+      } else if (selectedRound === "2") {
+        updatedData["Invested Amount Round 2"] = roundName || null;
+        updatedData["Invested Amount 2"] = investedAmount ? parseFloat(investedAmount) : null;
+        updatedData["Invested Amount Date 2"] = investedAmountDate || null;
+        updatedData["Invested Amount Valuation 2"] = currentValuation ? parseFloat(currentValuation) : null;
+        updatedData["Invested Amount Valuation Date 2"] = valuationDate || null;
+      } else if (selectedRound === "3") {
+        updatedData["Invested Amount Round 3"] = roundName || null;
+        updatedData["Invested Amount 3"] = investedAmount ? parseFloat(investedAmount) : null;
+        updatedData["Invested Amount Date 3"] = investedAmountDate || null;
+        updatedData["Invested Amount Valuation 3"] = currentValuation ? parseFloat(currentValuation) : null;
+        updatedData["Invested Amount Valuation Date 3"] = valuationDate || null;
+      }
 
       await updateCompany(company["Company Name"], updatedData);
       
@@ -241,6 +314,37 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
                     </SelectContent>
                   </Select>
                 </div>
+
+                {selectedCompany && (
+                  <div className="space-y-2">
+                    <Label htmlFor="investment-round">Investment Round</Label>
+                    <Select value={selectedRound} onValueChange={setSelectedRound}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select investment round" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableRounds().map((round) => (
+                          <SelectItem key={round.value} value={round.value}>
+                            {round.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {selectedCompany && getAvailableRounds().find(r => r.value === selectedRound)?.label === "Add New Round" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="round-name">Round Name</Label>
+                    <Input
+                      id="round-name"
+                      type="text"
+                      value={roundName}
+                      onChange={(e) => setRoundName(e.target.value)}
+                      placeholder="e.g., Series A, Seed, etc."
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">

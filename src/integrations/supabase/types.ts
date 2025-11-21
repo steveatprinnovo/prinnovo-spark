@@ -132,10 +132,20 @@ export type Database = {
           "Implementation Completion Date": string | null
           "Intro Origin": string | null
           "Invested Amount": number | null
+          "Invested Amount 2": number | null
+          "Invested Amount 3": number | null
           "Invested Amount Date": string | null
+          "Invested Amount Date 2": string | null
+          "Invested Amount Date 3": string | null
           "Invested Amount Round": string | null
+          "Invested Amount Round 2": string | null
+          "Invested Amount Round 3": string | null
           "Invested Amount Valuation": number | null
+          "Invested Amount Valuation 2": number | null
+          "Invested Amount Valuation 3": number | null
           "Invested Amount Valuation Date": string | null
+          "Invested Amount Valuation Date 2": string | null
+          "Invested Amount Valuation Date 3": string | null
           "Investment Tracker Stage": string | null
           "IPA Signature Date": string | null
           "IPA Year": number | null
@@ -165,10 +175,20 @@ export type Database = {
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
           "Invested Amount"?: number | null
+          "Invested Amount 2"?: number | null
+          "Invested Amount 3"?: number | null
           "Invested Amount Date"?: string | null
+          "Invested Amount Date 2"?: string | null
+          "Invested Amount Date 3"?: string | null
           "Invested Amount Round"?: string | null
+          "Invested Amount Round 2"?: string | null
+          "Invested Amount Round 3"?: string | null
           "Invested Amount Valuation"?: number | null
+          "Invested Amount Valuation 2"?: number | null
+          "Invested Amount Valuation 3"?: number | null
           "Invested Amount Valuation Date"?: string | null
+          "Invested Amount Valuation Date 2"?: string | null
+          "Invested Amount Valuation Date 3"?: string | null
           "Investment Tracker Stage"?: string | null
           "IPA Signature Date"?: string | null
           "IPA Year"?: number | null
@@ -198,10 +218,20 @@ export type Database = {
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
           "Invested Amount"?: number | null
+          "Invested Amount 2"?: number | null
+          "Invested Amount 3"?: number | null
           "Invested Amount Date"?: string | null
+          "Invested Amount Date 2"?: string | null
+          "Invested Amount Date 3"?: string | null
           "Invested Amount Round"?: string | null
+          "Invested Amount Round 2"?: string | null
+          "Invested Amount Round 3"?: string | null
           "Invested Amount Valuation"?: number | null
+          "Invested Amount Valuation 2"?: number | null
+          "Invested Amount Valuation 3"?: number | null
           "Invested Amount Valuation Date"?: string | null
+          "Invested Amount Valuation Date 2"?: string | null
+          "Invested Amount Valuation Date 3"?: string | null
           "Investment Tracker Stage"?: string | null
           "IPA Signature Date"?: string | null
           "IPA Year"?: number | null
