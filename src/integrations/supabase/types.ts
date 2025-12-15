@@ -113,17 +113,18 @@ export type Database = {
         }
         Relationships: []
       }
-      "Company Detail": {
+      company_detail: {
         Row: {
           Champions: string | null
           "Company Contact": string | null
           "Company Description": string | null
-          "Company Name": string
+          "Company Name": string | null
           "Country of Origin": string | null
           "Current Company Valuation": number | null
           "Current HLV Valuation": number | null
           "Data Monetization Dollars": number | null
           "Data Monetization Forecast": number | null
+          deal_id: number
           "EVP Owner": string | null
           "Final Portfolio Decision Date": string | null
           "High-Level Focus Area": string | null
@@ -161,12 +162,13 @@ export type Database = {
           Champions?: string | null
           "Company Contact"?: string | null
           "Company Description"?: string | null
-          "Company Name": string
+          "Company Name"?: string | null
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
           "Current HLV Valuation"?: number | null
           "Data Monetization Dollars"?: number | null
           "Data Monetization Forecast"?: number | null
+          deal_id: number
           "EVP Owner"?: string | null
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
@@ -204,12 +206,13 @@ export type Database = {
           Champions?: string | null
           "Company Contact"?: string | null
           "Company Description"?: string | null
-          "Company Name"?: string
+          "Company Name"?: string | null
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
           "Current HLV Valuation"?: number | null
           "Data Monetization Dollars"?: number | null
           "Data Monetization Forecast"?: number | null
+          deal_id?: number
           "EVP Owner"?: string | null
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
