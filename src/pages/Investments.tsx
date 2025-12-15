@@ -142,8 +142,8 @@ export default function Investments() {
         }
         
         // If gains are equal, sort by total invested amount descending
-        const aTotalInvested = (parseFloat(String(a["Invested Amount"])) || 0) + (parseFloat(String(a["Invested Amount 2"])) || 0) + (parseFloat(String(a["Invested Amount 3"])) || 0);
-        const bTotalInvested = (parseFloat(String(b["Invested Amount"])) || 0) + (parseFloat(String(b["Invested Amount 2"])) || 0) + (parseFloat(String(b["Invested Amount 3"])) || 0);
+        const aTotalInvested = (a["Invested Amount"] || 0) + (a["Invested Amount 2"] || 0) + (a["Invested Amount 3"] || 0);
+        const bTotalInvested = (b["Invested Amount"] || 0) + (b["Invested Amount 2"] || 0) + (b["Invested Amount 3"] || 0);
         return bTotalInvested - aTotalInvested;
       });
     });
@@ -153,9 +153,9 @@ export default function Investments() {
     
     // Helper to sum all rounds for a company
     const getTotalInvestedForCompany = (company: any) => {
-      return (parseFloat(String(company["Invested Amount"])) || 0) + 
-             (parseFloat(String(company["Invested Amount 2"])) || 0) + 
-             (parseFloat(String(company["Invested Amount 3"])) || 0);
+      return (company["Invested Amount"] || 0) + 
+             (company["Invested Amount 2"] || 0) + 
+             (company["Invested Amount 3"] || 0);
     };
 
     const committedSum = validCompanies
@@ -178,9 +178,9 @@ export default function Investments() {
     const portfolioValue = validCompanies
       .reduce((sum, c) => {
         const rounds = [
-          { valuation: parseFloat(String(c["Invested Amount Valuation"])) || 0, date: c["Invested Amount Valuation Date"] },
-          { valuation: parseFloat(String(c["Invested Amount Valuation 2"])) || 0, date: c["Invested Amount Valuation Date 2"] },
-          { valuation: parseFloat(String(c["Invested Amount Valuation 3"])) || 0, date: c["Invested Amount Valuation Date 3"] }
+          { valuation: c["Invested Amount Valuation"], date: c["Invested Amount Valuation Date"] },
+          { valuation: c["Invested Amount Valuation 2"], date: c["Invested Amount Valuation Date 2"] },
+          { valuation: c["Invested Amount Valuation 3"], date: c["Invested Amount Valuation Date 3"] }
         ].filter(r => r.valuation);
         
         if (rounds.length === 0) return sum;

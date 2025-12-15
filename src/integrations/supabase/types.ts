@@ -113,18 +113,17 @@ export type Database = {
         }
         Relationships: []
       }
-      company_detail: {
+      "Company Detail": {
         Row: {
           Champions: string | null
           "Company Contact": string | null
           "Company Description": string | null
-          "Company Name": string | null
+          "Company Name": string
           "Country of Origin": string | null
           "Current Company Valuation": number | null
           "Current HLV Valuation": number | null
-          "Data Monetization Dollars": string | null
-          "Data Monetization Forecast": string | null
-          deal_id: number
+          "Data Monetization Dollars": number | null
+          "Data Monetization Forecast": number | null
           "EVP Owner": string | null
           "Final Portfolio Decision Date": string | null
           "High-Level Focus Area": string | null
@@ -132,18 +131,18 @@ export type Database = {
           imgurl: string | null
           "Implementation Completion Date": string | null
           "Intro Origin": string | null
-          "Invested Amount": string | null
-          "Invested Amount 2": string | null
-          "Invested Amount 3": string | null
+          "Invested Amount": number | null
+          "Invested Amount 2": number | null
+          "Invested Amount 3": number | null
           "Invested Amount Date": string | null
           "Invested Amount Date 2": string | null
           "Invested Amount Date 3": string | null
           "Invested Amount Round": string | null
           "Invested Amount Round 2": string | null
           "Invested Amount Round 3": string | null
-          "Invested Amount Valuation": string | null
-          "Invested Amount Valuation 2": string | null
-          "Invested Amount Valuation 3": string | null
+          "Invested Amount Valuation": number | null
+          "Invested Amount Valuation 2": number | null
+          "Invested Amount Valuation 3": number | null
           "Invested Amount Valuation Date": string | null
           "Invested Amount Valuation Date 2": string | null
           "Invested Amount Valuation Date 3": string | null
@@ -152,23 +151,22 @@ export type Database = {
           "IPA Year": number | null
           "Pipeline Stage": string | null
           "Specific Focus Area": string | null
-          "Target Cash Investment Return": string | null
+          "Target Cash Investment Return": number | null
           "Target IPA Return": number | null
           "Term Sheet Signature Date": string | null
-          "Total Enterprise Value Captured": string | null
+          "Total Enterprise Value Captured": number | null
           venture_office: string | null
         }
         Insert: {
           Champions?: string | null
           "Company Contact"?: string | null
           "Company Description"?: string | null
-          "Company Name"?: string | null
+          "Company Name": string
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
           "Current HLV Valuation"?: number | null
-          "Data Monetization Dollars"?: string | null
-          "Data Monetization Forecast"?: string | null
-          deal_id: number
+          "Data Monetization Dollars"?: number | null
+          "Data Monetization Forecast"?: number | null
           "EVP Owner"?: string | null
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
@@ -176,18 +174,18 @@ export type Database = {
           imgurl?: string | null
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
-          "Invested Amount"?: string | null
-          "Invested Amount 2"?: string | null
-          "Invested Amount 3"?: string | null
+          "Invested Amount"?: number | null
+          "Invested Amount 2"?: number | null
+          "Invested Amount 3"?: number | null
           "Invested Amount Date"?: string | null
           "Invested Amount Date 2"?: string | null
           "Invested Amount Date 3"?: string | null
           "Invested Amount Round"?: string | null
           "Invested Amount Round 2"?: string | null
           "Invested Amount Round 3"?: string | null
-          "Invested Amount Valuation"?: string | null
-          "Invested Amount Valuation 2"?: string | null
-          "Invested Amount Valuation 3"?: string | null
+          "Invested Amount Valuation"?: number | null
+          "Invested Amount Valuation 2"?: number | null
+          "Invested Amount Valuation 3"?: number | null
           "Invested Amount Valuation Date"?: string | null
           "Invested Amount Valuation Date 2"?: string | null
           "Invested Amount Valuation Date 3"?: string | null
@@ -196,23 +194,22 @@ export type Database = {
           "IPA Year"?: number | null
           "Pipeline Stage"?: string | null
           "Specific Focus Area"?: string | null
-          "Target Cash Investment Return"?: string | null
+          "Target Cash Investment Return"?: number | null
           "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
-          "Total Enterprise Value Captured"?: string | null
+          "Total Enterprise Value Captured"?: number | null
           venture_office?: string | null
         }
         Update: {
           Champions?: string | null
           "Company Contact"?: string | null
           "Company Description"?: string | null
-          "Company Name"?: string | null
+          "Company Name"?: string
           "Country of Origin"?: string | null
           "Current Company Valuation"?: number | null
           "Current HLV Valuation"?: number | null
-          "Data Monetization Dollars"?: string | null
-          "Data Monetization Forecast"?: string | null
-          deal_id?: number
+          "Data Monetization Dollars"?: number | null
+          "Data Monetization Forecast"?: number | null
           "EVP Owner"?: string | null
           "Final Portfolio Decision Date"?: string | null
           "High-Level Focus Area"?: string | null
@@ -220,18 +217,18 @@ export type Database = {
           imgurl?: string | null
           "Implementation Completion Date"?: string | null
           "Intro Origin"?: string | null
-          "Invested Amount"?: string | null
-          "Invested Amount 2"?: string | null
-          "Invested Amount 3"?: string | null
+          "Invested Amount"?: number | null
+          "Invested Amount 2"?: number | null
+          "Invested Amount 3"?: number | null
           "Invested Amount Date"?: string | null
           "Invested Amount Date 2"?: string | null
           "Invested Amount Date 3"?: string | null
           "Invested Amount Round"?: string | null
           "Invested Amount Round 2"?: string | null
           "Invested Amount Round 3"?: string | null
-          "Invested Amount Valuation"?: string | null
-          "Invested Amount Valuation 2"?: string | null
-          "Invested Amount Valuation 3"?: string | null
+          "Invested Amount Valuation"?: number | null
+          "Invested Amount Valuation 2"?: number | null
+          "Invested Amount Valuation 3"?: number | null
           "Invested Amount Valuation Date"?: string | null
           "Invested Amount Valuation Date 2"?: string | null
           "Invested Amount Valuation Date 3"?: string | null
@@ -240,10 +237,10 @@ export type Database = {
           "IPA Year"?: number | null
           "Pipeline Stage"?: string | null
           "Specific Focus Area"?: string | null
-          "Target Cash Investment Return"?: string | null
+          "Target Cash Investment Return"?: number | null
           "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
-          "Total Enterprise Value Captured"?: string | null
+          "Total Enterprise Value Captured"?: number | null
           venture_office?: string | null
         }
         Relationships: []

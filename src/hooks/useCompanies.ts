@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface Company {
-  "Company Name": string | null;
+  "Company Name": string;
   "Company Description": string | null;
   "Country of Origin": string | null;
   "High-Level Focus Area": string | null;
@@ -12,20 +12,20 @@ export interface Company {
   "Current HLV Valuation": number | null;
   "Pipeline Stage": string | null;
   "Investment Tracker Stage": string | null;
-  "Invested Amount": string | null;
-  "Invested Amount Valuation": string | null;
+  "Invested Amount": number | null;
+  "Invested Amount Valuation": number | null;
   "Invested Amount Date": string | null;
   "Invested Amount Valuation Date": string | null;
   "Invested Amount Round": string | null;
   "Invested Amount Round 2": string | null;
-  "Invested Amount 2": string | null;
+  "Invested Amount 2": number | null;
   "Invested Amount Date 2": string | null;
-  "Invested Amount Valuation 2": string | null;
+  "Invested Amount Valuation 2": number | null;
   "Invested Amount Valuation Date 2": string | null;
   "Invested Amount Round 3": string | null;
-  "Invested Amount 3": string | null;
+  "Invested Amount 3": number | null;
   "Invested Amount Date 3": string | null;
-  "Invested Amount Valuation 3": string | null;
+  "Invested Amount Valuation 3": number | null;
   "Invested Amount Valuation Date 3": string | null;
   "EVP Owner": string | null;
   "IPA Year": number | null;
@@ -38,13 +38,12 @@ export interface Company {
   "Final Portfolio Decision Date": string | null;
   "Implementation Completion Date": string | null;
   "Target IPA Return": number | null;
-  "Target Cash Investment Return": string | null;
-  "Data Monetization Dollars": string | null;
-  "Data Monetization Forecast": string | null;
-  "Total Enterprise Value Captured": string | null;
+  "Target Cash Investment Return": number | null;
+  "Data Monetization Dollars": number | null;
+  "Data Monetization Forecast": number | null;
+  "Total Enterprise Value Captured": number | null;
   imgurl: string | null;
   venture_office: string | null;
-  deal_id: number;
 }
 
 export function useCompanies() {
@@ -62,7 +61,7 @@ export function useCompanies() {
       setError(null);
       
       const { data, error } = await supabase
-        .from('company_detail')
+        .from('Company Detail')
         .select('*');
 
       if (error) {
@@ -85,7 +84,7 @@ export function useCompanies() {
   const updateCompany = async (companyName: string, updates: Partial<Company>) => {
     try {
       const { error } = await supabase
-        .from('company_detail')
+        .from('Company Detail')
         .update(updates)
         .eq('Company Name', companyName);
 
