@@ -1,5 +1,6 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
+import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,7 +16,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { UpdateValuationModal } from "@/components/UpdateValuationModal";
 import { useMemo, useState } from "react";
 import { TrendingUp, ChevronRight, ChevronDown } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 function formatISODate(dateString: string | null | undefined, locale: string = "en-US", options?: Intl.DateTimeFormatOptions) {
@@ -263,28 +263,13 @@ export default function Investments() {
             {/* Admin Venture Office Selector */}
             {isAdmin && (
               <div className="w-64">
-                <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select Venture Office" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover z-50">
-                    <SelectItem value="all">All ({companies.filter(c => c["Investment Tracker Stage"]).length})</SelectItem>
-                    {Array.from(new Set(companies.filter(c => c["Investment Tracker Stage"]).map(c => c.venture_office).filter(Boolean))).map((office) => (
-                      <SelectItem key={office} value={office!}>
-                        <div className="flex items-center gap-2">
-                          {office === "Healthliant Ventures" && (
-                            <img 
-                              src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
-                              alt="Healthliant Ventures" 
-                              className="w-4 h-4 object-contain"
-                            />
-                          )}
-                          <span>{office} ({companies.filter(c => c["Investment Tracker Stage"] && c.venture_office === office).length})</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <VentureOfficeDropdown
+                  value={selectedVentureOffice}
+                  onChange={changeVentureOffice}
+                  ventureOffices={ventureOffices}
+                  companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c["Investment Tracker Stage"] && c.venture_office === o).length]))}
+                  totalCount={companies.filter(c => c["Investment Tracker Stage"]).length}
+                />
               </div>
             )}
             <div className="flex items-center gap-4">
