@@ -61,7 +61,7 @@ export function useCompanies() {
       setError(null);
       
       const { data, error } = await supabase
-        .from('Company Detail' as any)
+        .from('company_detail' as any)
         .select('*');
 
       if (error) {
@@ -84,7 +84,7 @@ export function useCompanies() {
   const updateCompany = async (companyName: string, updates: Partial<Company>) => {
     try {
       const { error } = await supabase
-        .from('Company Detail' as any)
+        .from('company_detail' as any)
         .update(updates)
         .eq('Company Name', companyName);
 
