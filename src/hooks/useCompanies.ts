@@ -61,7 +61,7 @@ export function useCompanies() {
       setError(null);
       
       const { data, error } = await supabase
-        .from('company_detail')
+        .from('Company Detail' as any)
         .select('*');
 
       if (error) {
@@ -70,7 +70,7 @@ export function useCompanies() {
       }
 
       console.log('Successfully fetched companies:', data?.length || 0);
-      setCompanies((data as Company[]) || []);
+      setCompanies((data as unknown as Company[]) || []);
     } catch (err: any) {
       const errorMessage = err.message || 'Unknown error occurred';
       console.error('Error in fetchCompanies:', err);
@@ -84,7 +84,7 @@ export function useCompanies() {
   const updateCompany = async (companyName: string, updates: Partial<Company>) => {
     try {
       const { error } = await supabase
-        .from('company_detail')
+        .from('Company Detail' as any)
         .update(updates)
         .eq('Company Name', companyName);
 
