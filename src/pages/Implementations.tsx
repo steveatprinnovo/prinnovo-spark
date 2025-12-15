@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
+import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -17,7 +18,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Check, X, Filter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Implementations = () => {
   const navigate = useNavigate();
@@ -293,28 +293,13 @@ const Implementations = () => {
           {/* Admin Venture Office Selector */}
           {isAdmin && (
             <div className="w-64">
-              <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Select Venture Office" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="all">All ({companies.length})</SelectItem>
-                  {Array.from(new Set(companies.map(c => c.venture_office).filter(Boolean))).map((office) => (
-                    <SelectItem key={office} value={office!}>
-                      <div className="flex items-center gap-2">
-                        {office === "Healthliant Ventures" && (
-                          <img 
-                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
-                            alt="Healthliant Ventures" 
-                            className="w-4 h-4 object-contain"
-                          />
-                        )}
-                        <span>{office} ({companies.filter(c => c.venture_office === office).length})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <VentureOfficeDropdown
+                value={selectedVentureOffice}
+                onChange={changeVentureOffice}
+                ventureOffices={ventureOffices}
+                companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
+                totalCount={companies.length}
+              />
             </div>
           )}
         </div>

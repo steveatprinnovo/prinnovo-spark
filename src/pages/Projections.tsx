@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
+import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -443,28 +444,13 @@ const Projections = () => {
           <div className="flex gap-4">
             {isAdmin && (
               <div className="w-64">
-                <Select value={selectedVentureOffice} onValueChange={changeVentureOffice}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Venture Office" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All ({companies.filter(c => c["Target IPA Return"]).length})</SelectItem>
-                  {ventureOfficeOptions.map((office) => (
-                    <SelectItem key={office.value} value={office.value}>
-                      <div className="flex items-center gap-2">
-                        {office.label === "Healthliant Ventures" && (
-                          <img 
-                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
-                            alt="Healthliant Ventures" 
-                            className="w-4 h-4 object-contain"
-                          />
-                        )}
-                        <span>{office.label} ({office.count})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <VentureOfficeDropdown
+                  value={selectedVentureOffice}
+                  onChange={changeVentureOffice}
+                  ventureOffices={ventureOfficeOptions.map(o => o.value)}
+                  companyCounts={Object.fromEntries(ventureOfficeOptions.map(o => [o.value, o.count]))}
+                  totalCount={companies.filter(c => c["Target IPA Return"]).length}
+                />
               </div>
             )}
             <div className="w-64">
