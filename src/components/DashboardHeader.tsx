@@ -1,14 +1,43 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserAuth } from "@/hooks/useUserAuth";
+import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
+import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import { LogOut, Home, ClipboardList, DollarSign, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
+import prinnovoLogo from "@/assets/prinnovo-logo.webp";
 
 export function DashboardHeader() {
   const { signOut, user } = useAuth();
+  const { isAdmin, ventureOffice } = useUserAuth();
+  const { selectedVentureOffice } = useAdminVentureOffice();
   const location = useLocation();
   const isMobile = useIsMobile();
+
+  // Determine which venture office to get logo for
+  const effectiveVentureOffice = isAdmin ? selectedVentureOffice : ventureOffice;
+  const { logoUrl } = useVentureOfficeLogo(effectiveVentureOffice);
+
+  // Determine which logo to show
+  const getLogoSrc = () => {
+    if (isAdmin && (!selectedVentureOffice || selectedVentureOffice === "all")) {
+      return prinnovoLogo;
+    }
+    if (logoUrl) {
+      return logoUrl;
+    }
+    // Fallback to default
+    return "/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png";
+  };
+
+  const getLogoAlt = () => {
+    if (isAdmin && (!selectedVentureOffice || selectedVentureOffice === "all")) {
+      return "Prinnovo";
+    }
+    return effectiveVentureOffice || "Portfolio Dashboard";
+  };
 
   return (
     <div className="border-b bg-card">
@@ -16,8 +45,8 @@ export function DashboardHeader() {
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-4">
             <img 
-              src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png" 
-              alt="Healthliant Ventures" 
+              src={getLogoSrc()} 
+              alt={getLogoAlt()} 
               className="h-8 w-auto"
             />
             {/* Desktop only - Portfolio title */}
