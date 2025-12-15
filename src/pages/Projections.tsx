@@ -91,11 +91,12 @@ const CompanyRow = ({
   const multiplier = FORECAST_MULTIPLIERS[forecast];
   
   const targetIpaReturn = (company["Target IPA Return"] || 0) * multiplier;
-  const targetCashReturn = (company["Target Cash Investment Return"] || 0) * multiplier;
-  const dataMonetizationForecast = (company["Data Monetization Forecast"] || 0) * multiplier;
+  const targetCashReturn = (parseFloat(String(company["Target Cash Investment Return"])) || 0) * multiplier;
+  const dataMonetizationForecast = (parseFloat(String(company["Data Monetization Forecast"])) || 0) * multiplier;
   
   const equityValue = company["Current HLV Valuation"] || 0;
-  const dataMonetizationDollars = company["Data Monetization Dollars"] || 0;
+  const dataMonetizationDollars = parseFloat(String(company["Data Monetization Dollars"])) || 0;
+  const investedAmount = parseFloat(String(company["Invested Amount"])) || 0;
   const totalEnterpriseValue = equityValue + dataMonetizationDollars;
 
   return (
@@ -130,7 +131,7 @@ const CompanyRow = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-help">{formatCurrency(company["Invested Amount"])}</span>
+              <span className="cursor-help">{formatCurrency(investedAmount)}</span>
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs">Invested: {formatDate(company["Invested Amount Date"])}</p>
@@ -139,11 +140,11 @@ const CompanyRow = ({
         </TooltipProvider>
       </TableCell>
       <TableCell className="cell-4 transition-colors text-center text-sm">
-        {(company["Invested Amount"] || 0) === 0
+        {investedAmount === 0
           ? "N/A"
           : showTargetCashReturnAsPercent
             ? targetCashReturn > 0
-              ? formatPercentage(((company["Invested Amount"] || 0) / targetCashReturn) * 100)
+              ? formatPercentage((investedAmount / targetCashReturn) * 100)
               : "0.00%"
             : formatCurrency(targetCashReturn)
         }
@@ -254,13 +255,13 @@ const Projections = () => {
       const prinnovoData: Company = {
         "Company Name": "Prinnovo Health",
         "Target IPA Return": filtered.reduce((sum, c) => sum + (c["Target IPA Return"] || 0), 0) * 0.02,
-        "Invested Amount": filtered.reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0) * 0.02,
-        "Target Cash Investment Return": filtered.reduce((sum, c) => sum + (c["Target Cash Investment Return"] || 0), 0) * 0.02,
+        "Invested Amount": String(filtered.reduce((sum, c) => sum + (parseFloat(String(c["Invested Amount"])) || 0), 0) * 0.02),
+        "Target Cash Investment Return": String(filtered.reduce((sum, c) => sum + (parseFloat(String(c["Target Cash Investment Return"])) || 0), 0) * 0.02),
         "Current HLV Valuation": filtered.reduce((sum, c) => sum + (c["Current HLV Valuation"] || 0), 0) * 0.02,
         "Current Company Valuation": filtered.reduce((sum, c) => sum + (c["Current Company Valuation"] || 0), 0) * 0.02,
-        "Data Monetization Dollars": filtered.reduce((sum, c) => sum + (c["Data Monetization Dollars"] || 0), 0) * 0.02,
-        "Data Monetization Forecast": filtered.reduce((sum, c) => sum + (c["Data Monetization Forecast"] || 0), 0) * 0.02,
-        "Total Enterprise Value Captured": filtered.reduce((sum, c) => sum + (c["Total Enterprise Value Captured"] || 0), 0) * 0.02,
+        "Data Monetization Dollars": String(filtered.reduce((sum, c) => sum + (parseFloat(String(c["Data Monetization Dollars"])) || 0), 0) * 0.02),
+        "Data Monetization Forecast": String(filtered.reduce((sum, c) => sum + (parseFloat(String(c["Data Monetization Forecast"])) || 0), 0) * 0.02),
+        "Total Enterprise Value Captured": String(filtered.reduce((sum, c) => sum + (parseFloat(String(c["Total Enterprise Value Captured"])) || 0), 0) * 0.02),
         imgurl: "prinnovo-logo.png",
         venture_office: selectedVentureOffice,
         "Company Description": null,
@@ -293,6 +294,7 @@ const Projections = () => {
         "Invested Amount Date 3": null,
         "Invested Amount Valuation 3": null,
         "Invested Amount Valuation Date 3": null,
+        deal_id: 0,
       };
       
       companiesWithPrinnovo.push(prinnovoData);
@@ -314,28 +316,28 @@ const Projections = () => {
           bValue = (b["Target IPA Return"] || 0) * multiplier;
           break;
         case "cashInvested":
-          aValue = a["Invested Amount"] || 0;
-          bValue = b["Invested Amount"] || 0;
+          aValue = parseFloat(String(a["Invested Amount"])) || 0;
+          bValue = parseFloat(String(b["Invested Amount"])) || 0;
           break;
         case "targetCashReturn":
-          aValue = (a["Target Cash Investment Return"] || 0) * multiplier;
-          bValue = (b["Target Cash Investment Return"] || 0) * multiplier;
+          aValue = (parseFloat(String(a["Target Cash Investment Return"])) || 0) * multiplier;
+          bValue = (parseFloat(String(b["Target Cash Investment Return"])) || 0) * multiplier;
           break;
         case "equityValue":
           aValue = a["Current HLV Valuation"] || 0;
           bValue = b["Current HLV Valuation"] || 0;
           break;
         case "dataMonetizationDollars":
-          aValue = a["Data Monetization Dollars"] || 0;
-          bValue = b["Data Monetization Dollars"] || 0;
+          aValue = parseFloat(String(a["Data Monetization Dollars"])) || 0;
+          bValue = parseFloat(String(b["Data Monetization Dollars"])) || 0;
           break;
         case "dataMonetizationForecast":
-          aValue = (a["Data Monetization Forecast"] || 0) * multiplier;
-          bValue = (b["Data Monetization Forecast"] || 0) * multiplier;
+          aValue = (parseFloat(String(a["Data Monetization Forecast"])) || 0) * multiplier;
+          bValue = (parseFloat(String(b["Data Monetization Forecast"])) || 0) * multiplier;
           break;
         case "totalEnterpriseValue":
-          aValue = (a["Current HLV Valuation"] || 0) + (a["Data Monetization Dollars"] || 0);
-          bValue = (b["Current HLV Valuation"] || 0) + (b["Data Monetization Dollars"] || 0);
+          aValue = (a["Current HLV Valuation"] || 0) + (parseFloat(String(a["Data Monetization Dollars"])) || 0);
+          bValue = (b["Current HLV Valuation"] || 0) + (parseFloat(String(b["Data Monetization Dollars"])) || 0);
           break;
         default:
           return 0;
@@ -385,14 +387,14 @@ const Projections = () => {
     
     return projectionsCompanies.reduce((totals, company) => {
       const targetIpaReturn = (company["Target IPA Return"] || 0) * multiplier;
-      const targetCashReturn = (company["Target Cash Investment Return"] || 0) * multiplier;
-      const dataMonetizationForecast = (company["Data Monetization Forecast"] || 0) * multiplier;
+      const targetCashReturn = (parseFloat(String(company["Target Cash Investment Return"])) || 0) * multiplier;
+      const dataMonetizationForecast = (parseFloat(String(company["Data Monetization Forecast"])) || 0) * multiplier;
       const equityValue = company["Current HLV Valuation"] || 0;
-      const dataMonetizationDollars = company["Data Monetization Dollars"] || 0;
+      const dataMonetizationDollars = parseFloat(String(company["Data Monetization Dollars"])) || 0;
       
       return {
         targetIpaReturn: totals.targetIpaReturn + targetIpaReturn,
-        cashInvested: totals.cashInvested + (company["Invested Amount"] || 0),
+        cashInvested: totals.cashInvested + (parseFloat(String(company["Invested Amount"])) || 0),
         targetCashReturn: totals.targetCashReturn + targetCashReturn,
         equityValue: totals.equityValue + equityValue,
         dataMonetizationDollars: totals.dataMonetizationDollars + dataMonetizationDollars,
