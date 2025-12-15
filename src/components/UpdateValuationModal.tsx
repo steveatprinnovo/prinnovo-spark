@@ -285,9 +285,9 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
       const updatedData = {
         ...company,
         "Investment Tracker Stage": investmentStage,
-        "Invested Amount": investedAmount ? parseFloat(investedAmount) : null,
+        "Invested Amount": investedAmount || null,
         "Invested Amount Date": investedAmountDate || null,
-        "Invested Amount Valuation": currentValuation ? parseFloat(currentValuation) : null,
+        "Invested Amount Valuation": currentValuation || null,
         "Invested Amount Valuation Date": valuationDate || null,
       };
 
