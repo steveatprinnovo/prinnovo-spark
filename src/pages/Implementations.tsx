@@ -203,16 +203,29 @@ const Implementations = () => {
     }
   };
 
+  // Filter companies by venture office for KPIs
+  const ventureOfficeFilteredCompanies = useMemo(() => {
+    return companies.filter(company => {
+      if (!isAdmin && ventureOffice) {
+        return company.venture_office === ventureOffice;
+      }
+      if (isAdmin && selectedVentureOffice !== "all") {
+        return company.venture_office === selectedVentureOffice;
+      }
+      return true;
+    });
+  }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
+
   // Calculate KPIs
   const kpiData = useMemo(() => {
-    const portfolioCompanies = companies.filter(company => 
+    const portfolioCompanies = ventureOfficeFilteredCompanies.filter(company => 
       company["Pipeline Stage"]?.toLowerCase() === "portfolio company" ||
       !!company["Final Portfolio Decision Date"]
     );
 
     // Helper function to calculate average days between two date fields
     const calculateAverageDays = (dateField1: keyof Company, dateField2: keyof Company) => {
-      const validDays = companies
+      const validDays = ventureOfficeFilteredCompanies
         .map(company => calculateDaysBetween(company[dateField1] as string, company[dateField2] as string))
         .filter(days => days !== null) as number[];
       
@@ -249,7 +262,7 @@ const Implementations = () => {
         gradient: "var(--gradient-accent)"
       }
     ];
-  }, [companies, calculateDaysBetween]);
+  }, [ventureOfficeFilteredCompanies, calculateDaysBetween]);
 
   // Show loading while checking authentication or loading data
   if (authLoading || authzLoading || loading || statusNotesLoading) {
