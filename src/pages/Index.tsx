@@ -146,6 +146,7 @@ const Index = () => {
               companies={companies}
               onCountryClick={handleCountryClick}
               selectedCountry={filters.countryOfOrigin}
+              selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || "all"}
             />
           </div>
         </div>

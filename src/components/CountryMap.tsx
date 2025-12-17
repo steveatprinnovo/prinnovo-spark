@@ -10,15 +10,18 @@ interface CountryMapProps {
   }>;
   onCountryClick: (country: string) => void;
   selectedCountry?: string;
+  selectedVentureOffice?: string;
 }
 
 export const CountryMap: React.FC<CountryMapProps> = ({ 
   companies, 
   onCountryClick, 
-  selectedCountry 
+  selectedCountry,
+  selectedVentureOffice = "all"
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [mapboxToken, setMapboxToken] = useState<string>('');
 
   // Get unique countries from companies data
@@ -137,23 +140,46 @@ export const CountryMap: React.FC<CountryMapProps> = ({
         }
       });
 
-      // Add Tanner Health marker in Carrollton, GA
-      const tannerHealthMarker = new mapboxgl.Marker({
-        color: '#ef4444', // Red color to make it stand out
-        scale: 0.7
-      })
-        .setLngLat([-85.0766, 33.5801]) // Coordinates for Carrollton, GA
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 })
-            .setHTML('<div class="font-semibold">Tanner Health</div><div class="text-sm text-gray-600">Carrollton, GA</div>')
-        )
-        .addTo(map.current);
+      // Markers will be added in separate useEffect based on selectedVentureOffice
     });
 
     return () => {
       map.current?.remove();
     };
   }, [mapboxToken, countriesWithCompanies, selectedCountry, onCountryClick]);
+
+  // Update markers based on selected venture office
+  useEffect(() => {
+    if (!map.current) return;
+
+    // Remove existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    const addMarker = (lng: number, lat: number, name: string, location: string, color: string) => {
+      const marker = new mapboxgl.Marker({ color, scale: 0.7 })
+        .setLngLat([lng, lat])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 })
+            .setHTML(`<div class="font-semibold">${name}</div><div class="text-sm text-gray-600">${location}</div>`)
+        )
+        .addTo(map.current!);
+      markersRef.current.push(marker);
+    };
+
+    // Carrollton, GA - Healthliant Ventures (Tanner Health)
+    const showCarrollton = selectedVentureOffice === "all" || selectedVentureOffice === "Healthliant Ventures";
+    // Gainesville, GA - Northeast Georgia Health Ventures
+    const showGainesville = selectedVentureOffice === "all" || selectedVentureOffice === "Northeast Georgia Health Ventures";
+
+    if (showCarrollton) {
+      addMarker(-85.0766, 33.5801, "Healthliant Ventures", "Carrollton, GA", "#ef4444");
+    }
+
+    if (showGainesville) {
+      addMarker(-83.8241, 34.2979, "Northeast Georgia Health Ventures", "Gainesville, GA", "#3b82f6");
+    }
+  }, [selectedVentureOffice]);
 
   // Update highlighted countries when data changes
   useEffect(() => {
