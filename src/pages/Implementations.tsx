@@ -205,15 +205,20 @@ const Implementations = () => {
 
   // Filter companies by venture office for KPIs
   const ventureOfficeFilteredCompanies = useMemo(() => {
-    return companies.filter(company => {
+    console.log("KPI Filter Debug:", { isAdmin, ventureOffice, selectedVentureOffice, totalCompanies: companies.length });
+    
+    const filtered = companies.filter(company => {
       if (!isAdmin && ventureOffice) {
         return company.venture_office === ventureOffice;
       }
-      if (isAdmin && selectedVentureOffice !== "all") {
+      if (isAdmin && selectedVentureOffice && selectedVentureOffice !== "all") {
         return company.venture_office === selectedVentureOffice;
       }
       return true;
     });
+    
+    console.log("KPI Filtered Companies:", filtered.length);
+    return filtered;
   }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
 
   // Calculate KPIs
