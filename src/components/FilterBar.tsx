@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
 
 interface FilterBarProps {
   onFiltersChange: (filters: FilterState) => void;
@@ -12,6 +13,7 @@ interface FilterBarProps {
     "EVP Owner": string | null;
     "IPA Year": number | null;
     "Pipeline Stage": string | null;
+    venture_office?: string | null;
     [key: string]: any;
   }>;
 }
@@ -26,6 +28,18 @@ export interface FilterState {
 
 
 export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProps) {
+  const { logos } = useAllVentureOfficeLogos();
+
+  const getLogoForOffice = (officeName: string): string | null => {
+    const officeData = logos.find((l) => l.name === officeName);
+    return officeData?.logoUrl || null;
+  };
+
+  // Get venture office for an EVP owner
+  const getVentureOfficeForOwner = (owner: string): string | null => {
+    const company = companies.find(c => c["EVP Owner"] === owner && c.venture_office);
+    return company?.venture_office || null;
+  };
   // Generate dynamic filter options from actual data
   const years = Array.from(new Set(
     companies
@@ -139,7 +153,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
           )}
            {filters.evpOwner && (
             <Badge variant="secondary" className="flex items-center gap-1">
-              EVP Owner: {filters.evpOwner}
+              Executive Owner: {filters.evpOwner}
               <button 
                 onClick={() => clearSingleFilter("evpOwner")}
                 className="ml-1 hover:bg-muted rounded-full p-0.5"
@@ -223,14 +237,27 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
         <div className="w-50">
           <Select value={filters.evpOwner} onValueChange={(value) => updateFilter("evpOwner", value)}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by EVP Owner" />
+              <SelectValue placeholder="Filter by Executive Owner" />
             </SelectTrigger>
             <SelectContent>
-              {evpOwners.map((owner) => (
-                <SelectItem key={owner} value={owner}>
-                  {owner} ({getEvpOwnerCount(owner)})
-                </SelectItem>
-              ))}
+              {evpOwners.map((owner) => {
+                const ventureOffice = getVentureOfficeForOwner(owner);
+                const logoUrl = ventureOffice ? getLogoForOffice(ventureOffice) : null;
+                return (
+                  <SelectItem key={owner} value={owner}>
+                    <div className="flex items-center gap-2">
+                      <span>{owner} ({getEvpOwnerCount(owner)})</span>
+                      {logoUrl && (
+                        <img 
+                          src={logoUrl} 
+                          alt={ventureOffice || ''} 
+                          className="w-4 h-4 object-contain"
+                        />
+                      )}
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
