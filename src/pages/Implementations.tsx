@@ -223,10 +223,8 @@ const Implementations = () => {
 
   // Calculate KPIs
   const kpiData = useMemo(() => {
-    const portfolioCompanies = ventureOfficeFilteredCompanies.filter(company => 
-      company["Pipeline Stage"]?.toLowerCase() === "portfolio company" ||
-      !!company["Final Portfolio Decision Date"]
-    );
+    // Simple count of all companies in the filtered venture office
+    const companyCount = ventureOfficeFilteredCompanies.length;
 
     // Helper function to calculate average days between two date fields
     const calculateAverageDays = (dateField1: keyof Company, dateField2: keyof Company) => {
@@ -240,9 +238,9 @@ const Implementations = () => {
 
     return [
       {
-        title: "Portfolio Companies",
-        value: portfolioCompanies.length.toString(),
-        subtitle: "Total companies in portfolio",
+        title: "Total Companies",
+        value: companyCount.toString(),
+        subtitle: "Companies in venture office",
         gradient: "var(--gradient-primary)"
       },
       {
