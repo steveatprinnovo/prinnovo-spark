@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
+import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import { useStatusNotes } from "@/hooks/useStatusNotes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -433,13 +434,23 @@ function CompanyImplementationItem({
   calculateDaysBetween
 }: CompanyImplementationItemProps) {
   const { logoUrl } = useCompanyLogo(company.imgurl);
+  const { logoUrl: ventureOfficeLogoUrl } = useVentureOfficeLogo(company.venture_office);
   const isPortfolio = company["Pipeline Stage"]?.toLowerCase() === "portfolio company";
 
   return (
     <div className="space-y-4">
       {/* Company Name and Status Update - Side by side */}
       <div className="flex items-start justify-between gap-6">
-        <h2 className="text-xl font-semibold text-foreground flex-shrink-0">{company["Company Name"]}</h2>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <h2 className="text-xl font-semibold text-foreground">{company["Company Name"]}</h2>
+          {ventureOfficeLogoUrl && (
+            <img 
+              src={ventureOfficeLogoUrl} 
+              alt={`${company.venture_office} logo`}
+              className="h-8 w-auto object-contain"
+            />
+          )}
+        </div>
         
         {/* Status Update Box - Twice as wide, single line */}
         <div className="flex-1 max-w-2xl">
