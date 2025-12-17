@@ -252,6 +252,7 @@ export type Database = {
         Row: {
           company_name: string
           created_at: string
+          deal_id: number | null
           id: string
           status_note: string | null
           updated_at: string
@@ -260,6 +261,7 @@ export type Database = {
         Insert: {
           company_name: string
           created_at?: string
+          deal_id?: number | null
           id?: string
           status_note?: string | null
           updated_at?: string
@@ -268,6 +270,7 @@ export type Database = {
         Update: {
           company_name?: string
           created_at?: string
+          deal_id?: number | null
           id?: string
           status_note?: string | null
           updated_at?: string

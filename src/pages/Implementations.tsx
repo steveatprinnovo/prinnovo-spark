@@ -173,15 +173,17 @@ const Implementations = () => {
     return stages;
   };
 
-  const handleStatusEditStart = (companyName: string) => {
-    setEditingStatus(companyName);
+  const handleStatusEditStart = (dealId: number, companyName: string) => {
+    const editKey = `${dealId}`;
+    setEditingStatus(editKey);
     // Initialize with existing status or empty string
-    setEditingValues({ [companyName]: statusNotes[companyName] || "" });
+    setEditingValues({ [editKey]: statusNotes[dealId] || "" });
   };
 
-  const handleStatusEditSave = async (companyName: string) => {
-    const newStatus = editingValues[companyName] || "";
-    const success = await saveStatusNote(companyName, newStatus);
+  const handleStatusEditSave = async (dealId: number, companyName: string) => {
+    const editKey = `${dealId}`;
+    const newStatus = editingValues[editKey] || "";
+    const success = await saveStatusNote(dealId, companyName, newStatus);
     
     if (success) {
       setEditingStatus(null);
@@ -418,22 +420,25 @@ const Implementations = () => {
         )}
         
         <div className="space-y-8">
-          {filteredCompanies.map((company, index) => (
-            <CompanyImplementationItem
-              key={company["Company Name"]}
-              company={company}
-              index={filteredCompanies.indexOf(company) + 1}
-              isEditingStatus={editingStatus === company["Company Name"]}
-              statusValue={editingValues[company["Company Name"]] || statusNotes[company["Company Name"]] || ""}
-              onStatusEditStart={() => handleStatusEditStart(company["Company Name"])}
-              onStatusEditSave={() => handleStatusEditSave(company["Company Name"])}
-              onStatusEditCancel={handleStatusEditCancel}
-              onStatusChange={(value) => setEditingValues({ ...editingValues, [company["Company Name"]]: value })}
-              getProgressStages={getProgressStages}
-              formatDate={formatDate}
-              calculateDaysBetween={calculateDaysBetween}
-            />
-          ))}
+          {filteredCompanies.map((company, index) => {
+            const editKey = `${company.deal_id}`;
+            return (
+              <CompanyImplementationItem
+                key={company.deal_id}
+                company={company}
+                index={filteredCompanies.indexOf(company) + 1}
+                isEditingStatus={editingStatus === editKey}
+                statusValue={editingValues[editKey] || statusNotes[company.deal_id] || ""}
+                onStatusEditStart={() => handleStatusEditStart(company.deal_id, company["Company Name"])}
+                onStatusEditSave={() => handleStatusEditSave(company.deal_id, company["Company Name"])}
+                onStatusEditCancel={handleStatusEditCancel}
+                onStatusChange={(value) => setEditingValues({ ...editingValues, [editKey]: value })}
+                getProgressStages={getProgressStages}
+                formatDate={formatDate}
+                calculateDaysBetween={calculateDaysBetween}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

@@ -253,6 +253,7 @@ const Projections = () => {
     if (shouldAddPrinnovo && filtered.length > 0) {
       // Calculate sum of all values × 0.02
       const prinnovoData: Company = {
+        deal_id: -1, // Synthetic company, not in database
         "Company Name": "Prinnovo Health",
         "Target IPA Return": filtered.reduce((sum, c) => sum + (c["Target IPA Return"] || 0), 0) * 0.02,
         "Invested Amount": filtered.reduce((sum, c) => sum + (c["Invested Amount"] || 0), 0) * 0.02,

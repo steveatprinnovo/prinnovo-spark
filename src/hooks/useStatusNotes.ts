@@ -6,6 +6,7 @@ export interface StatusNote {
   id: string;
   user_id: string;
   company_name: string;
+  deal_id: number | null;
   status_note: string;
   created_at: string;
   updated_at: string;
@@ -13,7 +14,7 @@ export interface StatusNote {
 
 export function useStatusNotes() {
   const { user } = useAuth();
-  const [statusNotes, setStatusNotes] = useState<{ [companyName: string]: string }>({});
+  const [statusNotes, setStatusNotes] = useState<{ [dealId: number]: string }>({});
   const [loading, setLoading] = useState(true);
 
   // Load status notes for the current user
@@ -36,11 +37,13 @@ export function useStatusNotes() {
           return;
         }
 
-        // Convert array to object for easy lookup
+        // Convert array to object for easy lookup by deal_id
         const notesMap = (data || []).reduce((acc, note) => {
-          acc[note.company_name] = note.status_note || '';
+          if (note.deal_id !== null) {
+            acc[note.deal_id] = note.status_note || '';
+          }
           return acc;
-        }, {} as { [companyName: string]: string });
+        }, {} as { [dealId: number]: string });
 
         setStatusNotes(notesMap);
       } catch (error) {
@@ -53,20 +56,21 @@ export function useStatusNotes() {
     loadStatusNotes();
   }, [user]);
 
-  // Save or update status note
-  const saveStatusNote = async (companyName: string, statusNote: string) => {
-    if (!user) return;
+  // Save or update status note by deal_id
+  const saveStatusNote = async (dealId: number, companyName: string, statusNote: string) => {
+    if (!user) return false;
 
     try {
       const { error } = await supabase
         .from('status_notes')
         .upsert({
           user_id: user.id,
+          deal_id: dealId,
           company_name: companyName,
           status_note: statusNote,
           updated_at: new Date().toISOString()
         }, {
-          onConflict: 'user_id,company_name'
+          onConflict: 'user_id,deal_id'
         });
 
       if (error) {
@@ -77,7 +81,7 @@ export function useStatusNotes() {
       // Update local state
       setStatusNotes(prev => ({
         ...prev,
-        [companyName]: statusNote
+        [dealId]: statusNote
       }));
 
       return true;
@@ -87,16 +91,16 @@ export function useStatusNotes() {
     }
   };
 
-  // Delete status note
-  const deleteStatusNote = async (companyName: string) => {
-    if (!user) return;
+  // Delete status note by deal_id
+  const deleteStatusNote = async (dealId: number) => {
+    if (!user) return false;
 
     try {
       const { error } = await supabase
         .from('status_notes')
         .delete()
         .eq('user_id', user.id)
-        .eq('company_name', companyName);
+        .eq('deal_id', dealId);
 
       if (error) {
         console.error('Error deleting status note:', error);
@@ -106,7 +110,7 @@ export function useStatusNotes() {
       // Update local state
       setStatusNotes(prev => {
         const newNotes = { ...prev };
-        delete newNotes[companyName];
+        delete newNotes[dealId];
         return newNotes;
       });
 

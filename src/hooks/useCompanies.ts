@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface Company {
+  deal_id: number;
   "Company Name": string;
   "Company Description": string | null;
   "Country of Origin": string | null;
