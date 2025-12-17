@@ -66,8 +66,17 @@ const Implementations = () => {
       }
       return true;
     });
+
+    // Deduplicate by Company Name (when "all" is selected, avoid showing duplicates)
+    const uniqueCompanies = ventureOfficeFiltered.reduce((acc, company) => {
+      const existingIndex = acc.findIndex(c => c["Company Name"] === company["Company Name"]);
+      if (existingIndex === -1) {
+        acc.push(company);
+      }
+      return acc;
+    }, [] as Company[]);
     
-    return [...ventureOfficeFiltered].sort((a, b) => {
+    return [...uniqueCompanies].sort((a, b) => {
       // Helper function to convert date string to Date object, return null if invalid
       const parseDate = (dateStr: string | null) => {
         if (!dateStr) return null;
@@ -216,9 +225,18 @@ const Implementations = () => {
       }
       return true;
     });
+
+    // Deduplicate by Company Name (when "all" is selected, avoid counting duplicates)
+    const uniqueFiltered = filtered.reduce((acc, company) => {
+      const existingIndex = acc.findIndex(c => c["Company Name"] === company["Company Name"]);
+      if (existingIndex === -1) {
+        acc.push(company);
+      }
+      return acc;
+    }, [] as Company[]);
     
-    console.log("KPI Filtered Companies:", filtered.length);
-    return filtered;
+    console.log("KPI Filtered Companies:", uniqueFiltered.length);
+    return uniqueFiltered;
   }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
 
   // Calculate KPIs
