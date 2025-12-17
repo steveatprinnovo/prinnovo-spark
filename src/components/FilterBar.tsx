@@ -246,7 +246,6 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
                 return (
                   <SelectItem key={owner} value={owner}>
                     <div className="flex items-center gap-2">
-                      <span>{owner} ({getEvpOwnerCount(owner)})</span>
                       {logoUrl && (
                         <img 
                           src={logoUrl} 
@@ -254,6 +253,7 @@ export function FilterBar({ onFiltersChange, filters, companies }: FilterBarProp
                           className="w-4 h-4 object-contain"
                         />
                       )}
+                      <span>{owner} ({getEvpOwnerCount(owner)})</span>
                     </div>
                   </SelectItem>
                 );
