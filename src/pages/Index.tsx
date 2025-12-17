@@ -44,7 +44,8 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  const filteredCompanies = useMemo(() => {
+  // Companies filtered by venture office only (for FilterBar options)
+  const ventureOfficeFilteredCompanies = useMemo(() => {
     return companies.filter(company => {
       // Filter by venture office (if user is not admin)
       if (!isAdmin && ventureOffice && company.venture_office !== ventureOffice) {
@@ -54,6 +55,12 @@ const Index = () => {
       if (isAdmin && selectedVentureOffice !== "all" && company.venture_office !== selectedVentureOffice) {
         return false;
       }
+      return true;
+    });
+  }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
+
+  const filteredCompanies = useMemo(() => {
+    return ventureOfficeFilteredCompanies.filter(company => {
       if (filters.ipaYear && company["IPA Year"]?.toString() !== filters.ipaYear) {
         return false;
       }
@@ -71,7 +78,7 @@ const Index = () => {
       }
       return true;
     }).sort((a, b) => a["Company Name"].localeCompare(b["Company Name"]));
-  }, [companies, filters, isAdmin, ventureOffice, selectedVentureOffice]);
+  }, [ventureOfficeFilteredCompanies, filters]);
 
   const handleCountryClick = (country: string) => {
     if (filters.countryOfOrigin === country) {
@@ -158,7 +165,7 @@ const Index = () => {
         <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} />
         
         {/* Filters */}
-        <FilterBar onFiltersChange={setFilters} filters={filters} companies={companies} />
+        <FilterBar onFiltersChange={setFilters} filters={filters} companies={ventureOfficeFilteredCompanies} />
         
         {/* Company Grid */}
         <CompanyGrid 
