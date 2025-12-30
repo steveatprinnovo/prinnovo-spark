@@ -799,7 +799,7 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                     <SelectContent>
                       <SelectItem value="Implementation">Implementation</SelectItem>
                       <SelectItem value="Pilot">Pilot</SelectItem>
-                      <SelectItem value="In Portfolio">Portfolio Company</SelectItem>
+                      <SelectItem value="Portfolio Company">Portfolio Company</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
