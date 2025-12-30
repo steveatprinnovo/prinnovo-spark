@@ -7,6 +7,7 @@ import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
+import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -22,6 +23,7 @@ const Index = () => {
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading } = useCompanies();
+  const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : ventureOffice || "");
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     ipaYear: "",
@@ -58,6 +60,33 @@ const Index = () => {
       return true;
     });
   }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
+
+  // Get the most recent updated date from companies or venture office
+  const lastUpdated = useMemo(() => {
+    const dates: string[] = [];
+    
+    // Add company updated_at dates
+    ventureOfficeFilteredCompanies.forEach(c => {
+      if ((c as any).updated_at) {
+        dates.push((c as any).updated_at);
+      }
+    });
+    
+    // Add venture office updated_at
+    if (ventureOfficeDetails?.updated_at) {
+      dates.push(ventureOfficeDetails.updated_at);
+    }
+    
+    if (dates.length === 0) return null;
+    return dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+  }, [ventureOfficeFilteredCompanies, ventureOfficeDetails]);
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
 
   const filteredCompanies = useMemo(() => {
     return ventureOfficeFilteredCompanies.filter(company => {
@@ -125,20 +154,30 @@ const Index = () => {
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
       
       <div className="container mx-auto p-6 space-y-6">
-        {/* Admin Venture Office Selector */}
-        {isAdmin && (
-          <div className="flex justify-end">
-            <div>
-              <VentureOfficeDropdown
-                value={selectedVentureOffice}
-                onChange={changeVentureOffice}
-                ventureOffices={ventureOffices}
-                companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
-                totalCount={companies.length}
-              />
-            </div>
+        {/* Page Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-foreground">Portfolio Dashboard</h1>
+          
+          <div className="flex flex-col items-end gap-3">
+            {/* Admin Venture Office Selector */}
+            {isAdmin && (
+              <div>
+                <VentureOfficeDropdown
+                  value={selectedVentureOffice}
+                  onChange={changeVentureOffice}
+                  ventureOffices={ventureOffices}
+                  companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
+                  totalCount={companies.length}
+                />
+              </div>
+            )}
+            {lastUpdated && (
+              <div className="text-sm text-muted-foreground italic">
+                Current as of {formatDate(lastUpdated)}
+              </div>
+            )}
           </div>
-        )}
+        </div>
         
         {/* Top Section: KPIs and Map */}
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">

@@ -49,10 +49,6 @@ export function DashboardHeader() {
               alt={getLogoAlt()} 
               className="h-8 w-auto"
             />
-            {/* Desktop only - Portfolio title */}
-            {!isMobile && (
-              <h1 className="text-lg font-semibold">Portfolio Dashboard</h1>
-            )}
           </div>
           
           {/* Navigation - Desktop vs Mobile/Tablet */}
