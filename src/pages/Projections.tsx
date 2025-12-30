@@ -467,8 +467,8 @@ const Projections = () => {
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
       
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Projections</h1>
+        <div className="flex justify-between items-end mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Projections</h1>
           
           <div className="flex gap-4">
             {isAdmin && (

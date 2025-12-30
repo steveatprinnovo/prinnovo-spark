@@ -324,7 +324,7 @@ const Implementations = () => {
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
       
       <div className="container mx-auto p-6 space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between items-end mb-8">
           <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
           
           {/* Admin Venture Office Selector */}
