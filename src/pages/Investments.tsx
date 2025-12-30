@@ -497,11 +497,20 @@ function CompanyRow({ company, showVentureOfficeLogo, ventureOfficeLogos }: Comp
             )}
             <span className="font-medium">{company["Company Name"]}</span>
             {ventureOfficeLogo && (
-              <img
-                src={ventureOfficeLogo}
-                alt={`${company.venture_office} logo`}
-                className="w-5 h-5 rounded object-contain ml-2"
-              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <img
+                      src={ventureOfficeLogo}
+                      alt={`${company.venture_office} logo`}
+                      className="w-5 h-5 rounded object-contain ml-2 cursor-help"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{company.venture_office}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </TableCell>
