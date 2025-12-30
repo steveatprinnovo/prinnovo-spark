@@ -466,11 +466,49 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
     setSaving(true);
     try {
       if (selectedCompanyId === "new") {
-        // Insert new company - exclude deal_id as it's auto-generated
+        // Generate deal_id based on office_id and sequential company number
+        const ventureOfficeName = editedCompany.venture_office;
+        
+        // Get the office_id for this venture office
+        const { data: officeData, error: officeError } = await supabase
+          .from('venture_office_detail')
+          .select('office_id')
+          .eq('Venture Office Name', ventureOfficeName)
+          .single();
+        
+        if (officeError || !officeData) {
+          throw new Error('Could not find venture office');
+        }
+        
+        const officeId = officeData.office_id;
+        
+        // Get the highest existing deal_id for this venture office (companies with deal_id starting with office_id)
+        const minDealId = officeId * 1000; // e.g., 103000
+        const maxDealId = (officeId + 1) * 1000 - 1; // e.g., 103999
+        
+        const { data: existingCompanies, error: companiesError } = await supabase
+          .from('company_detail')
+          .select('deal_id')
+          .gte('deal_id', minDealId)
+          .lte('deal_id', maxDealId)
+          .order('deal_id', { ascending: false })
+          .limit(1);
+        
+        if (companiesError) throw companiesError;
+        
+        // Calculate next deal_id
+        let nextDealId: number;
+        if (existingCompanies && existingCompanies.length > 0) {
+          nextDealId = existingCompanies[0].deal_id + 1;
+        } else {
+          // First company for this venture office: office_id * 1000 + 1
+          nextDealId = minDealId + 1;
+        }
+        
         const { deal_id: _, ...insertData } = editedCompany as Company;
         const { error } = await supabase
           .from('company_detail')
-          .insert(insertData as any);
+          .insert({ ...insertData, deal_id: nextDealId } as any);
         
         if (error) throw error;
         toast.success("Company created successfully");
