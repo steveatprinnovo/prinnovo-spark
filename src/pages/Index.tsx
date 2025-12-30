@@ -155,7 +155,7 @@ const Index = () => {
       
       <div className="container mx-auto p-6 space-y-6">
         {/* Page Header */}
-        <div className="flex justify-between items-end mb-8">
+        <div className="flex justify-between items-start mb-8">
           <h1 className="text-3xl font-bold text-foreground">Portfolio Dashboard</h1>
           
           <div className="flex flex-col items-end gap-3">

@@ -109,7 +109,7 @@ const Settings = () => {
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-end mb-8">
+        <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2">Settings</h1>
             <p className="text-muted-foreground">Manage venture office and portfolio company details</p>

@@ -291,7 +291,7 @@ export default function Investments() {
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
       
       <main className="container mx-auto px-6 py-6">
-        <div className="flex justify-between items-end mb-8">
+        <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Hard Dollar Investment Tracker</h1>
             <p className="text-muted-foreground">Track and monitor hard dollar investment allocations and performance</p>
