@@ -260,7 +260,7 @@ export default function Investments() {
       <main className="container mx-auto px-6 py-8">
         <div className="mb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Hard Dollar Investment Tracker</h1>
+            <h1 className="text-3xl font-bold text-foreground">Hard Dollar Investment Tracker</h1>
             <p className="text-muted-foreground">Track and monitor hard dollar investment allocations and performance</p>
           </div>
           <div className="flex flex-col items-end gap-3">
