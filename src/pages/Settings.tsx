@@ -16,9 +16,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
 
 const Settings = () => {
@@ -422,6 +424,25 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Investment details state
+  const [investmentSectionOpen, setInvestmentSectionOpen] = useState(false);
+  const [selectedRound, setSelectedRound] = useState<string>("1");
+  const [investmentStage, setInvestmentStage] = useState<string>("");
+  const [roundName, setRoundName] = useState<string>("");
+  const [investedAmount, setInvestedAmount] = useState<string>("");
+  const [investedAmountDate, setInvestedAmountDate] = useState<string>("");
+  const [currentValuation, setCurrentValuation] = useState<string>("");
+  const [valuationDate, setValuationDate] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roundToDelete, setRoundToDelete] = useState<string | null>(null);
+
+  const INVESTMENT_STAGES = [
+    "Committed",
+    "IPA Obligation", 
+    "Term Sheet Proposed",
+    "Operational Funding"
+  ];
 
   const selectedCompany = useMemo(() => {
     if (selectedCompanyId === "new" || selectedCompanyId === null) return null;
@@ -434,7 +455,118 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
     setEditedCompany({});
     setLogoFile(null);
     setLogoPreview(null);
+    resetInvestmentFields();
   }, [selectedVentureOffice]);
+
+  // Load investment data when selecting existing company or changing round
+  useEffect(() => {
+    if (selectedCompany) {
+      setInvestmentStage(selectedCompany["Investment Tracker Stage"] || "");
+      loadRoundData(selectedCompany, selectedRound);
+    }
+  }, [selectedCompany, selectedRound]);
+
+  const resetInvestmentFields = () => {
+    setInvestmentSectionOpen(false);
+    setSelectedRound("1");
+    setInvestmentStage("");
+    setRoundName("");
+    setInvestedAmount("");
+    setInvestedAmountDate("");
+    setCurrentValuation("");
+    setValuationDate("");
+  };
+
+  const loadRoundData = (company: Company, round: string) => {
+    if (round === "1") {
+      setRoundName(company["Invested Amount Round"] || "");
+      setInvestedAmount(company["Invested Amount"]?.toString() || "");
+      setInvestedAmountDate(company["Invested Amount Date"] || "");
+      setCurrentValuation(company["Invested Amount Valuation"]?.toString() || "");
+      setValuationDate(company["Invested Amount Valuation Date"] || "");
+    } else if (round === "2") {
+      setRoundName(company["Invested Amount Round 2"] || "");
+      setInvestedAmount(company["Invested Amount 2"]?.toString() || "");
+      setInvestedAmountDate(company["Invested Amount Date 2"] || "");
+      setCurrentValuation(company["Invested Amount Valuation 2"]?.toString() || "");
+      setValuationDate(company["Invested Amount Valuation Date 2"] || "");
+    } else if (round === "3") {
+      setRoundName(company["Invested Amount Round 3"] || "");
+      setInvestedAmount(company["Invested Amount 3"]?.toString() || "");
+      setInvestedAmountDate(company["Invested Amount Date 3"] || "");
+      setCurrentValuation(company["Invested Amount Valuation 3"]?.toString() || "");
+      setValuationDate(company["Invested Amount Valuation Date 3"] || "");
+    }
+  };
+
+  // Get available rounds for the selected company
+  const getAvailableRounds = () => {
+    if (!selectedCompany) return [{ value: "1", label: "Round 1", canDelete: false }];
+
+    const rounds = [];
+    if (selectedCompany["Invested Amount Round"]) rounds.push({ value: "1", label: selectedCompany["Invested Amount Round"], canDelete: true });
+    if (selectedCompany["Invested Amount Round 2"]) rounds.push({ value: "2", label: selectedCompany["Invested Amount Round 2"], canDelete: true });
+    if (selectedCompany["Invested Amount Round 3"]) rounds.push({ value: "3", label: selectedCompany["Invested Amount Round 3"], canDelete: true });
+
+    // Add option for next available round
+    if (rounds.length < 3) {
+      rounds.push({ value: String(rounds.length + 1), label: "Add New Round", canDelete: false, isNew: true });
+    }
+
+    // If no rounds exist, show Round 1
+    if (rounds.length === 0) {
+      rounds.push({ value: "1", label: "Round 1", canDelete: false });
+    }
+
+    return rounds;
+  };
+
+  const handleDeleteRound = async () => {
+    if (!selectedCompany || !roundToDelete) return;
+
+    setSaving(true);
+    try {
+      const updateData: any = {};
+
+      if (roundToDelete === "1") {
+        updateData["Invested Amount Round"] = null;
+        updateData["Invested Amount"] = null;
+        updateData["Invested Amount Date"] = null;
+        updateData["Invested Amount Valuation"] = null;
+        updateData["Invested Amount Valuation Date"] = null;
+      } else if (roundToDelete === "2") {
+        updateData["Invested Amount Round 2"] = null;
+        updateData["Invested Amount 2"] = null;
+        updateData["Invested Amount Date 2"] = null;
+        updateData["Invested Amount Valuation 2"] = null;
+        updateData["Invested Amount Valuation Date 2"] = null;
+      } else if (roundToDelete === "3") {
+        updateData["Invested Amount Round 3"] = null;
+        updateData["Invested Amount 3"] = null;
+        updateData["Invested Amount Date 3"] = null;
+        updateData["Invested Amount Valuation 3"] = null;
+        updateData["Invested Amount Valuation Date 3"] = null;
+      }
+
+      const { error } = await supabase
+        .from('company_detail')
+        .update(updateData)
+        .eq('deal_id', selectedCompany.deal_id);
+
+      if (error) throw error;
+
+      await refetchCompanies();
+      toast.success("Investment round deleted successfully");
+      
+      setSelectedRound("1");
+      setDeleteDialogOpen(false);
+      setRoundToDelete(null);
+    } catch (error: any) {
+      toast.error(`Failed to delete round: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Handle logo file selection
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -498,25 +630,29 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
         "Champions": "",
         "Intro Origin": "",
       });
+      setLogoFile(null);
+      setLogoPreview(null);
+      resetInvestmentFields();
+    } else {
+      const dealId = parseInt(value);
+      const company = companies.find(c => c.deal_id === dealId);
+      if (company) {
+        setSelectedCompanyId(dealId);
+        setEditedCompany({ ...company });
         setLogoFile(null);
-        setLogoPreview(null);
-      } else {
-        const dealId = parseInt(value);
-        const company = companies.find(c => c.deal_id === dealId);
-        if (company) {
-          setSelectedCompanyId(dealId);
-          setEditedCompany({ ...company });
-          setLogoFile(null);
-          setLogoPreview(company.imgurl || null);
-        }
+        setLogoPreview(company.imgurl || null);
+        setSelectedRound("1");
+        setInvestmentSectionOpen(false);
       }
-    };
+    }
+  };
 
   const handleCancel = () => {
     setSelectedCompanyId(null);
     setEditedCompany({});
     setLogoFile(null);
     setLogoPreview(null);
+    resetInvestmentFields();
   };
 
   const handleSave = async () => {
@@ -871,6 +1007,185 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                   />
                 </div>
               </div>
+
+              {/* Investment Details Section (Optional) - Only for existing companies */}
+              {selectedCompanyId !== "new" && (
+                <Collapsible open={investmentSectionOpen} onOpenChange={setInvestmentSectionOpen} className="mt-6">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        Investment Details (Optional)
+                      </div>
+                      {investmentSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 space-y-4">
+                    <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                      {/* Investment Stage */}
+                      <div className="space-y-2">
+                        <Label>Investment Tracker Stage</Label>
+                        <Select value={investmentStage} onValueChange={setInvestmentStage}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select investment stage..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover z-50">
+                            <SelectItem value="">No Investment Stage</SelectItem>
+                            {INVESTMENT_STAGES.map((stage) => (
+                              <SelectItem key={stage} value={stage}>
+                                {stage}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Investment Round */}
+                      <div className="space-y-2">
+                        <Label>Investment Round</Label>
+                        <div className="flex gap-2">
+                          <Select value={selectedRound} onValueChange={setSelectedRound}>
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Select investment round" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-popover z-50">
+                              {getAvailableRounds().map((round) => (
+                                <SelectItem key={round.value} value={round.value}>
+                                  <div className="flex items-center gap-2">
+                                    {round.isNew && <Plus className="h-4 w-4 text-primary" />}
+                                    <span>{round.label}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {getAvailableRounds().find(r => r.value === selectedRound)?.canDelete && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => {
+                                setRoundToDelete(selectedRound);
+                                setDeleteDialogOpen(true);
+                              }}
+                              className="shrink-0"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Round Name (for new rounds) */}
+                      {getAvailableRounds().find(r => r.value === selectedRound)?.isNew && (
+                        <div className="space-y-2">
+                          <Label>Round Name</Label>
+                          <Input
+                            value={roundName}
+                            onChange={(e) => setRoundName(e.target.value)}
+                            placeholder="e.g., Series A, Seed, etc."
+                          />
+                        </div>
+                      )}
+
+                      {/* Investment Fields */}
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Invested Amount</Label>
+                          <Input
+                            type="number"
+                            value={investedAmount}
+                            onChange={(e) => setInvestedAmount(e.target.value)}
+                            placeholder="Enter amount..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Invested Amount Date</Label>
+                          <Input
+                            type="date"
+                            value={investedAmountDate}
+                            onChange={(e) => setInvestedAmountDate(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Current Valuation</Label>
+                          <Input
+                            type="number"
+                            value={currentValuation}
+                            onChange={(e) => setCurrentValuation(e.target.value)}
+                            placeholder="Enter valuation..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Valuation Date</Label>
+                          <Input
+                            type="date"
+                            value={valuationDate}
+                            onChange={(e) => setValuationDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Save Investment Button */}
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          if (!selectedCompany) return;
+                          
+                          setSaving(true);
+                          try {
+                            const updateData: any = {
+                              "Investment Tracker Stage": investmentStage || null
+                            };
+
+                            if (selectedRound === "1") {
+                              updateData["Invested Amount Round"] = roundName || selectedCompany["Invested Amount Round"] || null;
+                              updateData["Invested Amount"] = investedAmount ? parseFloat(investedAmount) : null;
+                              updateData["Invested Amount Date"] = investedAmountDate || null;
+                              updateData["Invested Amount Valuation"] = currentValuation ? parseFloat(currentValuation) : null;
+                              updateData["Invested Amount Valuation Date"] = valuationDate || null;
+                            } else if (selectedRound === "2") {
+                              updateData["Invested Amount Round 2"] = roundName || selectedCompany["Invested Amount Round 2"] || null;
+                              updateData["Invested Amount 2"] = investedAmount ? parseFloat(investedAmount) : null;
+                              updateData["Invested Amount Date 2"] = investedAmountDate || null;
+                              updateData["Invested Amount Valuation 2"] = currentValuation ? parseFloat(currentValuation) : null;
+                              updateData["Invested Amount Valuation Date 2"] = valuationDate || null;
+                            } else if (selectedRound === "3") {
+                              updateData["Invested Amount Round 3"] = roundName || selectedCompany["Invested Amount Round 3"] || null;
+                              updateData["Invested Amount 3"] = investedAmount ? parseFloat(investedAmount) : null;
+                              updateData["Invested Amount Date 3"] = investedAmountDate || null;
+                              updateData["Invested Amount Valuation 3"] = currentValuation ? parseFloat(currentValuation) : null;
+                              updateData["Invested Amount Valuation Date 3"] = valuationDate || null;
+                            }
+
+                            const { error } = await supabase
+                              .from('company_detail')
+                              .update(updateData)
+                              .eq('deal_id', selectedCompany.deal_id);
+
+                            if (error) throw error;
+
+                            await refetchCompanies();
+                            toast.success("Investment details updated successfully");
+                          } catch (error: any) {
+                            toast.error(`Failed to update: ${error.message}`);
+                          } finally {
+                            setSaving(false);
+                          }
+                        }}
+                        disabled={saving}
+                        className="w-full"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Investment Details
+                      </Button>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
             </div>
           )}
 
@@ -882,6 +1197,24 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
           )}
         </div>
       </CardContent>
+
+      {/* Delete Round Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Investment Round</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this investment round? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteRound} disabled={saving}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
