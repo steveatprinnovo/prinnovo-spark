@@ -113,7 +113,7 @@ const Settings = () => {
           <div className="flex flex-col items-end gap-3">
             {/* Admin Venture Office Selector */}
             {isAdmin && (
-              <div className="w-80">
+              <div>
                 <VentureOfficeDropdown
                   value={selectedVentureOffice}
                   onChange={changeVentureOffice}
