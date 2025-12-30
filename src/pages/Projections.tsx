@@ -9,6 +9,8 @@ import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
+import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
+import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -50,6 +52,8 @@ interface CompanyRowProps {
   showTargetCashReturnAsPercent: boolean;
   showEquityValueAsPercent: boolean;
   showDataMonetizationAsPercent: boolean;
+  showVentureOfficeLogo?: boolean;
+  ventureOfficeLogos?: { name: string; logoUrl: string | null }[];
 }
 
 const formatDate = (dateString: string | null) => {
@@ -66,11 +70,17 @@ const CompanyRow = ({
   forecast, 
   showTargetCashReturnAsPercent, 
   showEquityValueAsPercent, 
-  showDataMonetizationAsPercent 
+  showDataMonetizationAsPercent,
+  showVentureOfficeLogo,
+  ventureOfficeLogos
 }: CompanyRowProps) => {
   const isPrinnovoHealth = company["Company Name"] === "Prinnovo Health";
   const { logoUrl: regularLogoUrl } = useCompanyLogo(company.imgurl);
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
+  
+  const ventureOfficeLogo = showVentureOfficeLogo 
+    ? ventureOfficeLogos?.find(l => l.name === company.venture_office)?.logoUrl 
+    : null;
   
   useEffect(() => {
     if (isPrinnovoHealth) {
@@ -114,6 +124,13 @@ const CompanyRow = ({
           )}
         </div>
         <span className="font-medium text-sm truncate">{company["Company Name"]}</span>
+        {ventureOfficeLogo && (
+          <img
+            src={ventureOfficeLogo}
+            alt={`${company.venture_office} logo`}
+            className="w-5 h-5 rounded object-contain"
+          />
+        )}
       </TableCell>
       <TableCell className="cell-2 transition-colors text-center text-sm">
         <TooltipProvider>
@@ -188,6 +205,8 @@ const Projections = () => {
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
+  const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
+  const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
 
   // Get unique venture offices
   const ventureOffices = useMemo(() => 
@@ -630,12 +649,14 @@ const Projections = () => {
             <TableBody>
               {projectionsCompanies.map((company) => (
                 <CompanyRow
-                  key={company["Company Name"]}
+                  key={`${company["Company Name"]}-${company.venture_office}`}
                   company={company}
                   forecast={forecast}
                   showTargetCashReturnAsPercent={showTargetCashReturnAsPercent}
                   showEquityValueAsPercent={showEquityValueAsPercent}
                   showDataMonetizationAsPercent={showDataMonetizationAsPercent}
+                  showVentureOfficeLogo={selectedVentureOffice === "all" && duplicatedCompanyNames.has(company["Company Name"] || "")}
+                  ventureOfficeLogos={ventureOfficeLogos}
                 />
               ))}
               

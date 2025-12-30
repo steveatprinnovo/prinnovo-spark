@@ -1,12 +1,14 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
-import { useCompanies } from "@/hooks/useCompanies";
+import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
+import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
+import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +41,8 @@ export default function Investments() {
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : undefined);
   const { companies, loading, updateCompany, refetch } = useCompanies();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
+  const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
 
   // Get unique venture offices
   const ventureOffices = useMemo(() => 
@@ -348,7 +352,12 @@ export default function Investments() {
                     </TableHeader>
                     <TableBody>
                       {stageCompanies.map((company) => (
-                        <CompanyRow key={company["Company Name"]} company={company} />
+                        <CompanyRow 
+                          key={`${company["Company Name"]}-${company.venture_office}`} 
+                          company={company} 
+                          showVentureOfficeLogo={selectedVentureOffice === "all" && duplicatedCompanyNames.has(company["Company Name"] || "")}
+                          ventureOfficeLogos={ventureOfficeLogos}
+                        />
                       ))}
                     </TableBody>
                   </Table>
@@ -370,9 +379,19 @@ export default function Investments() {
   );
 }
 
-function CompanyRow({ company }: { company: any }) {
+interface CompanyRowProps {
+  company: Company;
+  showVentureOfficeLogo?: boolean;
+  ventureOfficeLogos?: { name: string; logoUrl: string | null }[];
+}
+
+function CompanyRow({ company, showVentureOfficeLogo, ventureOfficeLogos }: CompanyRowProps) {
   const { logoUrl } = useCompanyLogo(company.imgurl);
   const [isOpen, setIsOpen] = useState(false);
+  
+  const ventureOfficeLogo = showVentureOfficeLogo 
+    ? ventureOfficeLogos?.find(l => l.name === company.venture_office)?.logoUrl 
+    : null;
 
   const formatCurrency = (amount: number | null) => {
     if (!amount) return "N/A";
@@ -477,6 +496,13 @@ function CompanyRow({ company }: { company: any }) {
               </div>
             )}
             <span className="font-medium">{company["Company Name"]}</span>
+            {ventureOfficeLogo && (
+              <img
+                src={ventureOfficeLogo}
+                alt={`${company.venture_office} logo`}
+                className="w-5 h-5 rounded object-contain ml-2"
+              />
+            )}
           </div>
         </TableCell>
         <TableCell className="text-right font-medium">
