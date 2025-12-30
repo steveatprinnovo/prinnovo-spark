@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserAuth } from "./useUserAuth";
 
 export interface VentureOfficeDetails {
+  office_id?: number;
   "Venture Office Name": string | null;
   "Companies Evaluated": number | null;
   "Qualified Leads": number | null;

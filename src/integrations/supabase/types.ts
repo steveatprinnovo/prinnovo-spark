@@ -330,6 +330,7 @@ export type Database = {
           id: number
           "Investment Allotment": number | null
           "IPA Negotiations": number | null
+          office_id: number
           "Prinnovo Health Ownership": string | null
           "Qualified Leads": number | null
           "Term Sheet Negotiations": number | null
@@ -342,6 +343,7 @@ export type Database = {
           id?: number
           "Investment Allotment"?: number | null
           "IPA Negotiations"?: number | null
+          office_id: number
           "Prinnovo Health Ownership"?: string | null
           "Qualified Leads"?: number | null
           "Term Sheet Negotiations"?: number | null
@@ -354,6 +356,7 @@ export type Database = {
           id?: number
           "Investment Allotment"?: number | null
           "IPA Negotiations"?: number | null
+          office_id?: number
           "Prinnovo Health Ownership"?: string | null
           "Qualified Leads"?: number | null
           "Term Sheet Negotiations"?: number | null
