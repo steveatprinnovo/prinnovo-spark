@@ -54,7 +54,7 @@ export function DashboardHeader() {
           {/* Navigation - Desktop vs Mobile/Tablet */}
           {!isMobile ? (
             /* Desktop Navigation Links */
-            <nav className="flex items-center space-x-6">
+            <nav className="flex items-center space-x-8">
               <Link 
                 to="/" 
                 className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
