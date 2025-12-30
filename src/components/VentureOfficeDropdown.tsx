@@ -29,7 +29,7 @@ export function VentureOfficeDropdown({
       <SelectTrigger className="bg-background">
         <SelectValue placeholder="Select Venture Office" />
       </SelectTrigger>
-      <SelectContent className="bg-popover z-50">
+      <SelectContent className="bg-popover z-50 min-w-[360px]">
         <SelectItem value="all">
           <div className="flex items-center gap-2">
             <img 
