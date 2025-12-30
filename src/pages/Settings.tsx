@@ -141,7 +141,6 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
         "Term Sheet Negotiations": details["Term Sheet Negotiations"],
         "IPA Negotiations": details["IPA Negotiations"],
         "Investment Allotment": details["Investment Allotment"],
-        "Prinnovo Health Ownership": details["Prinnovo Health Ownership"],
       });
     }
     setIsEditing(true);
@@ -303,17 +302,6 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
                   />
                 ) : (
                   <div className="p-2 bg-muted rounded-md">{details["Investment Allotment"] ?? "—"}</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Prinnovo Health Ownership</Label>
-                {isEditing ? (
-                  <Input 
-                    value={editedDetails["Prinnovo Health Ownership"] ?? ""} 
-                    onChange={(e) => updateField("Prinnovo Health Ownership", e.target.value)}
-                  />
-                ) : (
-                  <div className="p-2 bg-muted rounded-md">{details["Prinnovo Health Ownership"] ?? "—"}</div>
                 )}
               </div>
             </div>
