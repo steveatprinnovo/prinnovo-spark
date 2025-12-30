@@ -797,13 +797,9 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                       <SelectValue placeholder="Select stage..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Qualified Lead">Qualified Lead</SelectItem>
-                      <SelectItem value="Term Sheet Negotiation">Term Sheet Negotiation</SelectItem>
-                      <SelectItem value="IPA Negotiation">IPA Negotiation</SelectItem>
                       <SelectItem value="Implementation">Implementation</SelectItem>
                       <SelectItem value="Pilot">Pilot</SelectItem>
-                      <SelectItem value="In Portfolio">In Portfolio</SelectItem>
-                      <SelectItem value="Declined/Churned">Declined/Churned</SelectItem>
+                      <SelectItem value="In Portfolio">Portfolio Company</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
