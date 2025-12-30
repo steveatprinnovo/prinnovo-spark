@@ -472,7 +472,7 @@ const Projections = () => {
           
           <div className="flex gap-4">
             {isAdmin && (
-              <div className="w-64">
+              <div>
                 <VentureOfficeDropdown
                   value={selectedVentureOffice}
                   onChange={changeVentureOffice}

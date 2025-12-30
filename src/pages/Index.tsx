@@ -128,7 +128,7 @@ const Index = () => {
         {/* Admin Venture Office Selector */}
         {isAdmin && (
           <div className="flex justify-end">
-            <div className="w-64">
+            <div>
               <VentureOfficeDropdown
                 value={selectedVentureOffice}
                 onChange={changeVentureOffice}
