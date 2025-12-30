@@ -26,7 +26,7 @@ export function VentureOfficeDropdown({
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="bg-background">
+      <SelectTrigger className="bg-background min-w-[360px]">
         <SelectValue placeholder="Select Venture Office" />
       </SelectTrigger>
       <SelectContent className="bg-popover z-50 min-w-[360px]">
