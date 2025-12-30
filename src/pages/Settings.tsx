@@ -16,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
 
@@ -280,70 +281,122 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
             <p>Please select a specific venture office from the dropdown above to edit its details.</p>
           </div>
         ) : details ? (
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Companies Evaluated</Label>
-                {isEditing ? (
-                  <Input 
-                    type="number" 
-                    value={editedDetails["Companies Evaluated"] ?? ""} 
-                    onChange={(e) => updateField("Companies Evaluated", parseFloat(e.target.value) || 0)}
-                  />
-                ) : (
-                  <div className="p-2 bg-muted rounded-md">{details["Companies Evaluated"] ?? "—"}</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Qualified Leads</Label>
-                {isEditing ? (
-                  <Input 
-                    type="number" 
-                    value={editedDetails["Qualified Leads"] ?? ""} 
-                    onChange={(e) => updateField("Qualified Leads", parseFloat(e.target.value) || 0)}
-                  />
-                ) : (
-                  <div className="p-2 bg-muted rounded-md">{details["Qualified Leads"] ?? "—"}</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Term Sheet Negotiations</Label>
-                {isEditing ? (
-                  <Input 
-                    type="number" 
-                    value={editedDetails["Term Sheet Negotiations"] ?? ""} 
-                    onChange={(e) => updateField("Term Sheet Negotiations", parseFloat(e.target.value) || 0)}
-                  />
-                ) : (
-                  <div className="p-2 bg-muted rounded-md">{details["Term Sheet Negotiations"] ?? "—"}</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>IPA Negotiations</Label>
-                {isEditing ? (
-                  <Input 
-                    type="number" 
-                    value={editedDetails["IPA Negotiations"] ?? ""} 
-                    onChange={(e) => updateField("IPA Negotiations", parseFloat(e.target.value) || 0)}
-                  />
-                ) : (
-                  <div className="p-2 bg-muted rounded-md">{details["IPA Negotiations"] ?? "—"}</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Investment Allotment</Label>
-                {isEditing ? (
-                  <Input 
-                    type="number" 
-                    value={editedDetails["Investment Allotment"] ?? ""} 
-                    onChange={(e) => updateField("Investment Allotment", parseFloat(e.target.value) || 0)}
-                  />
-                ) : (
-                  <div className="p-2 bg-muted rounded-md">{details["Investment Allotment"] ?? "—"}</div>
-                )}
+          <TooltipProvider>
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    <Label>Total Companies Evaluated</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Number of companies the venture office has evaluated since inception</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {isEditing ? (
+                    <Input 
+                      type="number" 
+                      value={editedDetails["Companies Evaluated"] ?? ""} 
+                      onChange={(e) => updateField("Companies Evaluated", parseFloat(e.target.value) || 0)}
+                    />
+                  ) : (
+                    <div className="p-2 bg-muted rounded-md">{details["Companies Evaluated"] ?? "—"}</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    <Label>Active Qualified Leads</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Companies in active diligence</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {isEditing ? (
+                    <Input 
+                      type="number" 
+                      value={editedDetails["Qualified Leads"] ?? ""} 
+                      onChange={(e) => updateField("Qualified Leads", parseFloat(e.target.value) || 0)}
+                    />
+                  ) : (
+                    <div className="p-2 bg-muted rounded-md">{details["Qualified Leads"] ?? "—"}</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    <Label>Active Term Sheet Negotiations</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Companies with pending active term sheets</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {isEditing ? (
+                    <Input 
+                      type="number" 
+                      value={editedDetails["Term Sheet Negotiations"] ?? ""} 
+                      onChange={(e) => updateField("Term Sheet Negotiations", parseFloat(e.target.value) || 0)}
+                    />
+                  ) : (
+                    <div className="p-2 bg-muted rounded-md">{details["Term Sheet Negotiations"] ?? "—"}</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    <Label>Active IPA Negotiations</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Companies with signed term sheets where legal contracts are in process</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {isEditing ? (
+                    <Input 
+                      type="number" 
+                      value={editedDetails["IPA Negotiations"] ?? ""} 
+                      onChange={(e) => updateField("IPA Negotiations", parseFloat(e.target.value) || 0)}
+                    />
+                  ) : (
+                    <div className="p-2 bg-muted rounded-md">{details["IPA Negotiations"] ?? "—"}</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    <Label>Venture Office Investment Allotment</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Dollars provided from health system budget for annual investments (if unknown, leave blank)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {isEditing ? (
+                    <Input 
+                      type="number" 
+                      value={editedDetails["Investment Allotment"] ?? ""} 
+                      onChange={(e) => updateField("Investment Allotment", parseFloat(e.target.value) || 0)}
+                    />
+                  ) : (
+                    <div className="p-2 bg-muted rounded-md">{details["Investment Allotment"] ?? "—"}</div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          </TooltipProvider>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             No venture office details found.
