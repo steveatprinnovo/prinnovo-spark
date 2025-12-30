@@ -9,6 +9,7 @@ import Implementations from "./pages/Implementations";
 import Investments from "./pages/Investments";
 import Projections from "./pages/Projections";
 import BoardMode from "./pages/BoardMode";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/investments" element={<Investments />} />
           <Route path="/projections" element={<Projections />} />
           <Route path="/board-mode" element={<BoardMode />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, ClipboardList, DollarSign, TrendingUp, Menu, X, LogOut } from "lucide-react";
+import { Home, ClipboardList, DollarSign, TrendingUp, Settings, Menu, X, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -9,6 +9,7 @@ const navigationItems = [
   { path: "/implementations", icon: ClipboardList, label: "Implementations" },
   { path: "/investments", icon: DollarSign, label: "Investments" },
   { path: "/projections", icon: TrendingUp, label: "Projections" },
+  { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
 

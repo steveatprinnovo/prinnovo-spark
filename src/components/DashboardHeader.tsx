@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
-import { LogOut, Home, ClipboardList, DollarSign, TrendingUp } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
@@ -94,6 +94,15 @@ export function DashboardHeader() {
               >
                 <TrendingUp className="h-4 w-4" />
                 Projections
+              </Link>
+              <Link 
+                to="/settings" 
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname === "/settings" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                Settings
               </Link>
             </nav>
           ) : (
