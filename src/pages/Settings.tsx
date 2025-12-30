@@ -16,7 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase } from "lucide-react";
+import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
+import prinnovoLogo from "@/assets/prinnovo-logo.webp";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -91,7 +93,7 @@ const Settings = () => {
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="flex flex-col gap-6">
           {/* Venture Office Settings */}
           <VentureOfficeSettingsCard 
             selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || ""} 
@@ -118,6 +120,7 @@ interface VentureOfficeSettingsCardProps {
 
 function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOfficeSettingsCardProps) {
   const { details, loading } = useVentureOfficeDetails(selectedVentureOffice);
+  const { logoUrl: ventureOfficeLogo } = useVentureOfficeLogo(selectedVentureOffice);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState<Partial<VentureOfficeDetails>>({});
   const [saving, setSaving] = useState(false);
@@ -194,15 +197,21 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
 
   const showAggregateView = selectedVentureOffice === "all";
 
+  const displayLogo = selectedVentureOffice === "all" ? prinnovoLogo : ventureOfficeLogo;
+
   return (
-    <Card>
+    <Card className="bg-blue-50 border-2 border-blue-300">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Venture Office Settings
+            {displayLogo ? (
+              <img src={displayLogo} alt="Venture Office" className="h-6 w-6 object-contain" />
+            ) : (
+              <Building2 className="h-5 w-5" />
+            )}
+            Venture Office Updates
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="mt-3 text-sm italic">
             {showAggregateView 
               ? "Select a specific venture office to edit details" 
               : `Edit details for ${selectedVentureOffice}`}
@@ -413,14 +422,14 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
   const isEditing = selectedCompanyId !== null;
 
   return (
-    <Card>
+    <Card className="bg-green-50 border-2 border-green-300">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Company Settings
+            <Briefcase className="h-5 w-5" />
+            Portfolio Company Updates
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="mt-3 text-sm italic">
             Select a company to edit or add a new one
           </CardDescription>
         </div>
