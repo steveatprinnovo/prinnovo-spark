@@ -805,7 +805,7 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                 </div>
 
                 <div className="space-y-2">
-                  <Label>EVP Owner</Label>
+                  <Label>Executive Owner</Label>
                   <Input 
                     value={editedCompany["EVP Owner"] ?? ""} 
                     onChange={(e) => updateField("EVP Owner", e.target.value)}
@@ -855,7 +855,7 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Current HLV Valuation</Label>
+                  <Label>Current Venture Office Valuation</Label>
                   <Input 
                     type="number"
                     value={editedCompany["Current HLV Valuation"] ?? ""} 
@@ -864,7 +864,7 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                 </div>
 
                 <div className="space-y-2">
-                  <Label>HLV Ownership Percentage</Label>
+                  <Label>Venture Office Ownership Percentage</Label>
                   <Input 
                     value={editedCompany["HLV Ownership Percentage"] ?? ""} 
                     onChange={(e) => updateField("HLV Ownership Percentage", e.target.value)}
