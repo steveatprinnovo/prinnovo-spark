@@ -1020,8 +1020,12 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                       {investmentSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     </Button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-4 space-y-4">
-                    <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                  <CollapsibleContent className="pt-4">
+                    <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-lg space-y-4">
+                      <div className="flex items-center gap-2 text-amber-700 mb-2">
+                        <TrendingUp className="h-4 w-4" />
+                        <span className="text-sm font-medium">Investment details are saved separately from company details</span>
+                      </div>
                       {/* Investment Stage */}
                       <div className="space-y-2">
                         <Label>Investment Tracker Stage</Label>
