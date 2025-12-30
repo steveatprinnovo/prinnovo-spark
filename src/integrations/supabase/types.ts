@@ -156,6 +156,7 @@ export type Database = {
           "Target IPA Return": number | null
           "Term Sheet Signature Date": string | null
           "Total Enterprise Value Captured": number | null
+          updated_at: string | null
           venture_office: string | null
         }
         Insert: {
@@ -200,6 +201,7 @@ export type Database = {
           "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
           "Total Enterprise Value Captured"?: number | null
+          updated_at?: string | null
           venture_office?: string | null
         }
         Update: {
@@ -244,6 +246,7 @@ export type Database = {
           "Target IPA Return"?: number | null
           "Term Sheet Signature Date"?: string | null
           "Total Enterprise Value Captured"?: number | null
+          updated_at?: string | null
           venture_office?: string | null
         }
         Relationships: []
@@ -334,6 +337,7 @@ export type Database = {
           "Prinnovo Health Ownership": string | null
           "Qualified Leads": number | null
           "Term Sheet Negotiations": number | null
+          updated_at: string | null
           "Venture Office Logo": string | null
           "Venture Office Name": string | null
         }
@@ -347,6 +351,7 @@ export type Database = {
           "Prinnovo Health Ownership"?: string | null
           "Qualified Leads"?: number | null
           "Term Sheet Negotiations"?: number | null
+          updated_at?: string | null
           "Venture Office Logo"?: string | null
           "Venture Office Name"?: string | null
         }
@@ -360,6 +365,7 @@ export type Database = {
           "Prinnovo Health Ownership"?: string | null
           "Qualified Leads"?: number | null
           "Term Sheet Negotiations"?: number | null
+          updated_at?: string | null
           "Venture Office Logo"?: string | null
           "Venture Office Name"?: string | null
         }

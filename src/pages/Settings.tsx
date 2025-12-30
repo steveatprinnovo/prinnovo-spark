@@ -27,6 +27,7 @@ const Settings = () => {
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { selectedVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading, refetch: refetchCompanies } = useCompanies();
+  const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : ventureOffice || "");
 
   // Get unique venture offices
   const ventureOffices = useMemo(() => 
@@ -47,30 +48,30 @@ const Settings = () => {
     }).sort((a, b) => (a["Company Name"] || "").localeCompare(b["Company Name"] || ""));
   }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
 
-  // Get the most recent updated date from companies
+  // Get the most recent updated date from companies or venture office
   const lastUpdated = useMemo(() => {
-    const dates = filteredCompanies
-      .flatMap(c => [
-        c["Invested Amount Valuation Date"],
-        c["Invested Amount Valuation Date 2"],
-        c["Invested Amount Valuation Date 3"]
-      ])
-      .filter((date): date is string => date !== null && date !== undefined);
+    const dates: string[] = [];
+    
+    // Add company updated_at dates
+    filteredCompanies.forEach(c => {
+      if ((c as any).updated_at) {
+        dates.push((c as any).updated_at);
+      }
+    });
+    
+    // Add venture office updated_at
+    if (ventureOfficeDetails?.updated_at) {
+      dates.push(ventureOfficeDetails.updated_at);
+    }
     
     if (dates.length === 0) return null;
     return dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
-  }, [filteredCompanies]);
+  }, [filteredCompanies, ventureOfficeDetails]);
 
-  const formatISODate = (dateString: string | null | undefined) => {
+  const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "";
-    const parts = dateString.split("-");
-    if (parts.length !== 3) return dateString;
-    const [yearStr, monthStr, dayStr] = parts;
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-    const day = Number(dayStr);
-    if (!year || !month || !day) return dateString;
-    const date = new Date(year, month - 1, day);
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
@@ -126,7 +127,7 @@ const Settings = () => {
             )}
             {lastUpdated && (
               <div className="text-sm text-muted-foreground italic">
-                Current as of {formatISODate(lastUpdated)}
+                Current as of {formatDate(lastUpdated)}
               </div>
             )}
           </div>
