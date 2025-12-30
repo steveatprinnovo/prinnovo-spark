@@ -46,33 +46,6 @@ const Settings = () => {
     }).sort((a, b) => (a["Company Name"] || "").localeCompare(b["Company Name"] || ""));
   }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
 
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
-  // Show loading state
-  if (authLoading || authzLoading || loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6 space-y-6">
-          <Skeleton className="h-12 w-64" />
-          <div className="grid gap-6 md:grid-cols-2">
-            <Skeleton className="h-96" />
-            <Skeleton className="h-96" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
   // Get the most recent updated date from companies
   const lastUpdated = useMemo(() => {
     const dates = filteredCompanies
@@ -99,6 +72,33 @@ const Settings = () => {
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  // Show loading state
+  if (authLoading || authzLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader />
+        <div className="container mx-auto p-6 space-y-6">
+          <Skeleton className="h-12 w-64" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
