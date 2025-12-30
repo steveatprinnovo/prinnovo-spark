@@ -73,25 +73,63 @@ const Settings = () => {
     return null;
   }
 
+  // Get the most recent updated date from companies
+  const lastUpdated = useMemo(() => {
+    const dates = filteredCompanies
+      .flatMap(c => [
+        c["Invested Amount Valuation Date"],
+        c["Invested Amount Valuation Date 2"],
+        c["Invested Amount Valuation Date 3"]
+      ])
+      .filter((date): date is string => date !== null && date !== undefined);
+    
+    if (dates.length === 0) return null;
+    return dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+  }, [filteredCompanies]);
+
+  const formatISODate = (dateString: string | null | undefined) => {
+    if (!dateString) return "";
+    const parts = dateString.split("-");
+    if (parts.length !== 3) return dateString;
+    const [yearStr, monthStr, dayStr] = parts;
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    if (!year || !month || !day) return dateString;
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-6">
-        {/* Admin Venture Office Selector */}
-        {isAdmin && (
-          <div className="flex justify-end">
-            <div className="w-64">
-              <VentureOfficeDropdown
-                value={selectedVentureOffice}
-                onChange={changeVentureOffice}
-                ventureOffices={ventureOffices}
-                companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
-                totalCount={companies.length}
-              />
-            </div>
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Settings</h1>
+            <p className="text-muted-foreground">Manage venture office and portfolio company details</p>
           </div>
-        )}
+          <div className="flex flex-col items-end gap-3">
+            {/* Admin Venture Office Selector */}
+            {isAdmin && (
+              <div className="w-80">
+                <VentureOfficeDropdown
+                  value={selectedVentureOffice}
+                  onChange={changeVentureOffice}
+                  ventureOffices={ventureOffices}
+                  companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
+                  totalCount={companies.length}
+                />
+              </div>
+            )}
+            {lastUpdated && (
+              <div className="text-sm text-muted-foreground italic">
+                Current as of {formatISODate(lastUpdated)}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="flex flex-col gap-6">
           {/* Venture Office Settings */}
