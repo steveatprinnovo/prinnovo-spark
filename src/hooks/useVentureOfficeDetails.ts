@@ -12,6 +12,7 @@ export interface VentureOfficeDetails {
   "Investment Allotment": number | null;
   "Prinnovo Health Ownership": string | null;
   "Venture Office Logo": string | null;
+  updated_at?: string | null;
 }
 
 export function useVentureOfficeDetails(selectedOffice?: string) {
