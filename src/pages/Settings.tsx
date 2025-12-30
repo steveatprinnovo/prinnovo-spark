@@ -749,10 +749,34 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
 
                 <div className="space-y-2">
                   <Label>High-Level Focus Area</Label>
-                  <Input 
+                  <Select 
                     value={editedCompany["High-Level Focus Area"] ?? ""} 
-                    onChange={(e) => updateField("High-Level Focus Area", e.target.value)}
-                  />
+                    onValueChange={(v) => updateField("High-Level Focus Area", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select focus area..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Clinical">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-sm bg-green-500"></div>
+                          Clinical
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Financial">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-sm bg-orange-500"></div>
+                          Financial
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Operational">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-sm bg-blue-500"></div>
+                          Operational
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
