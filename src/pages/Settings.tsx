@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
@@ -419,6 +419,9 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | "new" | null>(null);
   const [editedCompany, setEditedCompany] = useState<Partial<Company>>({});
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedCompany = useMemo(() => {
     if (selectedCompanyId === "new" || selectedCompanyId === null) return null;
@@ -429,7 +432,55 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
   useEffect(() => {
     setSelectedCompanyId(null);
     setEditedCompany({});
+    setLogoFile(null);
+    setLogoPreview(null);
   }, [selectedVentureOffice]);
+
+  // Handle logo file selection
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload logo and get signed URL
+  const uploadLogo = async (companyName: string): Promise<string | null> => {
+    if (!logoFile) return null;
+    
+    const fileName = `${companyName.toLowerCase().replace(/\s+/g, '-')}.png`;
+    
+    // Upload to Company Logos bucket (will overwrite if exists)
+    const { error: uploadError } = await supabase.storage
+      .from('Company Logos')
+      .upload(fileName, logoFile, { 
+        upsert: true,
+        contentType: 'image/png'
+      });
+    
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error(`Failed to upload logo: ${uploadError.message}`);
+    }
+    
+    // Create signed URL with 50 years expiration (50 * 365 * 24 * 60 * 60 seconds)
+    const fiftyYearsInSeconds = 50 * 365 * 24 * 60 * 60;
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from('Company Logos')
+      .createSignedUrl(fileName, fiftyYearsInSeconds);
+    
+    if (signedUrlError || !signedUrlData) {
+      console.error('Signed URL error:', signedUrlError);
+      throw new Error('Failed to create signed URL for logo');
+    }
+    
+    return signedUrlData.signedUrl;
+  };
 
   const handleSelectCompany = (value: string) => {
     if (value === "new") {
@@ -447,24 +498,36 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
         "Champions": "",
         "Intro Origin": "",
       });
-    } else {
-      const dealId = parseInt(value);
-      const company = companies.find(c => c.deal_id === dealId);
-      if (company) {
-        setSelectedCompanyId(dealId);
-        setEditedCompany({ ...company });
+        setLogoFile(null);
+        setLogoPreview(null);
+      } else {
+        const dealId = parseInt(value);
+        const company = companies.find(c => c.deal_id === dealId);
+        if (company) {
+          setSelectedCompanyId(dealId);
+          setEditedCompany({ ...company });
+          setLogoFile(null);
+          setLogoPreview(company.imgurl || null);
+        }
       }
-    }
-  };
+    };
 
   const handleCancel = () => {
     setSelectedCompanyId(null);
     setEditedCompany({});
+    setLogoFile(null);
+    setLogoPreview(null);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Handle logo upload if a new file was selected
+      let logoUrl: string | null = null;
+      if (logoFile && editedCompany["Company Name"]) {
+        logoUrl = await uploadLogo(editedCompany["Company Name"]);
+      }
+
       if (selectedCompanyId === "new") {
         // Generate deal_id based on office_id and sequential company number
         const ventureOfficeName = editedCompany.venture_office;
@@ -506,17 +569,28 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
         }
         
         const { deal_id: _, ...insertData } = editedCompany as Company;
+        const insertPayload = {
+          ...insertData,
+          deal_id: nextDealId,
+          ...(logoUrl && { imgurl: logoUrl })
+        };
+        
         const { error } = await supabase
           .from('company_detail')
-          .insert({ ...insertData, deal_id: nextDealId } as any);
+          .insert(insertPayload as any);
         
         if (error) throw error;
         toast.success("Company created successfully");
       } else if (selectedCompanyId) {
         // Update existing company
+        const updatePayload = {
+          ...editedCompany,
+          ...(logoUrl && { imgurl: logoUrl })
+        };
+        
         const { error } = await supabase
           .from('company_detail')
-          .update(editedCompany)
+          .update(updatePayload)
           .eq('deal_id', selectedCompanyId);
         
         if (error) throw error;
@@ -526,6 +600,8 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
       refetchCompanies();
       setSelectedCompanyId(null);
       setEditedCompany({});
+      setLogoFile(null);
+      setLogoPreview(null);
     } catch (err: any) {
       toast.error(`Failed to save: ${err.message}`);
     } finally {
@@ -609,6 +685,48 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                     onChange={(e) => updateField("Company Description", e.target.value)}
                     rows={3}
                   />
+                </div>
+
+                {/* Company Logo Upload */}
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Company Logo</Label>
+                  <div className="flex items-center gap-4">
+                    {/* Logo Preview */}
+                    <div className="h-16 w-16 rounded-md border border-border bg-muted flex items-center justify-center overflow-hidden">
+                      {logoPreview ? (
+                        <img 
+                          src={logoPreview} 
+                          alt="Logo preview" 
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    
+                    {/* Upload Button */}
+                    <div className="flex flex-col gap-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {logoPreview ? "Change Logo" : "Upload Logo"}
+                      </Button>
+                      <span className="text-xs text-muted-foreground">
+                        {logoFile ? logoFile.name : "PNG, JPG up to 5MB"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {selectedVentureOffice === "all" && (
