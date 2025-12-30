@@ -125,11 +125,20 @@ const CompanyRow = ({
         </div>
         <span className="font-medium text-sm truncate">{company["Company Name"]}</span>
         {ventureOfficeLogo && (
-          <img
-            src={ventureOfficeLogo}
-            alt={`${company.venture_office} logo`}
-            className="w-5 h-5 rounded object-contain"
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <img
+                  src={ventureOfficeLogo}
+                  alt={`${company.venture_office} logo`}
+                  className="w-5 h-5 rounded object-contain cursor-help"
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{company.venture_office}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </TableCell>
       <TableCell className="cell-2 transition-colors text-center text-sm">
