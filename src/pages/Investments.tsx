@@ -407,6 +407,7 @@ export default function Investments() {
         companies={companies}
         updateCompany={updateCompany}
         refetch={refetch}
+        selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice}
       />
     </div>
   );
