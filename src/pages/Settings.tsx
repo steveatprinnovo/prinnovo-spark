@@ -1030,7 +1030,7 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                             <SelectValue placeholder="Select investment stage..." />
                           </SelectTrigger>
                           <SelectContent className="bg-popover z-50">
-                            <SelectItem value="">No Investment Stage</SelectItem>
+                            <SelectItem value="none">No Investment Stage</SelectItem>
                             {INVESTMENT_STAGES.map((stage) => (
                               <SelectItem key={stage} value={stage}>
                                 {stage}
@@ -1138,7 +1138,7 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                           setSaving(true);
                           try {
                             const updateData: any = {
-                              "Investment Tracker Stage": investmentStage || null
+                              "Investment Tracker Stage": investmentStage === "none" ? null : (investmentStage || null)
                             };
 
                             if (selectedRound === "1") {
