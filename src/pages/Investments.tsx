@@ -153,7 +153,8 @@ export default function Investments() {
     });
 
     // Calculate KPIs
-    const totalAllocated = ventureOfficeDetails?.["Investment Allotment"] || 10000000;
+    const investmentAllotment = ventureOfficeDetails?.["Investment Allotment"];
+    const hasAllotment = investmentAllotment !== null && investmentAllotment !== undefined && investmentAllotment !== 0;
     
     // Helper to sum all rounds for a company
     const getTotalInvestedForCompany = (company: any) => {
@@ -203,7 +204,8 @@ export default function Investments() {
 
     const portfolioGain = totalInvested > 0 ? ((portfolioValue - totalInvested) / totalInvested) * 100 : 0;
 
-    const kpis = [
+    // Build KPIs based on whether Investment Allotment exists
+    const kpis = hasAllotment ? [
       {
         title: "Portfolio Value",
         value: portfolioValue,
@@ -212,20 +214,51 @@ export default function Investments() {
       },
       {
         title: "Total After Currently Invested Through 2025",
-        value: totalAllocated - committedSum,
-        subtitle: `out of ${formatCurrency(totalAllocated)} allocated`,
+        value: investmentAllotment - committedSum,
+        subtitle: `out of ${formatCurrency(investmentAllotment)} allocated`,
         gradient: "var(--gradient-accent)"
       },
       {
         title: "Total After IPA Commitments Through 2025",
-        value: totalAllocated - committedSum - ipaObligationSum,
-        subtitle: `out of ${formatCurrency(totalAllocated)} allocated`,
+        value: investmentAllotment - committedSum - ipaObligationSum,
+        subtitle: `out of ${formatCurrency(investmentAllotment)} allocated`,
         gradient: "var(--gradient-primary)"
       },
       {
         title: "Total After Term Sheets Proposed Through 2025",
-        value: totalAllocated - committedSum - ipaObligationSum - termSheetSum,
-        subtitle: `out of ${formatCurrency(totalAllocated)} allocated`,
+        value: investmentAllotment - committedSum - ipaObligationSum - termSheetSum,
+        subtitle: `out of ${formatCurrency(investmentAllotment)} allocated`,
+        gradient: "var(--gradient-accent)"
+      },
+      {
+        title: "Total Operational Funding",
+        value: operationalSum,
+        subtitle: "loans, investments as payments",
+        gradient: "var(--gradient-primary)"
+      }
+    ] : [
+      {
+        title: "Portfolio Value",
+        value: portfolioValue,
+        subtitle: `${portfolioGain > 0 ? '+' : ''}${portfolioGain.toFixed(1)}% gain`,
+        gradient: "var(--gradient-primary)"
+      },
+      {
+        title: "Total Currently Invested",
+        value: committedSum,
+        subtitle: "To Date",
+        gradient: "var(--gradient-accent)"
+      },
+      {
+        title: "Total IPA Commitments",
+        value: ipaObligationSum,
+        subtitle: "To Date",
+        gradient: "var(--gradient-primary)"
+      },
+      {
+        title: "Total Term Sheet Proposed Investments",
+        value: termSheetSum,
+        subtitle: "To Date",
         gradient: "var(--gradient-accent)"
       },
       {
