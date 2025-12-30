@@ -18,6 +18,7 @@ interface UpdateValuationModalProps {
   companies: Company[];
   updateCompany: (companyName: string, updates: Partial<Company>) => Promise<boolean>;
   refetch: () => Promise<void>;
+  selectedVentureOffice?: string;
 }
 
 const INVESTMENT_STAGES = [
@@ -50,7 +51,7 @@ function CompanySelectItem({ company }: { company: any }) {
   );
 }
 
-export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany, refetch }: UpdateValuationModalProps) {
+export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany, refetch, selectedVentureOffice }: UpdateValuationModalProps) {
   const [activeTab, setActiveTab] = useState<string>("update");
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [investmentStage, setInvestmentStage] = useState<string>("");
@@ -64,10 +65,14 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roundToDelete, setRoundToDelete] = useState<string | null>(null);
 
-  // Filter companies that have investment tracker stages
-  const investmentCompanies = companies.filter(
-    company => company["Investment Tracker Stage"] !== null
-  );
+  // Filter companies that have investment tracker stages and match selected venture office
+  const investmentCompanies = companies.filter(company => {
+    if (company["Investment Tracker Stage"] === null) return false;
+    if (selectedVentureOffice && selectedVentureOffice !== "all" && company.venture_office !== selectedVentureOffice) {
+      return false;
+    }
+    return true;
+  });
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -306,10 +311,14 @@ export function UpdateValuationModal({ isOpen, onClose, companies, updateCompany
     }
   };
 
-  // Get companies that don't have investment tracker stages for "Add New" tab
-  const portfolioCompanies = companies.filter(
-    company => company["Investment Tracker Stage"] === null
-  );
+  // Get companies that don't have investment tracker stages for "Add New" tab (filtered by venture office)
+  const portfolioCompanies = companies.filter(company => {
+    if (company["Investment Tracker Stage"] !== null) return false;
+    if (selectedVentureOffice && selectedVentureOffice !== "all" && company.venture_office !== selectedVentureOffice) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
