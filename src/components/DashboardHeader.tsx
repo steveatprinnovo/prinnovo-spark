@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
-import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Settings } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Target, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
@@ -90,6 +90,15 @@ export function DashboardHeader() {
               >
                 <TrendingUp className="h-4 w-4" />
                 Projections
+              </Link>
+              <Link 
+                to="/focus-areas" 
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname === "/focus-areas" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <Target className="h-4 w-4" />
+                Focus Areas
               </Link>
               <Link 
                 to="/settings" 
