@@ -26,7 +26,7 @@ const Implementations = () => {
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
   const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading, updateCompany } = useCompanies();
-  const { statusNotes, loading: statusNotesLoading, saveStatusNote } = useStatusNotes();
+  const { statusNotes, loading: statusNotesLoading, saveStatusNote, getStatusNote } = useStatusNotes();
   const { toast } = useToast();
   const [editingStatus, setEditingStatus] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState<{ [key: string]: string }>({});
@@ -168,8 +168,8 @@ const Implementations = () => {
   const handleStatusEditStart = (dealId: number, companyName: string) => {
     const editKey = `${dealId}`;
     setEditingStatus(editKey);
-    // Initialize with existing status or empty string
-    setEditingValues({ [editKey]: statusNotes[dealId] || "" });
+    // Initialize with existing status (check by deal_id first, then by company name)
+    setEditingValues({ [editKey]: getStatusNote(dealId, companyName) });
   };
 
   const handleStatusEditSave = async (dealId: number, companyName: string) => {
@@ -412,7 +412,7 @@ const Implementations = () => {
                 company={company}
                 index={filteredCompanies.indexOf(company) + 1}
                 isEditingStatus={editingStatus === editKey}
-                statusValue={editingValues[editKey] || statusNotes[company.deal_id] || ""}
+                statusValue={editingValues[editKey] || getStatusNote(company.deal_id, company["Company Name"])}
                 onStatusEditStart={() => handleStatusEditStart(company.deal_id, company["Company Name"])}
                 onStatusEditSave={() => handleStatusEditSave(company.deal_id, company["Company Name"])}
                 onStatusEditCancel={handleStatusEditCancel}
