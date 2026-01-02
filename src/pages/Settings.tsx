@@ -17,12 +17,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
+import { useFocusAreas, FocusArea } from "@/hooks/useFocusAreas";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -164,9 +165,18 @@ interface VentureOfficeSettingsCardProps {
 function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOfficeSettingsCardProps) {
   const { details, loading } = useVentureOfficeDetails(selectedVentureOffice);
   const { logoUrl: ventureOfficeLogo } = useVentureOfficeLogo(selectedVentureOffice);
+  const { focusAreas, loading: focusAreasLoading, addFocusArea, updateFocusArea, deleteFocusArea, addCompanyToFocusArea, removeCompanyFromFocusArea } = useFocusAreas(selectedVentureOffice);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState<Partial<VentureOfficeDetails>>({});
   const [saving, setSaving] = useState(false);
+  
+  // Focus Areas state
+  const [focusAreasSectionOpen, setFocusAreasSectionOpen] = useState(false);
+  const [newFocusAreaName, setNewFocusAreaName] = useState("");
+  const [addingFocusArea, setAddingFocusArea] = useState(false);
+  const [editingFocusAreaId, setEditingFocusAreaId] = useState<string | null>(null);
+  const [editingFocusAreaName, setEditingFocusAreaName] = useState("");
+  const [newCompanyInputs, setNewCompanyInputs] = useState<{ [focusAreaId: string]: { name: string; url: string } }>({});
 
   // Reset editing state when venture office changes
   useEffect(() => {
@@ -405,6 +415,226 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
           <div className="text-center py-8 text-muted-foreground">
             No venture office details found.
           </div>
+        )}
+
+        {/* Focus Areas Section */}
+        {!showAggregateView && (
+          <Collapsible open={focusAreasSectionOpen} onOpenChange={setFocusAreasSectionOpen} className="mt-6">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Focus Areas
+                </div>
+                {focusAreasSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <div className="p-4 bg-teal-50 border-2 border-teal-300 rounded-lg space-y-4">
+                <div className="flex items-center gap-2 text-teal-700 mb-2">
+                  <Target className="h-4 w-4" />
+                  <span className="text-sm font-medium">Manage focus areas and example companies for this venture office</span>
+                </div>
+
+                {focusAreasLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ) : (
+                  <>
+                    {/* Existing Focus Areas */}
+                    {focusAreas.map((focusArea) => (
+                      <div key={focusArea.id} className="p-3 bg-background border rounded-lg space-y-3">
+                        {/* Focus Area Name */}
+                        <div className="flex items-center justify-between gap-2">
+                          {editingFocusAreaId === focusArea.id ? (
+                            <div className="flex-1 flex gap-2">
+                              <Input
+                                value={editingFocusAreaName}
+                                onChange={(e) => setEditingFocusAreaName(e.target.value)}
+                                placeholder="Focus area name"
+                                className="flex-1"
+                              />
+                              <Button
+                                size="sm"
+                                onClick={async () => {
+                                  if (editingFocusAreaName.trim()) {
+                                    await updateFocusArea(focusArea.id, editingFocusAreaName.trim());
+                                    setEditingFocusAreaId(null);
+                                    setEditingFocusAreaName("");
+                                  }
+                                }}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingFocusAreaId(null);
+                                  setEditingFocusAreaName("");
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <>
+                              <h4 className="font-medium text-foreground">{focusArea.focus_area_name}</h4>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingFocusAreaId(focusArea.id);
+                                    setEditingFocusAreaName(focusArea.focus_area_name);
+                                  }}
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={async () => {
+                                    if (confirm(`Delete focus area "${focusArea.focus_area_name}"?`)) {
+                                      await deleteFocusArea(focusArea.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Example Companies */}
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Example Companies</Label>
+                          {focusArea.companies.map((company) => (
+                            <div key={company.id} className="flex items-center gap-2 pl-2 py-1 bg-muted/50 rounded">
+                              <span className="flex-1 text-sm">{company.company_name}</span>
+                              {company.website_url && (
+                                <a
+                                  href={company.website_url.startsWith('http') ? company.website_url : `https://${company.website_url}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                onClick={() => removeCompanyFromFocusArea(company.id, focusArea.id)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+
+                          {/* Add New Company */}
+                          <div className="flex gap-2 items-end">
+                            <div className="flex-1">
+                              <Label className="text-xs">Company Name</Label>
+                              <Input
+                                value={newCompanyInputs[focusArea.id]?.name || ""}
+                                onChange={(e) => setNewCompanyInputs(prev => ({
+                                  ...prev,
+                                  [focusArea.id]: { ...prev[focusArea.id], name: e.target.value }
+                                }))}
+                                placeholder="Company name"
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <Label className="text-xs">Website URL</Label>
+                              <Input
+                                value={newCompanyInputs[focusArea.id]?.url || ""}
+                                onChange={(e) => setNewCompanyInputs(prev => ({
+                                  ...prev,
+                                  [focusArea.id]: { ...prev[focusArea.id], url: e.target.value }
+                                }))}
+                                placeholder="https://example.com"
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                            <Button
+                              size="sm"
+                              className="h-8"
+                              disabled={!newCompanyInputs[focusArea.id]?.name?.trim()}
+                              onClick={async () => {
+                                const input = newCompanyInputs[focusArea.id];
+                                if (input?.name?.trim()) {
+                                  await addCompanyToFocusArea(focusArea.id, input.name.trim(), input.url?.trim() || null);
+                                  setNewCompanyInputs(prev => ({
+                                    ...prev,
+                                    [focusArea.id]: { name: "", url: "" }
+                                  }));
+                                }
+                              }}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Add New Focus Area */}
+                    {addingFocusArea ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={newFocusAreaName}
+                          onChange={(e) => setNewFocusAreaName(e.target.value)}
+                          placeholder="Enter focus area name"
+                          className="flex-1"
+                          autoFocus
+                        />
+                        <Button
+                          size="sm"
+                          onClick={async () => {
+                            if (newFocusAreaName.trim()) {
+                              await addFocusArea(newFocusAreaName.trim());
+                              setNewFocusAreaName("");
+                              setAddingFocusArea(false);
+                            }
+                          }}
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setNewFocusAreaName("");
+                            setAddingFocusArea(false);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full border-dashed"
+                        onClick={() => setAddingFocusArea(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Focus Area
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </CardContent>
     </Card>
