@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
+import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
@@ -418,6 +419,8 @@ interface CompanySettingsCardProps {
 }
 
 function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffice }: CompanySettingsCardProps) {
+  // Get set of duplicated company names (appear in multiple venture offices)
+  const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | "new" | null>(null);
   const [editedCompany, setEditedCompany] = useState<Partial<Company>>({});
   const [saving, setSaving] = useState(false);
@@ -792,11 +795,17 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                       Add New Company
                     </span>
                   </SelectItem>
-                  {companies.map((company) => (
-                    <SelectItem key={company.deal_id} value={company.deal_id.toString()}>
-                      {company["Company Name"]}
-                    </SelectItem>
-                  ))}
+                  {companies.map((company) => {
+                    const isDuplicated = duplicatedCompanyNames.has(company["Company Name"] || "");
+                    const displayName = isDuplicated && company.venture_office
+                      ? `${company["Company Name"]} (${company.venture_office})`
+                      : company["Company Name"];
+                    return (
+                      <SelectItem key={company.deal_id} value={company.deal_id.toString()}>
+                        {displayName}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
