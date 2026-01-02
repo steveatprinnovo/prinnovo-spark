@@ -251,6 +251,62 @@ export type Database = {
         }
         Relationships: []
       }
+      focus_area_companies: {
+        Row: {
+          company_name: string
+          created_at: string
+          focus_area_id: string
+          id: string
+          website_url: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          focus_area_id: string
+          id?: string
+          website_url?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          focus_area_id?: string
+          id?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "focus_area_companies_focus_area_id_fkey"
+            columns: ["focus_area_id"]
+            isOneToOne: false
+            referencedRelation: "focus_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      focus_areas: {
+        Row: {
+          created_at: string
+          focus_area_name: string
+          id: string
+          updated_at: string
+          venture_office: string
+        }
+        Insert: {
+          created_at?: string
+          focus_area_name: string
+          id?: string
+          updated_at?: string
+          venture_office: string
+        }
+        Update: {
+          created_at?: string
+          focus_area_name?: string
+          id?: string
+          updated_at?: string
+          venture_office?: string
+        }
+        Relationships: []
+      }
       status_notes: {
         Row: {
           company_name: string
