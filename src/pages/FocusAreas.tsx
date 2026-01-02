@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Target, Building2 } from "lucide-react";
+import { ExternalLink, Target, Building2, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface FocusAreaCompany {
@@ -19,6 +19,7 @@ interface FocusArea {
   id: string;
   venture_office: string;
   focus_area_name: string;
+  is_high_priority: boolean;
   companies: FocusAreaCompany[];
 }
 
@@ -168,6 +169,12 @@ const FocusAreas = () => {
                         <CardTitle className="flex items-center gap-2 text-lg">
                           <Target className="h-4 w-4 text-primary" />
                           {area.focus_area_name}
+                          {area.is_high_priority && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded">
+                              <Star className="h-3 w-3 fill-current" />
+                              High Priority
+                            </span>
+                          )}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>

@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink, Star } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -165,7 +165,7 @@ interface VentureOfficeSettingsCardProps {
 function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOfficeSettingsCardProps) {
   const { details, loading } = useVentureOfficeDetails(selectedVentureOffice);
   const { logoUrl: ventureOfficeLogo } = useVentureOfficeLogo(selectedVentureOffice);
-  const { focusAreas, loading: focusAreasLoading, addFocusArea, updateFocusArea, deleteFocusArea, addCompanyToFocusArea, removeCompanyFromFocusArea } = useFocusAreas(selectedVentureOffice);
+  const { focusAreas, loading: focusAreasLoading, addFocusArea, updateFocusArea, updateFocusAreaPriority, deleteFocusArea, addCompanyToFocusArea, removeCompanyFromFocusArea } = useFocusAreas(selectedVentureOffice);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState<Partial<VentureOfficeDetails>>({});
   const [saving, setSaving] = useState(false);
@@ -481,7 +481,15 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
                             </div>
                           ) : (
                             <>
-                              <h4 className="font-medium text-foreground">{focusArea.focus_area_name}</h4>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-foreground">{focusArea.focus_area_name}</h4>
+                                {focusArea.is_high_priority && (
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded">
+                                    <Star className="h-3 w-3 fill-current" />
+                                    High
+                                  </span>
+                                )}
+                              </div>
                               <div className="flex gap-1">
                                 <Button
                                   size="sm"
@@ -508,6 +516,22 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
                               </div>
                             </>
                           )}
+                        </div>
+
+                        {/* High Priority Checkbox */}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`priority-${focusArea.id}`}
+                            checked={focusArea.is_high_priority}
+                            onChange={async (e) => {
+                              await updateFocusAreaPriority(focusArea.id, e.target.checked);
+                            }}
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <Label htmlFor={`priority-${focusArea.id}`} className="text-sm text-muted-foreground cursor-pointer">
+                            High Priority
+                          </Label>
                         </div>
 
                         {/* Example Companies */}
