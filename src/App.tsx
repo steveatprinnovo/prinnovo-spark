@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Implementations from "./pages/Implementations";
 import Investments from "./pages/Investments";
 import Projections from "./pages/Projections";
+import FocusAreas from "./pages/FocusAreas";
 import BoardMode from "./pages/BoardMode";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/implementations" element={<Implementations />} />
           <Route path="/investments" element={<Investments />} />
           <Route path="/projections" element={<Projections />} />
+          <Route path="/focus-areas" element={<FocusAreas />} />
           <Route path="/board-mode" element={<BoardMode />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
