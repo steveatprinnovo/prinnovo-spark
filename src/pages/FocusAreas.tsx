@@ -2,10 +2,12 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useAuth } from "@/hooks/useAuth";
+import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Target, Building2, Star } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ExternalLink, Target, Building2, Star, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface FocusAreaCompany {
@@ -25,14 +27,17 @@ interface FocusArea {
 
 interface VentureOfficeGroup {
   venture_office: string;
+  logoUrl: string | null;
   focusAreas: FocusArea[];
 }
 
 const FocusAreas = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
   const [focusAreas, setFocusAreas] = useState<FocusArea[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch all focus areas with companies
   useEffect(() => {
@@ -85,11 +90,31 @@ const FocusAreas = () => {
     }
   }, [user]);
 
+  // Filter focus areas based on search query
+  const filteredFocusAreas = useMemo(() => {
+    if (!searchQuery.trim()) return focusAreas;
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    return focusAreas.filter(area => {
+      // Check if focus area name matches
+      if (area.focus_area_name.toLowerCase().includes(query)) return true;
+      
+      // Check if any company name matches
+      if (area.companies.some(c => c.company_name.toLowerCase().includes(query))) return true;
+      
+      // Check if venture office matches
+      if (area.venture_office.toLowerCase().includes(query)) return true;
+      
+      return false;
+    });
+  }, [focusAreas, searchQuery]);
+
   // Group focus areas by venture office
   const groupedByVentureOffice = useMemo((): VentureOfficeGroup[] => {
     const groups: Record<string, FocusArea[]> = {};
     
-    focusAreas.forEach(area => {
+    filteredFocusAreas.forEach(area => {
       const office = area.venture_office || 'Unknown';
       if (!groups[office]) {
         groups[office] = [];
@@ -98,12 +123,16 @@ const FocusAreas = () => {
     });
 
     return Object.entries(groups)
-      .map(([venture_office, focusAreas]) => ({
-        venture_office,
-        focusAreas
-      }))
+      .map(([venture_office, focusAreas]) => {
+        const logoData = ventureOfficeLogos.find(l => l.name === venture_office);
+        return {
+          venture_office,
+          logoUrl: logoData?.logoUrl || null,
+          focusAreas
+        };
+      })
       .sort((a, b) => a.venture_office.localeCompare(b.venture_office));
-  }, [focusAreas]);
+  }, [filteredFocusAreas, ventureOfficeLogos]);
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -137,25 +166,54 @@ const FocusAreas = () => {
       <DashboardHeader />
       
       <div className="container mx-auto p-6 space-y-6">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Focus Areas</h1>
-          <p className="text-muted-foreground">Strategic focus areas across all venture offices</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Focus Areas</h1>
+            <p className="text-muted-foreground">Strategic focus areas across all venture offices</p>
+          </div>
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search focus areas or companies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         {groupedByVentureOffice.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
               <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No focus areas have been defined yet.</p>
-              <p className="text-sm mt-2">Focus areas can be added in the Settings page under Venture Office Updates.</p>
+              {searchQuery.trim() ? (
+                <>
+                  <p>No focus areas match your search.</p>
+                  <p className="text-sm mt-2">Try adjusting your search terms.</p>
+                </>
+              ) : (
+                <>
+                  <p>No focus areas have been defined yet.</p>
+                  <p className="text-sm mt-2">Focus areas can be added in the Settings page under Venture Office Updates.</p>
+                </>
+              )}
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-8">
             {groupedByVentureOffice.map(group => (
               <div key={group.venture_office} className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3">
+                  {group.logoUrl ? (
+                    <img 
+                      src={group.logoUrl} 
+                      alt={group.venture_office} 
+                      className="h-8 w-8 object-contain rounded"
+                    />
+                  ) : (
+                    <Building2 className="h-6 w-6 text-primary" />
+                  )}
                   <h2 className="text-2xl font-semibold">{group.venture_office}</h2>
                   <Badge variant="secondary" className="ml-2">
                     {group.focusAreas.length} {group.focusAreas.length === 1 ? 'Focus Area' : 'Focus Areas'}
