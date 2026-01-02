@@ -288,6 +288,7 @@ export type Database = {
           created_at: string
           focus_area_name: string
           id: string
+          is_high_priority: boolean
           updated_at: string
           venture_office: string
         }
@@ -295,6 +296,7 @@ export type Database = {
           created_at?: string
           focus_area_name: string
           id?: string
+          is_high_priority?: boolean
           updated_at?: string
           venture_office: string
         }
@@ -302,6 +304,7 @@ export type Database = {
           created_at?: string
           focus_area_name?: string
           id?: string
+          is_high_priority?: boolean
           updated_at?: string
           venture_office?: string
         }

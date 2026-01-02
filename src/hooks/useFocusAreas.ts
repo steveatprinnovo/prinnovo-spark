@@ -13,6 +13,7 @@ export interface FocusArea {
   id: string;
   venture_office: string;
   focus_area_name: string;
+  is_high_priority: boolean;
   created_at: string;
   updated_at: string;
   companies: FocusAreaCompany[];
@@ -100,21 +101,44 @@ export function useFocusAreas(ventureOffice: string) {
     }
   };
 
-  const updateFocusArea = async (id: string, focusAreaName: string) => {
+  const updateFocusArea = async (id: string, focusAreaName: string, isHighPriority?: boolean) => {
     try {
+      const updateData: { focus_area_name?: string; is_high_priority?: boolean } = {};
+      if (focusAreaName !== undefined) updateData.focus_area_name = focusAreaName;
+      if (isHighPriority !== undefined) updateData.is_high_priority = isHighPriority;
+
       const { error } = await supabase
         .from('focus_areas')
-        .update({ focus_area_name: focusAreaName })
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
 
       setFocusAreas(prev => prev.map(area => 
-        area.id === id ? { ...area, focus_area_name: focusAreaName } : area
+        area.id === id ? { ...area, ...updateData } : area
       ));
       return true;
     } catch (error) {
       console.error('Error updating focus area:', error);
+      return false;
+    }
+  };
+
+  const updateFocusAreaPriority = async (id: string, isHighPriority: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('focus_areas')
+        .update({ is_high_priority: isHighPriority })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setFocusAreas(prev => prev.map(area => 
+        area.id === id ? { ...area, is_high_priority: isHighPriority } : area
+      ));
+      return true;
+    } catch (error) {
+      console.error('Error updating focus area priority:', error);
       return false;
     }
   };
@@ -189,6 +213,7 @@ export function useFocusAreas(ventureOffice: string) {
     refetch: fetchFocusAreas,
     addFocusArea,
     updateFocusArea,
+    updateFocusAreaPriority,
     deleteFocusArea,
     addCompanyToFocusArea,
     removeCompanyFromFocusArea
