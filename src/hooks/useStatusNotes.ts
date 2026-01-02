@@ -15,12 +15,14 @@ export interface StatusNote {
 export function useStatusNotes() {
   const { user } = useAuth();
   const [statusNotes, setStatusNotes] = useState<{ [dealId: number]: string }>({});
+  const [statusNotesByName, setStatusNotesByName] = useState<{ [companyName: string]: string }>({});
   const [loading, setLoading] = useState(true);
 
   // Load status notes for the current user
   useEffect(() => {
     if (!user) {
       setStatusNotes({});
+      setStatusNotesByName({});
       setLoading(false);
       return;
     }
@@ -38,14 +40,23 @@ export function useStatusNotes() {
         }
 
         // Convert array to object for easy lookup by deal_id
-        const notesMap = (data || []).reduce((acc, note) => {
+        const notesMapById = (data || []).reduce((acc, note) => {
           if (note.deal_id !== null) {
             acc[note.deal_id] = note.status_note || '';
           }
           return acc;
         }, {} as { [dealId: number]: string });
 
-        setStatusNotes(notesMap);
+        // Also create lookup by company_name for legacy notes without deal_id
+        const notesMapByName = (data || []).reduce((acc, note) => {
+          if (note.company_name && note.deal_id === null) {
+            acc[note.company_name] = note.status_note || '';
+          }
+          return acc;
+        }, {} as { [companyName: string]: string });
+
+        setStatusNotes(notesMapById);
+        setStatusNotesByName(notesMapByName);
       } catch (error) {
         console.error('Error loading status notes:', error);
       } finally {
@@ -55,6 +66,17 @@ export function useStatusNotes() {
 
     loadStatusNotes();
   }, [user]);
+
+  // Get status note - first check by deal_id, then fall back to company_name
+  const getStatusNote = (dealId: number, companyName: string): string => {
+    if (statusNotes[dealId]) {
+      return statusNotes[dealId];
+    }
+    if (companyName && statusNotesByName[companyName]) {
+      return statusNotesByName[companyName];
+    }
+    return '';
+  };
 
   // Save or update status note by deal_id
   const saveStatusNote = async (dealId: number, companyName: string, statusNote: string) => {
@@ -123,8 +145,10 @@ export function useStatusNotes() {
 
   return {
     statusNotes,
+    statusNotesByName,
     loading,
     saveStatusNote,
-    deleteStatusNote
+    deleteStatusNote,
+    getStatusNote
   };
 }
