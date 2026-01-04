@@ -388,6 +388,39 @@ export type Database = {
         }
         Relationships: []
       }
+      venture_office_costs: {
+        Row: {
+          cost_id: number
+          created_at: string
+          it_team_services_cost: number | null
+          legal_costs: number | null
+          month: string | null
+          operating_expenses: number | null
+          venture_office: string | null
+          venture_team_services_cost: number | null
+        }
+        Insert: {
+          cost_id: number
+          created_at?: string
+          it_team_services_cost?: number | null
+          legal_costs?: number | null
+          month?: string | null
+          operating_expenses?: number | null
+          venture_office?: string | null
+          venture_team_services_cost?: number | null
+        }
+        Update: {
+          cost_id?: number
+          created_at?: string
+          it_team_services_cost?: number | null
+          legal_costs?: number | null
+          month?: string | null
+          operating_expenses?: number | null
+          venture_office?: string | null
+          venture_team_services_cost?: number | null
+        }
+        Relationships: []
+      }
       venture_office_detail: {
         Row: {
           "Companies Evaluated": number | null

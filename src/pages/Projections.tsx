@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
+import { CostsTable } from "@/components/CostsTable";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -214,6 +215,7 @@ const Projections = () => {
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
+  const [costsYear, setCostsYear] = useState<number>(new Date().getFullYear());
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
@@ -504,7 +506,7 @@ const Projections = () => {
         <Tabs defaultValue="revenues" className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="revenues">Revenues</TabsTrigger>
-            <TabsTrigger value="costs">Costs</TabsTrigger>
+            {isAdmin && <TabsTrigger value="costs">Costs</TabsTrigger>}
           </TabsList>
           
           <TabsContent value="revenues">
@@ -712,11 +714,15 @@ const Projections = () => {
             </div>
           </TabsContent>
           
-          <TabsContent value="costs">
-            <div className="p-8 text-center text-muted-foreground">
-              Costs data will be displayed here
-            </div>
-          </TabsContent>
+          {isAdmin && (
+            <TabsContent value="costs">
+              <CostsTable
+                selectedVentureOffice={selectedVentureOffice}
+                selectedYear={costsYear}
+                onYearChange={setCostsYear}
+              />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
