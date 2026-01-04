@@ -181,6 +181,11 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                 </TableCell>
               </TableRow>
 
+              {/* Spacer row */}
+              <TableRow>
+                <TableCell colSpan={monthLabels.length + 2} className="py-1.5 bg-transparent border-0" />
+              </TableRow>
+
               {/* Operating Costs Section */}
               <TableRow className="bg-amber-500/10">
                 <TableCell 
@@ -221,6 +226,11 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                 <TableCell className="text-center bg-amber-500/10 font-bold text-xs py-2">
                   {formatCurrency(operatingSubtotals.total)}
                 </TableCell>
+              </TableRow>
+
+              {/* Spacer row */}
+              <TableRow>
+                <TableCell colSpan={monthLabels.length + 2} className="py-1.5 bg-transparent border-0" />
               </TableRow>
 
               {/* Grand Total Row */}
