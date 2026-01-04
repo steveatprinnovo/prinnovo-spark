@@ -146,7 +146,10 @@ export function useVentureOfficeCosts(
     filteredCosts.forEach(cost => {
       if (!cost.month) return;
       
-      const monthKey = cost.month;
+      // Normalize the month key to YYYY-MM-01 format for consistent grouping
+      const costDate = new Date(cost.month);
+      const monthKey = format(startOfMonth(costDate), "yyyy-MM-dd");
+      
       const existing = monthMap.get(monthKey) || {
         month: monthKey,
         venture_team_services_cost: 0,
