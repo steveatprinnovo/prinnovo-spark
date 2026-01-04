@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeCosts } from "@/hooks/useVentureOfficeCosts";
 import { format } from "date-fns";
 
@@ -36,9 +37,12 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
     onYearChange // Pass callback to set default year when detected
   );
 
-  // Get month labels for the selected year
+  // Get month labels for the selected year with rate_adjust indicator
   const monthLabels = useMemo(() => {
-    return monthlyCosts.map(cost => format(new Date(cost.month), "MMM"));
+    return monthlyCosts.map(cost => ({
+      label: format(new Date(cost.month), "MMM"),
+      rateAdjust: cost.rate_adjust,
+    }));
   }, [monthlyCosts]);
 
   if (loading) {
@@ -91,7 +95,22 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                 <TableHead className="sticky left-0 z-10 bg-muted min-w-[160px] text-xs py-2">Cost Category</TableHead>
                 {monthLabels.map((month, index) => (
                   <TableHead key={index} className="text-center min-w-[70px] text-xs py-2">
-                    {month}
+                    {month.rateAdjust ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">
+                              {month.label}<span className="text-destructive">*</span>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Rate Adjust</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      month.label
+                    )}
                   </TableHead>
                 ))}
                 <TableHead className="text-center min-w-[90px] bg-muted/50 font-bold text-xs py-2">Total</TableHead>

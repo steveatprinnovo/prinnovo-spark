@@ -396,6 +396,7 @@ export type Database = {
           legal_costs: number | null
           month: string | null
           operating_expenses: number | null
+          rate_adjust: boolean | null
           venture_office: string | null
           venture_team_services_cost: number | null
         }
@@ -406,6 +407,7 @@ export type Database = {
           legal_costs?: number | null
           month?: string | null
           operating_expenses?: number | null
+          rate_adjust?: boolean | null
           venture_office?: string | null
           venture_team_services_cost?: number | null
         }
@@ -416,6 +418,7 @@ export type Database = {
           legal_costs?: number | null
           month?: string | null
           operating_expenses?: number | null
+          rate_adjust?: boolean | null
           venture_office?: string | null
           venture_team_services_cost?: number | null
         }
@@ -435,6 +438,7 @@ export type Database = {
           updated_at: string | null
           "Venture Office Logo": string | null
           "Venture Office Name": string | null
+          venture_office_initiation_date: string | null
         }
         Insert: {
           "Companies Evaluated"?: number | null
@@ -449,6 +453,7 @@ export type Database = {
           updated_at?: string | null
           "Venture Office Logo"?: string | null
           "Venture Office Name"?: string | null
+          venture_office_initiation_date?: string | null
         }
         Update: {
           "Companies Evaluated"?: number | null
@@ -463,6 +468,7 @@ export type Database = {
           updated_at?: string | null
           "Venture Office Logo"?: string | null
           "Venture Office Name"?: string | null
+          venture_office_initiation_date?: string | null
         }
         Relationships: []
       }

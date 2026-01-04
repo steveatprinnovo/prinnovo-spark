@@ -9,6 +9,7 @@ export interface VentureOfficeCost {
   it_team_services_cost: number | null;
   operating_expenses: number | null;
   legal_costs: number | null;
+  rate_adjust: boolean | null;
 }
 
 export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYear: number | null, onDefaultYearDetected?: (year: number) => void) {
@@ -90,6 +91,7 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
       it_team_services_cost: number;
       operating_expenses: number;
       legal_costs: number;
+      rate_adjust: boolean;
     }>();
 
     costs.forEach(cost => {
@@ -102,6 +104,7 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
         it_team_services_cost: 0,
         operating_expenses: 0,
         legal_costs: 0,
+        rate_adjust: false,
       };
 
       monthMap.set(monthKey, {
@@ -110,6 +113,7 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
         it_team_services_cost: existing.it_team_services_cost + (cost.it_team_services_cost || 0),
         operating_expenses: existing.operating_expenses + (cost.operating_expenses || 0),
         legal_costs: existing.legal_costs + (cost.legal_costs || 0),
+        rate_adjust: existing.rate_adjust || (cost.rate_adjust === true),
       });
     });
 
