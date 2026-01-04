@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ExternalLink, Target, Building2, Star, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface FocusAreaCompany {
   id: string;
@@ -32,6 +33,7 @@ interface VentureOfficeGroup {
 }
 
 const FocusAreas = () => {
+  usePageTitle("Focus Areas");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();

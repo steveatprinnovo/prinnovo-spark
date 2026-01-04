@@ -19,10 +19,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, FileSpreadsheet, Presentation, Users, Target, FileText, Gift, DollarSign, CheckCircle, Cog, GitBranch, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // AgendaItem interface is now imported from useAgenda hook - Updated
 
 export default function BoardMode() {
+  usePageTitle("Board Mode");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { 

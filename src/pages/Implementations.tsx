@@ -19,8 +19,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Check, X, Filter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Implementations = () => {
+  usePageTitle("Implementations");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
