@@ -7,7 +7,7 @@ import { format } from "date-fns";
 
 interface CostsTableProps {
   selectedVentureOffice: string;
-  selectedYear: number;
+  selectedYear: number | null;
   onYearChange: (year: number) => void;
 }
 
@@ -32,7 +32,8 @@ type CostKey = typeof COST_CATEGORIES[number]["key"];
 export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }: CostsTableProps) {
   const { monthlyCosts, totals, loading, availableYears } = useVentureOfficeCosts(
     selectedVentureOffice,
-    selectedYear
+    selectedYear,
+    onYearChange // Pass callback to set default year when detected
   );
 
   // Get month labels for the selected year
@@ -60,17 +61,17 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-foreground">Year:</span>
+        <span className="text-xs font-medium text-foreground">Year:</span>
         <Select 
-          value={selectedYear.toString()} 
+          value={selectedYear?.toString() ?? ""} 
           onValueChange={(value) => onYearChange(parseInt(value))}
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-24 h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {availableYears.map(year => (
-              <SelectItem key={year} value={year.toString()}>
+              <SelectItem key={year} value={year.toString()} className="text-xs">
                 {year}
               </SelectItem>
             ))}
@@ -79,21 +80,21 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
       </div>
 
       {monthlyCosts.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground">
+        <div className="p-8 text-center text-muted-foreground text-sm">
           No cost data available for {selectedYear}.
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <Table className="min-w-full">
+          <Table className="min-w-full text-xs">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-10 bg-muted min-w-[200px]">Cost Category</TableHead>
+                <TableHead className="sticky left-0 z-10 bg-muted min-w-[160px] text-xs py-2">Cost Category</TableHead>
                 {monthLabels.map((month, index) => (
-                  <TableHead key={index} className="text-center min-w-[100px]">
+                  <TableHead key={index} className="text-center min-w-[70px] text-xs py-2">
                     {month}
                   </TableHead>
                 ))}
-                <TableHead className="text-center min-w-[120px] bg-muted/50 font-bold">Total</TableHead>
+                <TableHead className="text-center min-w-[90px] bg-muted/50 font-bold text-xs py-2">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -101,15 +102,15 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                 const rowTotal = totals[key];
                 return (
                   <TableRow key={key}>
-                    <TableCell className="sticky left-0 z-10 bg-background font-medium">
+                    <TableCell className="sticky left-0 z-10 bg-background font-medium text-xs py-2">
                       {label}
                     </TableCell>
                     {monthlyCosts.map((cost, index) => (
-                      <TableCell key={index} className="text-center">
+                      <TableCell key={index} className="text-center text-xs py-2">
                         {formatCurrency(cost[key as CostKey])}
                       </TableCell>
                     ))}
-                    <TableCell className="text-center bg-muted/50 font-semibold">
+                    <TableCell className="text-center bg-muted/50 font-semibold text-xs py-2">
                       {formatCurrency(rowTotal)}
                     </TableCell>
                   </TableRow>
@@ -117,7 +118,7 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
               })}
               {/* Grand Total Row */}
               <TableRow className="bg-muted/30 font-semibold">
-                <TableCell className="sticky left-0 z-10 bg-muted/30 font-bold">
+                <TableCell className="sticky left-0 z-10 bg-muted/30 font-bold text-xs py-2">
                   Total
                 </TableCell>
                 {monthlyCosts.map((cost, index) => {
@@ -127,12 +128,12 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                     cost.operating_expenses + 
                     cost.legal_costs;
                   return (
-                    <TableCell key={index} className="text-center font-semibold">
+                    <TableCell key={index} className="text-center font-semibold text-xs py-2">
                       {formatCurrency(monthTotal)}
                     </TableCell>
                   );
                 })}
-                <TableCell className="text-center bg-muted font-bold">
+                <TableCell className="text-center bg-muted font-bold text-xs py-2">
                   {formatCurrency(
                     totals.venture_team_services_cost +
                     totals.it_team_services_cost +

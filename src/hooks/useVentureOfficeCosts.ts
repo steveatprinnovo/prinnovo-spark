@@ -11,7 +11,7 @@ export interface VentureOfficeCost {
   legal_costs: number | null;
 }
 
-export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYear: number) {
+export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYear: number | null, onDefaultYearDetected?: (year: number) => void) {
   const [costs, setCosts] = useState<VentureOfficeCost[]>([]);
   const [loading, setLoading] = useState(true);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
@@ -39,6 +39,11 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
           )].sort((a, b) => b - a); // Sort descending (newest first)
           
           setAvailableYears(years);
+          
+          // If no year is selected yet, notify parent of the most recent year
+          if (selectedYear === null && years.length > 0 && onDefaultYearDetected) {
+            onDefaultYearDetected(years[0]);
+          }
         }
 
         // Now fetch costs for the selected year
@@ -56,12 +61,14 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
           console.error("Error fetching venture office costs:", error);
           setCosts([]);
         } else {
-          // Filter by selected year
-          const filteredData = (data || []).filter(cost => {
-            if (!cost.month) return false;
-            const costYear = new Date(cost.month).getFullYear();
-            return costYear === selectedYear;
-          });
+          // Filter by selected year (only if year is set)
+          const filteredData = selectedYear !== null 
+            ? (data || []).filter(cost => {
+                if (!cost.month) return false;
+                const costYear = new Date(cost.month).getFullYear();
+                return costYear === selectedYear;
+              })
+            : [];
           setCosts(filteredData);
         }
       } catch (error) {
