@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
@@ -118,9 +119,24 @@ export function DashboardHeader() {
         {/* Desktop only - User section */}
         {!isMobile && (
           <div className="ml-auto flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">
-              {user?.email}
-            </span>
+            {user?.user_metadata?.full_name || user?.user_metadata?.name ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-sm text-muted-foreground cursor-default">
+                      {user?.user_metadata?.full_name || user?.user_metadata?.name}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{user?.email}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                {user?.email}
+              </span>
+            )}
             <Button 
               variant="outline" 
               size="sm" 
