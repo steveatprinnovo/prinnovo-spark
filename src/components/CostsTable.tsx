@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Separator } from "@/components/ui/separator";
 import { useVentureOfficeCosts, ContractYearOption } from "@/hooks/useVentureOfficeCosts";
 import { BudgetVarianceCards, OverallBudgetVarianceCards } from "@/components/BudgetVarianceCards";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface CostsTableProps {
   selectedVentureOffice: string;
@@ -60,7 +60,7 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
   // Get month labels for the selected year with rate_adjust indicator
   const monthLabels = useMemo(() => {
     return monthlyCosts.map(cost => ({
-      label: format(new Date(cost.month), "MMM"),
+      label: format(parseISO(cost.month), "MMM"),
       rateAdjust: cost.rate_adjust,
     }));
   }, [monthlyCosts]);
