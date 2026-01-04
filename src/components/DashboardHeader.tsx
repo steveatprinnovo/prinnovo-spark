@@ -5,7 +5,7 @@ import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Target, Settings } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
@@ -15,7 +15,16 @@ export function DashboardHeader() {
   const { isAdmin, ventureOffice } = useUserAuth();
   const { selectedVentureOffice } = useAdminVentureOffice();
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
+
+  const handleSignOut = async () => {
+    await signOut();
+    // Clear any local storage related to admin selection
+    localStorage.removeItem("admin_selected_venture_office");
+    // Force navigation to auth page
+    navigate("/auth", { replace: true });
+  };
 
   // Determine which venture office to get logo for
   const effectiveVentureOffice = isAdmin ? selectedVentureOffice : ventureOffice;
@@ -140,7 +149,7 @@ export function DashboardHeader() {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={signOut}
+              onClick={handleSignOut}
               className="gap-2"
             >
               <LogOut className="h-4 w-4" />
