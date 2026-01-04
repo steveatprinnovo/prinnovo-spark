@@ -250,24 +250,26 @@ export function BudgetVarianceCards({
     return <LoadingCards />;
   }
 
+  const yearPrefix = selectedContractYear ? `Year ${selectedContractYear} ` : "";
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {renderVarianceCard(
-        "Services Budget Variance",
+        `${yearPrefix}Services Budget Variance`,
         variances.services.budget,
         variances.services.actual,
         variances.services.variance,
         "border-primary/20"
       )}
       {renderVarianceCard(
-        "Operating Costs Budget Variance",
+        `${yearPrefix}Operating Costs Budget Variance`,
         variances.operating.budget,
         variances.operating.actual,
         variances.operating.variance,
         "border-amber-500/20"
       )}
       {renderVarianceCard(
-        "Total Budget Variance",
+        `${yearPrefix}Total Budget Variance`,
         variances.total.budget,
         variances.total.actual,
         variances.total.variance,
