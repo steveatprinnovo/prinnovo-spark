@@ -24,8 +24,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
 import { useFocusAreas, FocusArea } from "@/hooks/useFocusAreas";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Settings = () => {
+  usePageTitle("Settings");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();

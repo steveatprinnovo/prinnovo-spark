@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, ChevronUp, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 type ForecastType = "target" | "very-conservative" | "conservative" | "aggressive" | "very-aggressive";
 type SortField = "company" | "targetIpaReturn" | "cashInvested" | "targetCashReturn" | "equityValue" | "dataMonetizationDollars" | "dataMonetizationForecast" | "totalEnterpriseValue";
@@ -200,6 +201,7 @@ const CompanyRow = ({
 };
 
 const Projections = () => {
+  usePageTitle("Projections");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();

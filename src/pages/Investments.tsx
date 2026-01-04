@@ -19,6 +19,7 @@ import { UpdateValuationModal } from "@/components/UpdateValuationModal";
 import { useMemo, useState } from "react";
 import { TrendingUp, ChevronRight, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 function formatISODate(dateString: string | null | undefined, locale: string = "en-US", options?: Intl.DateTimeFormatOptions) {
   if (!dateString) return "";
@@ -34,6 +35,7 @@ function formatISODate(dateString: string | null | undefined, locale: string = "
 }
 
 export default function Investments() {
+  usePageTitle("Investments");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
