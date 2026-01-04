@@ -182,10 +182,10 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
               </TableRow>
 
               {/* Operating Costs Section */}
-              <TableRow className="bg-secondary/30">
+              <TableRow className="bg-amber-500/10">
                 <TableCell 
                   colSpan={monthLabels.length + 2} 
-                  className="sticky left-0 z-10 font-bold text-xs py-1.5 text-secondary-foreground"
+                  className="sticky left-0 z-10 font-bold text-xs py-1.5 text-amber-700 dark:text-amber-400"
                 >
                   Operating Costs
                 </TableCell>
@@ -209,8 +209,8 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                 );
               })}
               {/* Operating Costs Subtotal */}
-              <TableRow className="bg-secondary/10 font-semibold">
-                <TableCell className="sticky left-0 z-10 bg-secondary/10 font-bold text-xs py-2 pl-4">
+              <TableRow className="bg-amber-500/5 font-semibold">
+                <TableCell className="sticky left-0 z-10 bg-amber-500/5 font-bold text-xs py-2 pl-4">
                   Operating Costs Total
                 </TableCell>
                 {operatingSubtotals.monthly.map((subtotal, index) => (
@@ -218,14 +218,14 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                     {formatCurrency(subtotal)}
                   </TableCell>
                 ))}
-                <TableCell className="text-center bg-secondary/20 font-bold text-xs py-2">
+                <TableCell className="text-center bg-amber-500/10 font-bold text-xs py-2">
                   {formatCurrency(operatingSubtotals.total)}
                 </TableCell>
               </TableRow>
 
               {/* Grand Total Row */}
-              <TableRow className="bg-muted/30 font-semibold">
-                <TableCell className="sticky left-0 z-10 bg-muted/30 font-bold text-xs py-2">
+              <TableRow className="bg-slate-700/10 dark:bg-slate-300/10 font-semibold">
+                <TableCell className="sticky left-0 z-10 bg-slate-700/10 dark:bg-slate-300/10 font-bold text-xs py-2">
                   Grand Total
                 </TableCell>
                 {monthlyCosts.map((cost, index) => {
@@ -240,7 +240,7 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                     </TableCell>
                   );
                 })}
-                <TableCell className="text-center bg-muted font-bold text-xs py-2">
+                <TableCell className="text-center bg-slate-700/20 dark:bg-slate-300/20 font-bold text-xs py-2">
                   {formatCurrency(servicesSubtotals.total + operatingSubtotals.total)}
                 </TableCell>
               </TableRow>
