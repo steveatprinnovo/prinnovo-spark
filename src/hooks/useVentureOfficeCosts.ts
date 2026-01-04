@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { parse, isValid, addYears, startOfMonth, isBefore, isAfter, format, isWithinInterval } from "date-fns";
+import { parse, isValid, addYears, startOfMonth, isBefore, format, endOfMonth } from "date-fns";
 
 export interface VentureOfficeCost {
   cost_id: number;
@@ -42,8 +42,11 @@ export function useVentureOfficeCosts(
     let yearNum = 1;
     while (true) {
       const yearStart = addYears(startOfMonth(initDate), yearNum - 1);
-      const yearEnd = new Date(addYears(startOfMonth(initDate), yearNum));
-      yearEnd.setDate(yearEnd.getDate() - 1); // End is last day before next anniversary
+      // End date is the last day of the month before the next anniversary
+      const nextAnniversary = addYears(startOfMonth(initDate), yearNum);
+      const lastMonthOfYear = new Date(nextAnniversary);
+      lastMonthOfYear.setMonth(lastMonthOfYear.getMonth() - 1);
+      const yearEnd = endOfMonth(lastMonthOfYear);
       
       // Only add if the year's start month has passed (anniversary has occurred for this year)
       if (isBefore(yearStart, now)) {
@@ -117,8 +120,10 @@ export function useVentureOfficeCosts(
     
     return costs.filter(cost => {
       if (!cost.month) return false;
-      const costDate = new Date(cost.month);
-      return isWithinInterval(costDate, { start: selectedYear.startDate, end: selectedYear.endDate });
+      const costDate = startOfMonth(new Date(cost.month));
+      // Check if cost month is >= start and <= end of contract year
+      return !isBefore(costDate, startOfMonth(selectedYear.startDate)) && 
+             !isBefore(endOfMonth(selectedYear.endDate), costDate);
     });
   }, [costs, selectedContractYear, contractYearOptions]);
 
