@@ -167,7 +167,7 @@ export function useVentureOfficeCosts(
     );
   }, [filteredCosts]);
 
-  // Calculate totals
+  // Calculate totals for filtered data (by contract year)
   const totals = useMemo(() => {
     return monthlyCosts.reduce((acc, cost) => ({
       venture_team_services_cost: acc.venture_team_services_cost + cost.venture_team_services_cost,
@@ -182,5 +182,20 @@ export function useVentureOfficeCosts(
     });
   }, [monthlyCosts]);
 
-  return { costs: filteredCosts, monthlyCosts, totals, loading, contractYearOptions };
+  // Calculate overall totals across ALL data (not filtered by contract year)
+  const overallTotals = useMemo(() => {
+    return costs.reduce((acc, cost) => ({
+      venture_team_services_cost: acc.venture_team_services_cost + (cost.venture_team_services_cost || 0),
+      it_team_services_cost: acc.it_team_services_cost + (cost.it_team_services_cost || 0),
+      operating_expenses: acc.operating_expenses + (cost.operating_expenses || 0),
+      legal_costs: acc.legal_costs + (cost.legal_costs || 0),
+    }), {
+      venture_team_services_cost: 0,
+      it_team_services_cost: 0,
+      operating_expenses: 0,
+      legal_costs: 0,
+    });
+  }, [costs]);
+
+  return { costs: filteredCosts, monthlyCosts, totals, overallTotals, loading, contractYearOptions };
 }
