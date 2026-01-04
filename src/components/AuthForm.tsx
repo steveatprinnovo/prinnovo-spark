@@ -187,15 +187,6 @@ export function AuthForm() {
             </Button>
           </form>
 
-          {/* Helper Links */}
-          {!isSignUp && <div className="flex justify-between mt-4 text-sm">
-              <button type="button" className="text-muted-foreground hover:text-foreground">
-                Forgot password?
-              </button>
-              <button type="button" className="text-destructive hover:underline">
-                Need help?
-              </button>
-            </div>}
 
           {/* Terms */}
           
