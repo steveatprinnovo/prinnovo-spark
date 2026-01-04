@@ -218,11 +218,11 @@ export function AuthForm() {
               <Input
                 id="password"
                 type="password"
-                placeholder={isSignUp ? "Create a password (min. 6 characters)" : "••••••••"}
+                placeholder={isSignUp ? "Create a password (min. 4 characters)" : "••••••••"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={4}
                 disabled={isLoading}
                 className="h-12 border-border"
               />
