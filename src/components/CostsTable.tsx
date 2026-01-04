@@ -3,13 +3,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useVentureOfficeCosts } from "@/hooks/useVentureOfficeCosts";
+import { useVentureOfficeCosts, ContractYearOption } from "@/hooks/useVentureOfficeCosts";
 import { format } from "date-fns";
 
 interface CostsTableProps {
   selectedVentureOffice: string;
-  selectedYear: number | null;
-  onYearChange: (year: number) => void;
+  selectedContractYear: number | null;
+  onContractYearChange: (year: number) => void;
+  initiationDate: string | null | undefined;
 }
 
 const formatCurrency = (value: number) => {
@@ -33,11 +34,12 @@ const OPERATING_COSTS = [
 
 type CostKey = "venture_team_services_cost" | "it_team_services_cost" | "operating_expenses" | "legal_costs";
 
-export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }: CostsTableProps) {
-  const { monthlyCosts, totals, loading, availableYears } = useVentureOfficeCosts(
+export function CostsTable({ selectedVentureOffice, selectedContractYear, onContractYearChange, initiationDate }: CostsTableProps) {
+  const { monthlyCosts, totals, loading, contractYearOptions } = useVentureOfficeCosts(
     selectedVentureOffice,
-    selectedYear,
-    onYearChange // Pass callback to set default year when detected
+    selectedContractYear,
+    initiationDate,
+    onContractYearChange // Pass callback to set default year when detected
   );
 
   // Get month labels for the selected year with rate_adjust indicator
@@ -76,10 +78,18 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
     );
   }
 
-  if (availableYears.length === 0) {
+  if (!initiationDate) {
     return (
       <div className="p-8 text-center text-muted-foreground">
-        No cost data available.
+        No Venture Office Initiation Date has been set. Please configure it in Settings to view costs by Contract Year.
+      </div>
+    );
+  }
+
+  if (contractYearOptions.length === 0) {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        No completed contract years available yet based on the initiation date.
       </div>
     );
   }
@@ -87,18 +97,18 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-foreground">Year:</span>
+        <span className="text-xs font-medium text-foreground">Contract Year:</span>
         <Select 
-          value={selectedYear?.toString() ?? ""} 
-          onValueChange={(value) => onYearChange(parseInt(value))}
+          value={selectedContractYear?.toString() ?? ""} 
+          onValueChange={(value) => onContractYearChange(parseInt(value))}
         >
-          <SelectTrigger className="w-24 h-8 text-xs">
+          <SelectTrigger className="w-auto min-w-[280px] h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {availableYears.map(year => (
-              <SelectItem key={year} value={year.toString()} className="text-xs">
-                {year}
+            {contractYearOptions.map(option => (
+              <SelectItem key={option.yearNumber} value={option.yearNumber.toString()} className="text-xs">
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -107,7 +117,7 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
 
       {monthlyCosts.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground text-sm">
-          No cost data available for {selectedYear}.
+          No cost data available for Contract Year {selectedContractYear}.
         </div>
       ) : (
         <div className="overflow-x-auto">

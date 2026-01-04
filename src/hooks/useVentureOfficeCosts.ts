@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { parse, isValid, addYears, startOfMonth, isBefore, isAfter, format, isWithinInterval } from "date-fns";
 
 export interface VentureOfficeCost {
   cost_id: number;
@@ -12,42 +13,74 @@ export interface VentureOfficeCost {
   rate_adjust: boolean | null;
 }
 
-export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYear: number | null, onDefaultYearDetected?: (year: number) => void) {
+export interface ContractYearOption {
+  yearNumber: number;
+  label: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+export function useVentureOfficeCosts(
+  selectedVentureOffice: string, 
+  selectedContractYear: number | null, 
+  initiationDate: string | null | undefined,
+  onDefaultYearDetected?: (year: number) => void
+) {
   const [costs, setCosts] = useState<VentureOfficeCost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
+
+  // Calculate available contract years based on initiation date
+  const contractYearOptions = useMemo((): ContractYearOption[] => {
+    if (!initiationDate) return [];
+    
+    const initDate = parse(initiationDate, "yyyy-MM-dd", new Date());
+    if (!isValid(initDate)) return [];
+    
+    const now = new Date();
+    const options: ContractYearOption[] = [];
+    
+    let yearNum = 1;
+    while (true) {
+      const yearStart = addYears(startOfMonth(initDate), yearNum - 1);
+      const yearEnd = new Date(addYears(startOfMonth(initDate), yearNum));
+      yearEnd.setDate(yearEnd.getDate() - 1); // End is last day before next anniversary
+      
+      // Only add if the year's start month has passed (anniversary has occurred for this year)
+      if (isBefore(yearStart, now)) {
+        const startLabel = format(yearStart, "MMMM yyyy");
+        const endLabel = format(yearEnd, "MMMM yyyy");
+        options.push({
+          yearNumber: yearNum,
+          label: `Year ${yearNum} (${startLabel} - ${endLabel})`,
+          startDate: yearStart,
+          endDate: yearEnd,
+        });
+        yearNum++;
+      } else {
+        break;
+      }
+    }
+    
+    return options;
+  }, [initiationDate]);
 
   useEffect(() => {
     const fetchCosts = async () => {
       setLoading(true);
       try {
-        // First, get all unique years from the data
-        let yearQuery = supabase
-          .from("venture_office_costs")
-          .select("month");
-        
-        if (selectedVentureOffice !== "all") {
-          yearQuery = yearQuery.eq("venture_office", selectedVentureOffice);
-        }
-        
-        const { data: yearData } = await yearQuery;
-        
-        if (yearData) {
-          const years = [...new Set(
-            yearData
-              .map(d => d.month ? new Date(d.month).getFullYear() : null)
-              .filter((y): y is number => y !== null)
-          )].sort((a, b) => b - a); // Sort descending (newest first)
-          
-          setAvailableYears(years);
-          
-          // If no year is selected yet, notify parent of the most recent year
-          if (selectedYear === null && years.length > 0 && onDefaultYearDetected) {
-            onDefaultYearDetected(years[0]);
-          }
+        // If no initiation date or no contract years available, just fetch all data for display
+        if (!initiationDate || contractYearOptions.length === 0) {
+          setCosts([]);
+          setLoading(false);
+          return;
         }
 
-        // Now fetch costs for the selected year
+        // Set default year to most recent if not selected
+        if (selectedContractYear === null && contractYearOptions.length > 0 && onDefaultYearDetected) {
+          onDefaultYearDetected(contractYearOptions[contractYearOptions.length - 1].yearNumber);
+        }
+
+        // Now fetch costs
         let query = supabase
           .from("venture_office_costs")
           .select("*");
@@ -62,15 +95,7 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
           console.error("Error fetching venture office costs:", error);
           setCosts([]);
         } else {
-          // Filter by selected year (only if year is set)
-          const filteredData = selectedYear !== null 
-            ? (data || []).filter(cost => {
-                if (!cost.month) return false;
-                const costYear = new Date(cost.month).getFullYear();
-                return costYear === selectedYear;
-              })
-            : [];
-          setCosts(filteredData);
+          setCosts(data || []);
         }
       } catch (error) {
         console.error("Error fetching venture office costs:", error);
@@ -81,7 +106,21 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
     };
 
     fetchCosts();
-  }, [selectedVentureOffice, selectedYear]);
+  }, [selectedVentureOffice, selectedContractYear, initiationDate, contractYearOptions.length]);
+
+  // Filter costs by selected contract year date range
+  const filteredCosts = useMemo(() => {
+    if (selectedContractYear === null || contractYearOptions.length === 0) return [];
+    
+    const selectedYear = contractYearOptions.find(y => y.yearNumber === selectedContractYear);
+    if (!selectedYear) return [];
+    
+    return costs.filter(cost => {
+      if (!cost.month) return false;
+      const costDate = new Date(cost.month);
+      return isWithinInterval(costDate, { start: selectedYear.startDate, end: selectedYear.endDate });
+    });
+  }, [costs, selectedContractYear, contractYearOptions]);
 
   // Aggregate costs by month
   const monthlyCosts = useMemo(() => {
@@ -94,7 +133,7 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
       rate_adjust: boolean;
     }>();
 
-    costs.forEach(cost => {
+    filteredCosts.forEach(cost => {
       if (!cost.month) return;
       
       const monthKey = cost.month;
@@ -121,7 +160,7 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
     return Array.from(monthMap.values()).sort((a, b) => 
       new Date(a.month).getTime() - new Date(b.month).getTime()
     );
-  }, [costs]);
+  }, [filteredCosts]);
 
   // Calculate totals
   const totals = useMemo(() => {
@@ -138,5 +177,5 @@ export function useVentureOfficeCosts(selectedVentureOffice: string, selectedYea
     });
   }, [monthlyCosts]);
 
-  return { costs, monthlyCosts, totals, loading, availableYears };
+  return { costs: filteredCosts, monthlyCosts, totals, loading, contractYearOptions };
 }
