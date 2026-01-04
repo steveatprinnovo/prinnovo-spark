@@ -388,6 +388,36 @@ export type Database = {
         }
         Relationships: []
       }
+      venture_office_budgets: {
+        Row: {
+          created_at: string | null
+          id: string
+          operating_costs_budget: number | null
+          services_budget: number | null
+          updated_at: string | null
+          venture_office: string
+          year_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          operating_costs_budget?: number | null
+          services_budget?: number | null
+          updated_at?: string | null
+          venture_office: string
+          year_number: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          operating_costs_budget?: number | null
+          services_budget?: number | null
+          updated_at?: string | null
+          venture_office?: string
+          year_number?: number
+        }
+        Relationships: []
+      }
       venture_office_costs: {
         Row: {
           cost_id: number
