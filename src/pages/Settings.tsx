@@ -927,7 +927,7 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* Year Selection */}
                       <div className="space-y-2">
-                        <Label>Fiscal Year</Label>
+                        <Label>Contract Year</Label>
                         <Select
                           value={selectedBudgetYear !== null ? String(selectedBudgetYear) : ""}
                           onValueChange={(value) => setSelectedBudgetYear(parseInt(value))}
