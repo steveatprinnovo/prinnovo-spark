@@ -120,7 +120,7 @@ export function BudgetVarianceCards({
     return (
       <Card className={`bg-card/50 border ${colorClass}`}>
         <CardContent className="p-4">
-          <h4 className="text-xs font-semibold text-muted-foreground mb-3">{title}</h4>
+          <h4 className="text-xs font-semibold text-foreground mb-3">{title}</h4>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground">Budget:</span>
