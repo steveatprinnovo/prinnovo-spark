@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ interface AddCostValuesModalProps {
   onOpenChange: (open: boolean) => void;
   selectedVentureOffice: string;
   officeId: number | undefined;
+  initiationDate: string | null | undefined;
   onSuccess: () => void;
 }
 
@@ -30,20 +31,12 @@ const MONTHS = [
   { value: "12", label: "December" },
 ];
 
-const generateYears = () => {
-  const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let year = currentYear - 5; year <= currentYear + 2; year++) {
-    years.push(year.toString());
-  }
-  return years;
-};
-
 export function AddCostValuesModal({
   open,
   onOpenChange,
   selectedVentureOffice,
   officeId,
+  initiationDate,
   onSuccess,
 }: AddCostValuesModalProps) {
   const currentDate = new Date();
@@ -58,8 +51,65 @@ export function AddCostValuesModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingRecord, setExistingRecord] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [existingMonthsForYear, setExistingMonthsForYear] = useState<Set<string>>(new Set());
 
-  const years = generateYears();
+  // Generate years starting from initiation date year
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    let startYear = currentYear - 5;
+    
+    if (initiationDate) {
+      const initYear = new Date(initiationDate).getFullYear();
+      startYear = Math.max(initYear, startYear);
+    }
+    
+    const yearsList = [];
+    for (let year = startYear; year <= currentYear + 2; year++) {
+      yearsList.push(year.toString());
+    }
+    return yearsList;
+  }, [initiationDate]);
+
+  // Ensure selected year is valid when years change
+  useEffect(() => {
+    if (years.length > 0 && !years.includes(selectedYear)) {
+      setSelectedYear(years[years.length - 1]);
+    }
+  }, [years, selectedYear]);
+
+  // Fetch existing months data for the selected year
+  useEffect(() => {
+    const fetchExistingMonths = async () => {
+      if (!officeId || !selectedYear || !open) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("venture_office_costs")
+          .select("month")
+          .eq("venture_office", selectedVentureOffice)
+          .gte("month", `${selectedYear}-01-01`)
+          .lte("month", `${selectedYear}-12-31`);
+
+        if (error) {
+          console.error("Error fetching existing months:", error);
+          return;
+        }
+
+        const monthsSet = new Set<string>();
+        data?.forEach((record) => {
+          if (record.month) {
+            const month = new Date(record.month).getMonth() + 1;
+            monthsSet.add(month.toString().padStart(2, "0"));
+          }
+        });
+        setExistingMonthsForYear(monthsSet);
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    fetchExistingMonths();
+  }, [officeId, selectedYear, selectedVentureOffice, open]);
 
   // Generate cost_id: office_id (3 digits) + year (4 digits) + month (2 digits)
   const generateCostId = () => {
@@ -169,6 +219,8 @@ export function AddCostValuesModal({
         toast.error("Failed to save cost values");
       } else {
         toast.success(existingRecord ? "Cost values updated successfully" : "Cost values added successfully");
+        // Refresh existing months after save
+        setExistingMonthsForYear(prev => new Set([...prev, selectedMonth]));
         onSuccess();
         onOpenChange(false);
       }
@@ -229,11 +281,19 @@ export function AddCostValuesModal({
                   <SelectValue placeholder="Select month" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MONTHS.map((month) => (
-                    <SelectItem key={month.value} value={month.value}>
-                      {month.label}
-                    </SelectItem>
-                  ))}
+                  {MONTHS.map((month) => {
+                    const needsData = !existingMonthsForYear.has(month.value);
+                    return (
+                      <SelectItem key={month.value} value={month.value}>
+                        <span className="flex items-center gap-2">
+                          {month.label}
+                          {needsData && (
+                            <span className="text-destructive text-xs font-medium">*Needs Data</span>
+                          )}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
