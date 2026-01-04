@@ -200,6 +200,7 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
         "Term Sheet Negotiations": details["Term Sheet Negotiations"],
         "IPA Negotiations": details["IPA Negotiations"],
         "Investment Allotment": details["Investment Allotment"],
+        venture_office_initiation_date: details.venture_office_initiation_date,
       });
     }
     setIsEditing(true);
@@ -232,8 +233,51 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
     }
   };
 
-  const updateField = (field: keyof VentureOfficeDetails, value: string | number) => {
+  const updateField = (field: keyof VentureOfficeDetails, value: string | number | null) => {
     setEditedDetails(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Helper to format initiation date as Month Year
+  const formatInitiationDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return "—";
+    const date = parse(dateStr, "yyyy-MM-dd", new Date());
+    if (!isValid(date)) return "—";
+    return format(date, "MMMM yyyy");
+  };
+
+  // Generate month options
+  const months = [
+    { value: "01", label: "January" },
+    { value: "02", label: "February" },
+    { value: "03", label: "March" },
+    { value: "04", label: "April" },
+    { value: "05", label: "May" },
+    { value: "06", label: "June" },
+    { value: "07", label: "July" },
+    { value: "08", label: "August" },
+    { value: "09", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+  ];
+
+  // Generate year options (last 20 years to next 5 years)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 26 }, (_, i) => currentYear - 20 + i);
+
+  // Parse current initiation date for selects
+  const currentInitiationDate = editedDetails.venture_office_initiation_date || details?.venture_office_initiation_date;
+  const parsedInitDate = currentInitiationDate ? parse(currentInitiationDate, "yyyy-MM-dd", new Date()) : null;
+  const selectedMonth = parsedInitDate && isValid(parsedInitDate) ? format(parsedInitDate, "MM") : "";
+  const selectedYear = parsedInitDate && isValid(parsedInitDate) ? format(parsedInitDate, "yyyy") : "";
+
+  const handleInitiationDateChange = (month: string, year: string) => {
+    if (month && year) {
+      const newDate = `${year}-${month}-01`;
+      updateField("venture_office_initiation_date", newDate);
+    } else {
+      updateField("venture_office_initiation_date", null);
+    }
   };
 
   if (loading) {
@@ -412,6 +456,51 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
                     />
                   ) : (
                     <div className="p-2 bg-muted rounded-md">{details["Investment Allotment"] ?? "—"}</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    <Label>Venture Office Initiation Date</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Month and year when the venture office was initiated</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {isEditing ? (
+                    <div className="flex gap-2">
+                      <Select 
+                        value={selectedMonth} 
+                        onValueChange={(month) => handleInitiationDateChange(month, selectedYear || String(currentYear))}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {months.map((m) => (
+                            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select 
+                        value={selectedYear} 
+                        onValueChange={(year) => handleInitiationDateChange(selectedMonth || "01", year)}
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {years.map((y) => (
+                            <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <div className="p-2 bg-muted rounded-md">{formatInitiationDate(details.venture_office_initiation_date)}</div>
                   )}
                 </div>
               </div>
