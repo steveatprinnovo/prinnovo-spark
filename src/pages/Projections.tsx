@@ -749,6 +749,7 @@ const Projections = () => {
           onOpenChange={setShowAddCostModal}
           selectedVentureOffice={selectedVentureOffice}
           officeId={ventureOfficeDetails?.office_id}
+          initiationDate={ventureOfficeDetails?.venture_office_initiation_date}
           onSuccess={() => setCostsRefreshKey(prev => prev + 1)}
         />
       </div>
