@@ -216,6 +216,7 @@ const Projections = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
   const [costsYear, setCostsYear] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("revenues");
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
@@ -475,6 +476,22 @@ const Projections = () => {
           <h1 className="text-3xl font-bold text-foreground">Projections</h1>
           
           <div className="flex gap-4">
+            {activeTab !== "costs" && (
+              <div className="w-64">
+                <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="target">Target Forecast</SelectItem>
+                    <SelectItem value="very-conservative">Very Conservative</SelectItem>
+                    <SelectItem value="conservative">Conservative</SelectItem>
+                    <SelectItem value="aggressive">Aggressive</SelectItem>
+                    <SelectItem value="very-aggressive">Very Aggressive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {isAdmin && (
               <div>
                 <VentureOfficeDropdown
@@ -486,24 +503,10 @@ const Projections = () => {
                 />
               </div>
             )}
-            <div className="w-64">
-              <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="target">Target Forecast</SelectItem>
-                  <SelectItem value="very-conservative">Very Conservative</SelectItem>
-                  <SelectItem value="conservative">Conservative</SelectItem>
-                  <SelectItem value="aggressive">Aggressive</SelectItem>
-                  <SelectItem value="very-aggressive">Very Aggressive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </div>
 
-        <Tabs defaultValue="revenues" className="w-full">
+        <Tabs defaultValue="revenues" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="revenues">Revenues</TabsTrigger>
             {isAdmin && <TabsTrigger value="costs">Costs</TabsTrigger>}
