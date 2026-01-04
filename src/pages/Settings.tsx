@@ -1215,10 +1215,27 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                     <Label>Venture Office</Label>
                     <Input 
                       value={selectedVentureOffice === "all" ? (editedCompany.venture_office ?? "") : selectedVentureOffice} 
-                      onChange={(e) => updateField("venture_office", e.target.value)}
-                      disabled={selectedVentureOffice !== "all"}
-                      className={selectedVentureOffice !== "all" ? "bg-muted" : ""}
+                      readOnly
+                      disabled
+                      className="bg-muted cursor-not-allowed"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Pipeline Stage</Label>
+                    <Select 
+                      value={editedCompany["Pipeline Stage"] ?? ""} 
+                      onValueChange={(v) => updateField("Pipeline Stage", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select stage..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Implementation">Implementation</SelectItem>
+                        <SelectItem value="Pilot">Pilot</SelectItem>
+                        <SelectItem value="Portfolio Company">Portfolio Company</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -1328,25 +1345,6 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                 </div>
               </div>
 
-              {/* Pipeline Stage - Keep visible but separate */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Pipeline Stage</Label>
-                  <Select 
-                    value={editedCompany["Pipeline Stage"] ?? ""} 
-                    onValueChange={(v) => updateField("Pipeline Stage", v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select stage..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Implementation">Implementation</SelectItem>
-                      <SelectItem value="Pilot">Pilot</SelectItem>
-                      <SelectItem value="Portfolio Company">Portfolio Company</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
               {/* Investment Details Section (Optional) - Only for existing companies */}
               {selectedCompanyId !== "new" && (
