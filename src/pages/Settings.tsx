@@ -17,10 +17,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink, Star, CalendarIcon } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink, Star, CalendarIcon, DollarSign } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, parse, isValid } from "date-fns";
+import { format, parse, isValid, addYears, isBefore, startOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
@@ -184,11 +184,58 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
   const [editingFocusAreaName, setEditingFocusAreaName] = useState("");
   const [newCompanyInputs, setNewCompanyInputs] = useState<{ [focusAreaId: string]: { name: string; url: string } }>({});
 
+  // Budget state (admin only)
+  const [budgetSectionOpen, setBudgetSectionOpen] = useState(false);
+  const [selectedBudgetYear, setSelectedBudgetYear] = useState<number | null>(null);
+  const [servicesBudget, setServicesBudget] = useState<string>("");
+  const [operatingCostsBudget, setOperatingCostsBudget] = useState<string>("");
+  const [savingBudget, setSavingBudget] = useState(false);
+  const [existingBudgets, setExistingBudgets] = useState<{ year_number: number; services_budget: number; operating_costs_budget: number }[]>([]);
+
   // Reset editing state when venture office changes
   useEffect(() => {
     setIsEditing(false);
     setEditedDetails({});
+    setSelectedBudgetYear(null);
+    setServicesBudget("");
+    setOperatingCostsBudget("");
   }, [selectedVentureOffice]);
+
+  // Fetch existing budgets for the selected venture office
+  useEffect(() => {
+    const fetchBudgets = async () => {
+      if (!selectedVentureOffice || selectedVentureOffice === "all") {
+        setExistingBudgets([]);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('venture_office_budgets' as any)
+        .select('year_number, services_budget, operating_costs_budget')
+        .eq('venture_office', selectedVentureOffice)
+        .order('year_number');
+      
+      if (!error && data) {
+        setExistingBudgets(data as any);
+      }
+    };
+    
+    fetchBudgets();
+  }, [selectedVentureOffice]);
+
+  // Load budget when year is selected
+  useEffect(() => {
+    if (selectedBudgetYear !== null) {
+      const existing = existingBudgets.find(b => b.year_number === selectedBudgetYear);
+      if (existing) {
+        setServicesBudget(String(existing.services_budget || ""));
+        setOperatingCostsBudget(String(existing.operating_costs_budget || ""));
+      } else {
+        setServicesBudget("");
+        setOperatingCostsBudget("");
+      }
+    }
+  }, [selectedBudgetYear, existingBudgets]);
 
   // Initialize edited details when entering edit mode
   const handleStartEdit = () => {
@@ -277,6 +324,98 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
       updateField("venture_office_initiation_date", newDate);
     } else {
       updateField("venture_office_initiation_date", null);
+    }
+  };
+
+  // Calculate available budget years based on initiation date
+  const getBudgetYearOptions = () => {
+    const initiationDateStr = details?.venture_office_initiation_date;
+    if (!initiationDateStr) return [];
+    
+    const initiationDate = parse(initiationDateStr, "yyyy-MM-dd", new Date());
+    if (!isValid(initiationDate)) return [];
+    
+    const now = new Date();
+    const options: { yearNumber: number; label: string }[] = [];
+    
+    let yearNum = 1;
+    while (true) {
+      const yearStart = addYears(startOfMonth(initiationDate), yearNum - 1);
+      const yearEnd = addYears(startOfMonth(initiationDate), yearNum);
+      yearEnd.setDate(yearEnd.getDate() - 1); // End is last day before next anniversary
+      
+      // Only add if the year's start month has passed (anniversary has occurred for this year)
+      if (isBefore(yearStart, now)) {
+        const startLabel = format(yearStart, "MMMM yyyy");
+        const endLabel = format(yearEnd, "MMMM yyyy");
+        options.push({
+          yearNumber: yearNum,
+          label: `Year ${yearNum} (${startLabel} - ${endLabel})`
+        });
+        yearNum++;
+      } else {
+        break;
+      }
+    }
+    
+    return options;
+  };
+
+  const budgetYearOptions = getBudgetYearOptions();
+
+  // Save budget
+  const handleSaveBudget = async () => {
+    if (selectedBudgetYear === null || selectedVentureOffice === "all") return;
+    
+    setSavingBudget(true);
+    try {
+      const budgetData = {
+        venture_office: selectedVentureOffice,
+        year_number: selectedBudgetYear,
+        services_budget: parseFloat(servicesBudget) || 0,
+        operating_costs_budget: parseFloat(operatingCostsBudget) || 0,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Check if budget exists for this year
+      const existing = existingBudgets.find(b => b.year_number === selectedBudgetYear);
+      
+      if (existing) {
+        const { error } = await supabase
+          .from('venture_office_budgets' as any)
+          .update({
+            services_budget: budgetData.services_budget,
+            operating_costs_budget: budgetData.operating_costs_budget,
+            updated_at: budgetData.updated_at
+          })
+          .eq('venture_office', selectedVentureOffice)
+          .eq('year_number', selectedBudgetYear);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('venture_office_budgets' as any)
+          .insert(budgetData);
+        
+        if (error) throw error;
+      }
+      
+      toast.success("Budget saved successfully");
+      
+      // Refresh budgets
+      const { data } = await supabase
+        .from('venture_office_budgets' as any)
+        .select('year_number, services_budget, operating_costs_budget')
+        .eq('venture_office', selectedVentureOffice)
+        .order('year_number');
+      
+      if (data) {
+        setExistingBudgets(data as any);
+      }
+    } catch (err: any) {
+      toast.error(`Failed to save budget: ${err.message}`);
+    } finally {
+      setSavingBudget(false);
     }
   };
 
@@ -750,6 +889,126 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
                       </Button>
                     )}
                   </>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Budget Section - Admin Only */}
+        {!showAggregateView && isAdmin && (
+          <Collapsible open={budgetSectionOpen} onOpenChange={setBudgetSectionOpen} className="mt-6">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Budget Settings
+                </div>
+                {budgetSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <div className="p-4 bg-emerald-50 border-2 border-emerald-300 rounded-lg space-y-4">
+                <div className="flex items-center gap-2 text-emerald-700 mb-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="text-sm font-medium">Manage annual budget allocations for this venture office</span>
+                </div>
+
+                {!details?.venture_office_initiation_date ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <p className="text-sm">Please set the Venture Office Initiation Date above to configure budgets.</p>
+                  </div>
+                ) : budgetYearOptions.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <p className="text-sm">No completed fiscal years available yet based on the initiation date.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Year Selection */}
+                      <div className="space-y-2">
+                        <Label>Fiscal Year</Label>
+                        <Select
+                          value={selectedBudgetYear !== null ? String(selectedBudgetYear) : ""}
+                          onValueChange={(value) => setSelectedBudgetYear(parseInt(value))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {budgetYearOptions.map((option) => (
+                              <SelectItem key={option.yearNumber} value={String(option.yearNumber)}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Services Budget */}
+                      <div className="space-y-2">
+                        <Label>Services Budget</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                          <Input
+                            type="number"
+                            value={servicesBudget}
+                            onChange={(e) => setServicesBudget(e.target.value)}
+                            placeholder="0.00"
+                            className="pl-7"
+                            disabled={selectedBudgetYear === null}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Operating Costs Budget */}
+                      <div className="space-y-2">
+                        <Label>Operating Costs Budget</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                          <Input
+                            type="number"
+                            value={operatingCostsBudget}
+                            onChange={(e) => setOperatingCostsBudget(e.target.value)}
+                            placeholder="0.00"
+                            className="pl-7"
+                            disabled={selectedBudgetYear === null}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={handleSaveBudget}
+                        disabled={selectedBudgetYear === null || savingBudget}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {savingBudget ? "Saving..." : "Save Budget"}
+                      </Button>
+                    </div>
+
+                    {/* Existing Budgets Summary */}
+                    {existingBudgets.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-emerald-200">
+                        <Label className="text-xs text-muted-foreground mb-2 block">Saved Budgets</Label>
+                        <div className="space-y-1">
+                          {existingBudgets.map((budget) => {
+                            const yearOption = budgetYearOptions.find(o => o.yearNumber === budget.year_number);
+                            return (
+                              <div key={budget.year_number} className="flex justify-between text-sm bg-background/50 p-2 rounded">
+                                <span className="font-medium">Year {budget.year_number}</span>
+                                <span className="text-muted-foreground">
+                                  Services: ${(budget.services_budget || 0).toLocaleString()} | Operating: ${(budget.operating_costs_budget || 0).toLocaleString()}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </CollapsibleContent>
