@@ -3,8 +3,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 import { useVentureOfficeCosts, ContractYearOption } from "@/hooks/useVentureOfficeCosts";
-import { BudgetVarianceCards } from "@/components/BudgetVarianceCards";
+import { BudgetVarianceCards, OverallBudgetVarianceCards } from "@/components/BudgetVarianceCards";
 import { format } from "date-fns";
 
 interface CostsTableProps {
@@ -36,12 +37,16 @@ const OPERATING_COSTS = [
 type CostKey = "venture_team_services_cost" | "it_team_services_cost" | "operating_expenses" | "legal_costs";
 
 export function CostsTable({ selectedVentureOffice, selectedContractYear, onContractYearChange, initiationDate }: CostsTableProps) {
-  const { monthlyCosts, totals, loading, contractYearOptions } = useVentureOfficeCosts(
+  const { monthlyCosts, totals, overallTotals, loading, contractYearOptions } = useVentureOfficeCosts(
     selectedVentureOffice,
     selectedContractYear,
     initiationDate,
     onContractYearChange // Pass callback to set default year when detected
   );
+
+  // Calculate overall subtotals for KPI cards (across all data)
+  const overallServicesTotal = overallTotals.venture_team_services_cost + overallTotals.it_team_services_cost;
+  const overallOperatingTotal = overallTotals.operating_expenses + overallTotals.legal_costs;
 
   // Get month labels for the selected year with rate_adjust indicator
   const monthLabels = useMemo(() => {
@@ -100,7 +105,21 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
   const operatingTotal = operatingSubtotals.total;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Overall Budget Variance KPIs */}
+      <OverallBudgetVarianceCards
+        selectedVentureOffice={selectedVentureOffice}
+        servicesTotal={overallServicesTotal}
+        operatingTotal={overallOperatingTotal}
+      />
+
+      {/* Separator and Sub-header */}
+      <div className="space-y-4">
+        <Separator />
+        <h3 className="text-sm font-semibold text-foreground">Contract Details</h3>
+      </div>
+
+      {/* Contract Year Selector */}
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-foreground">Contract Year:</span>
         <Select 
@@ -120,6 +139,7 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
         </Select>
       </div>
 
+      {/* Contract Year Budget Variance KPIs */}
       <BudgetVarianceCards
         selectedVentureOffice={selectedVentureOffice}
         selectedContractYear={selectedContractYear}
