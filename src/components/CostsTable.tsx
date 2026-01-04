@@ -84,6 +84,14 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
     };
   }, [monthlyCosts, totals]);
 
+  if (!selectedVentureOffice || selectedVentureOffice === "all") {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        Please select a venture office to view cost detail.
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
