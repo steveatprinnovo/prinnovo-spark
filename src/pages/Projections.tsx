@@ -4,6 +4,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { CostsTable } from "@/components/CostsTable";
+import { AddCostValuesModal } from "@/components/AddCostValuesModal";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -18,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, ChevronUp, ChevronDown } from "lucide-react";
+import { DollarSign, ChevronUp, ChevronDown, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -217,6 +218,8 @@ const Projections = () => {
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
   const [costsContractYear, setCostsContractYear] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("revenues");
+  const [showAddCostModal, setShowAddCostModal] = useState(false);
+  const [costsRefreshKey, setCostsRefreshKey] = useState(0);
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
@@ -507,10 +510,19 @@ const Projections = () => {
         </div>
 
         <Tabs defaultValue="revenues" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="revenues">Revenues</TabsTrigger>
-            {isAdmin && <TabsTrigger value="costs">Costs</TabsTrigger>}
-          </TabsList>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="revenues">Revenues</TabsTrigger>
+              {isAdmin && <TabsTrigger value="costs">Costs</TabsTrigger>}
+            </TabsList>
+            
+            {isAdmin && activeTab === "costs" && selectedVentureOffice !== "all" && (
+              <Button onClick={() => setShowAddCostModal(true)} size="sm">
+                <Plus className="h-4 w-4 mr-1" />
+                Add New Values
+              </Button>
+            )}
+          </div>
           
           <TabsContent value="revenues">
             <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto h-[calc(100vh-250px)]">
@@ -724,10 +736,21 @@ const Projections = () => {
                 selectedContractYear={costsContractYear}
                 onContractYearChange={setCostsContractYear}
                 initiationDate={ventureOfficeDetails?.venture_office_initiation_date}
+                officeId={ventureOfficeDetails?.office_id}
+                refreshKey={costsRefreshKey}
               />
             </TabsContent>
           )}
         </Tabs>
+
+        {/* Add Cost Values Modal */}
+        <AddCostValuesModal
+          open={showAddCostModal}
+          onOpenChange={setShowAddCostModal}
+          selectedVentureOffice={selectedVentureOffice}
+          officeId={ventureOfficeDetails?.office_id}
+          onSuccess={() => setCostsRefreshKey(prev => prev + 1)}
+        />
       </div>
     </div>
   );
