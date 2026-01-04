@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeCosts, ContractYearOption } from "@/hooks/useVentureOfficeCosts";
+import { BudgetVarianceCards } from "@/components/BudgetVarianceCards";
 import { format } from "date-fns";
 
 interface CostsTableProps {
@@ -94,6 +95,10 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
     );
   }
 
+  // Calculate subtotals for KPI cards
+  const servicesTotal = servicesSubtotals.total;
+  const operatingTotal = operatingSubtotals.total;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -114,6 +119,13 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
           </SelectContent>
         </Select>
       </div>
+
+      <BudgetVarianceCards
+        selectedVentureOffice={selectedVentureOffice}
+        selectedContractYear={selectedContractYear}
+        servicesTotal={servicesTotal}
+        operatingTotal={operatingTotal}
+      />
 
       {monthlyCosts.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground text-sm">
