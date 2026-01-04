@@ -17,7 +17,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink, Star } from "lucide-react";
+import { Building2, Plus, Save, X, Pencil, Briefcase, HelpCircle, Upload, ImageIcon, TrendingUp, Trash2, ChevronDown, ChevronRight, Target, Link as LinkIcon, ExternalLink, Star, CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parse, isValid } from "date-fns";
+import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -1302,45 +1306,125 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
               {/* Section 3: Key Dates */}
               <div className="p-4 bg-purple-50 dark:bg-purple-950/30 border-2 border-purple-200 dark:border-purple-800 rounded-lg space-y-4">
                 <div className="flex items-center gap-2 text-purple-700 dark:text-purple-400 mb-2">
-                  <TrendingUp className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   <span className="text-sm font-semibold">Key Dates</span>
                 </div>
                 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Term Sheet Signature Date</Label>
-                    <Input 
-                      type="date"
-                      value={editedCompany["Term Sheet Signature Date"] ?? ""} 
-                      onChange={(e) => updateField("Term Sheet Signature Date", e.target.value || null)}
-                    />
+                    <div className="flex gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="YYYY-MM-DD"
+                        value={editedCompany["Term Sheet Signature Date"] ?? ""} 
+                        onChange={(e) => updateField("Term Sheet Signature Date", e.target.value || null)}
+                        className="flex-1"
+                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="icon" className="shrink-0">
+                            <CalendarIcon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-popover z-50" align="end">
+                          <Calendar
+                            mode="single"
+                            selected={editedCompany["Term Sheet Signature Date"] ? parse(editedCompany["Term Sheet Signature Date"], "yyyy-MM-dd", new Date()) : undefined}
+                            onSelect={(date) => updateField("Term Sheet Signature Date", date ? format(date, "yyyy-MM-dd") : null)}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label>IPA Signature Date</Label>
-                    <Input 
-                      type="date"
-                      value={editedCompany["IPA Signature Date"] ?? ""} 
-                      onChange={(e) => updateField("IPA Signature Date", e.target.value || null)}
-                    />
+                    <div className="flex gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="YYYY-MM-DD"
+                        value={editedCompany["IPA Signature Date"] ?? ""} 
+                        onChange={(e) => updateField("IPA Signature Date", e.target.value || null)}
+                        className="flex-1"
+                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="icon" className="shrink-0">
+                            <CalendarIcon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-popover z-50" align="end">
+                          <Calendar
+                            mode="single"
+                            selected={editedCompany["IPA Signature Date"] ? parse(editedCompany["IPA Signature Date"], "yyyy-MM-dd", new Date()) : undefined}
+                            onSelect={(date) => updateField("IPA Signature Date", date ? format(date, "yyyy-MM-dd") : null)}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Implementation Completion Date</Label>
-                    <Input 
-                      type="date"
-                      value={editedCompany["Implementation Completion Date"] ?? ""} 
-                      onChange={(e) => updateField("Implementation Completion Date", e.target.value || null)}
-                    />
+                    <div className="flex gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="YYYY-MM-DD"
+                        value={editedCompany["Implementation Completion Date"] ?? ""} 
+                        onChange={(e) => updateField("Implementation Completion Date", e.target.value || null)}
+                        className="flex-1"
+                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="icon" className="shrink-0">
+                            <CalendarIcon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-popover z-50" align="end">
+                          <Calendar
+                            mode="single"
+                            selected={editedCompany["Implementation Completion Date"] ? parse(editedCompany["Implementation Completion Date"], "yyyy-MM-dd", new Date()) : undefined}
+                            onSelect={(date) => updateField("Implementation Completion Date", date ? format(date, "yyyy-MM-dd") : null)}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Final Portfolio Decision Date</Label>
-                    <Input 
-                      type="date"
-                      value={editedCompany["Final Portfolio Decision Date"] ?? ""} 
-                      onChange={(e) => updateField("Final Portfolio Decision Date", e.target.value || null)}
-                    />
+                    <div className="flex gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="YYYY-MM-DD"
+                        value={editedCompany["Final Portfolio Decision Date"] ?? ""} 
+                        onChange={(e) => updateField("Final Portfolio Decision Date", e.target.value || null)}
+                        className="flex-1"
+                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="icon" className="shrink-0">
+                            <CalendarIcon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-popover z-50" align="end">
+                          <Calendar
+                            mode="single"
+                            selected={editedCompany["Final Portfolio Decision Date"] ? parse(editedCompany["Final Portfolio Decision Date"], "yyyy-MM-dd", new Date()) : undefined}
+                            onSelect={(date) => updateField("Final Portfolio Decision Date", date ? format(date, "yyyy-MM-dd") : null)}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
                 </div>
               </div>
