@@ -215,7 +215,7 @@ export function AuthForm() {
 
         {/* Preview Screenshots */}
         <div className="relative w-full max-w-2xl">
-          {/* Main screenshot */}
+          {/* Main screenshot - center */}
           <div className="relative z-10 rounded-xl shadow-2xl overflow-hidden border border-border/50 bg-background">
             <div className="flex items-center gap-1.5 px-4 py-2 bg-muted/50 border-b border-border/50">
               <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -225,18 +225,18 @@ export function AuthForm() {
             <img src={previewHome} alt="Dashboard Preview" className="w-full" />
           </div>
 
-          {/* Secondary screenshot - offset */}
-          <div className="absolute -bottom-8 -right-8 w-3/4 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-0 opacity-80">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 border-b border-border/50">
-              <div className="w-2 h-2 rounded-full bg-red-400"></div>
-              <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-              <div className="w-2 h-2 rounded-full bg-green-400"></div>
+          {/* Screenshot 2 - top left, in front */}
+          <div className="absolute -top-4 -left-4 w-1/2 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-20">
+            <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 border-b border-border/50">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
             </div>
             <img src={previewImplementations} alt="Implementations Preview" className="w-full" />
           </div>
 
-          {/* Third screenshot - smaller offset */}
-          <div className="absolute -top-4 -left-4 w-1/2 rounded-xl shadow-lg overflow-hidden border border-border/50 bg-background z-20 opacity-90">
+          {/* Screenshot 3 - bottom right, in front */}
+          <div className="absolute -bottom-4 -right-4 w-1/2 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-20">
             <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 border-b border-border/50">
               <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
               <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
