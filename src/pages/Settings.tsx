@@ -1069,125 +1069,267 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
 
           {/* Edit Form */}
           {isEditing && (
-            <div className="space-y-4 border-t pt-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Company Name *</Label>
-                  <Input 
-                    value={editedCompany["Company Name"] ?? ""} 
-                    onChange={(e) => updateField("Company Name", e.target.value)}
-                  />
+            <div className="space-y-6 border-t pt-4">
+              
+              {/* Section 1: Company Details */}
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-800 rounded-lg space-y-4">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 mb-2">
+                  <Building2 className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Company Details</span>
                 </div>
                 
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Company Description</Label>
-                  <Textarea 
-                    value={editedCompany["Company Description"] ?? ""} 
-                    onChange={(e) => updateField("Company Description", e.target.value)}
-                    rows={3}
-                  />
-                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>Company Name *</Label>
+                    <Input 
+                      value={editedCompany["Company Name"] ?? ""} 
+                      onChange={(e) => updateField("Company Name", e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>Company Description</Label>
+                    <Textarea 
+                      value={editedCompany["Company Description"] ?? ""} 
+                      onChange={(e) => updateField("Company Description", e.target.value)}
+                      rows={3}
+                    />
+                  </div>
 
-                {/* Company Logo Upload */}
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Company Logo</Label>
-                  <div className="flex items-center gap-4">
-                    {/* Logo Preview */}
-                    <div className="h-16 w-16 rounded-md border border-border bg-muted flex items-center justify-center overflow-hidden">
-                      {logoPreview ? (
-                        <img 
-                          src={logoPreview} 
-                          alt="Logo preview" 
-                          className="h-full w-full object-contain"
+                  {/* Company Logo Upload */}
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>Company Logo</Label>
+                    <div className="flex items-center gap-4">
+                      <div className="h-16 w-16 rounded-md border border-border bg-muted flex items-center justify-center overflow-hidden">
+                        {logoPreview ? (
+                          <img 
+                            src={logoPreview} 
+                            alt="Logo preview" 
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-col gap-1">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoChange}
+                          className="hidden"
                         />
-                      ) : (
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      )}
-                    </div>
-                    
-                    {/* Upload Button */}
-                    <div className="flex flex-col gap-1">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoChange}
-                        className="hidden"
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        {logoPreview ? "Change Logo" : "Upload Logo"}
-                      </Button>
-                      <span className="text-xs text-muted-foreground">
-                        {logoFile ? logoFile.name : "PNG, JPG up to 5MB"}
-                      </span>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {logoPreview ? "Change Logo" : "Upload Logo"}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          {logoFile ? logoFile.name : "PNG, JPG up to 5MB"}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {selectedVentureOffice === "all" && (
+                  <div className="space-y-2">
+                    <Label>High-Level Focus Area</Label>
+                    <Select 
+                      value={editedCompany["High-Level Focus Area"] ?? ""} 
+                      onValueChange={(v) => updateField("High-Level Focus Area", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select focus area..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Clinical">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-sm bg-green-500"></div>
+                            Clinical
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Financial">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-sm bg-orange-500"></div>
+                            Financial
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Operational">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-sm bg-blue-500"></div>
+                            Operational
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Specific Focus Area</Label>
+                    <Input 
+                      value={editedCompany["Specific Focus Area"] ?? ""} 
+                      onChange={(e) => updateField("Specific Focus Area", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Country of Origin</Label>
+                    <Input 
+                      value={editedCompany["Country of Origin"] ?? ""} 
+                      onChange={(e) => updateField("Country of Origin", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Company Contact</Label>
+                    <Input 
+                      value={editedCompany["Company Contact"] ?? ""} 
+                      onChange={(e) => updateField("Company Contact", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Current Company Valuation</Label>
+                    <Input 
+                      type="number"
+                      value={editedCompany["Current Company Valuation"] ?? ""} 
+                      onChange={(e) => updateField("Current Company Valuation", e.target.value ? parseFloat(e.target.value) : null)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Venture Office Details */}
+              <div className="p-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-200 dark:border-green-800 rounded-lg space-y-4">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-400 mb-2">
+                  <Target className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Venture Office Details</span>
+                </div>
+                
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Venture Office</Label>
                     <Input 
-                      value={editedCompany.venture_office ?? ""} 
+                      value={selectedVentureOffice === "all" ? (editedCompany.venture_office ?? "") : selectedVentureOffice} 
                       onChange={(e) => updateField("venture_office", e.target.value)}
+                      disabled={selectedVentureOffice !== "all"}
+                      className={selectedVentureOffice !== "all" ? "bg-muted" : ""}
                     />
                   </div>
-                )}
 
-                <div className="space-y-2">
-                  <Label>Country of Origin</Label>
-                  <Input 
-                    value={editedCompany["Country of Origin"] ?? ""} 
-                    onChange={(e) => updateField("Country of Origin", e.target.value)}
-                  />
+                  <div className="space-y-2">
+                    <Label>Executive Owner</Label>
+                    <Input 
+                      value={editedCompany["EVP Owner"] ?? ""} 
+                      onChange={(e) => updateField("EVP Owner", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Champions</Label>
+                    <Input 
+                      value={editedCompany["Champions"] ?? ""} 
+                      onChange={(e) => updateField("Champions", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Intro Origin</Label>
+                    <Input 
+                      value={editedCompany["Intro Origin"] ?? ""} 
+                      onChange={(e) => updateField("Intro Origin", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>IPA Year</Label>
+                    <Input 
+                      type="number"
+                      value={editedCompany["IPA Year"] ?? ""} 
+                      onChange={(e) => updateField("IPA Year", e.target.value ? parseInt(e.target.value) : null)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Target IPA Return</Label>
+                    <Input 
+                      type="number"
+                      value={editedCompany["Target IPA Return"] ?? ""} 
+                      onChange={(e) => updateField("Target IPA Return", e.target.value ? parseFloat(e.target.value) : null)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Current Venture Office Valuation</Label>
+                    <Input 
+                      type="number"
+                      value={editedCompany["Current HLV Valuation"] ?? ""} 
+                      onChange={(e) => updateField("Current HLV Valuation", e.target.value ? parseFloat(e.target.value) : null)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Venture Office Ownership Percentage</Label>
+                    <Input 
+                      value={editedCompany["HLV Ownership Percentage"] ?? ""} 
+                      onChange={(e) => updateField("HLV Ownership Percentage", e.target.value)}
+                    />
+                  </div>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label>High-Level Focus Area</Label>
-                  <Select 
-                    value={editedCompany["High-Level Focus Area"] ?? ""} 
-                    onValueChange={(v) => updateField("High-Level Focus Area", v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select focus area..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Clinical">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-sm bg-green-500"></div>
-                          Clinical
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Financial">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-sm bg-orange-500"></div>
-                          Financial
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Operational">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-sm bg-blue-500"></div>
-                          Operational
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Section 3: Key Dates */}
+              <div className="p-4 bg-purple-50 dark:bg-purple-950/30 border-2 border-purple-200 dark:border-purple-800 rounded-lg space-y-4">
+                <div className="flex items-center gap-2 text-purple-700 dark:text-purple-400 mb-2">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Key Dates</span>
                 </div>
+                
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Term Sheet Signature Date</Label>
+                    <Input 
+                      type="date"
+                      value={editedCompany["Term Sheet Signature Date"] ?? ""} 
+                      onChange={(e) => updateField("Term Sheet Signature Date", e.target.value || null)}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Specific Focus Area</Label>
-                  <Input 
-                    value={editedCompany["Specific Focus Area"] ?? ""} 
-                    onChange={(e) => updateField("Specific Focus Area", e.target.value)}
-                  />
+                  <div className="space-y-2">
+                    <Label>IPA Signature Date</Label>
+                    <Input 
+                      type="date"
+                      value={editedCompany["IPA Signature Date"] ?? ""} 
+                      onChange={(e) => updateField("IPA Signature Date", e.target.value || null)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Implementation Completion Date</Label>
+                    <Input 
+                      type="date"
+                      value={editedCompany["Implementation Completion Date"] ?? ""} 
+                      onChange={(e) => updateField("Implementation Completion Date", e.target.value || null)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Final Portfolio Decision Date</Label>
+                    <Input 
+                      type="date"
+                      value={editedCompany["Final Portfolio Decision Date"] ?? ""} 
+                      onChange={(e) => updateField("Final Portfolio Decision Date", e.target.value || null)}
+                    />
+                  </div>
                 </div>
+              </div>
 
+              {/* Pipeline Stage - Keep visible but separate */}
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Pipeline Stage</Label>
                   <Select 
@@ -1203,73 +1345,6 @@ function CompanySettingsCard({ companies, refetchCompanies, selectedVentureOffic
                       <SelectItem value="Portfolio Company">Portfolio Company</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Executive Owner</Label>
-                  <Input 
-                    value={editedCompany["EVP Owner"] ?? ""} 
-                    onChange={(e) => updateField("EVP Owner", e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Company Contact</Label>
-                  <Input 
-                    value={editedCompany["Company Contact"] ?? ""} 
-                    onChange={(e) => updateField("Company Contact", e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Champions</Label>
-                  <Input 
-                    value={editedCompany["Champions"] ?? ""} 
-                    onChange={(e) => updateField("Champions", e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Intro Origin</Label>
-                  <Input 
-                    value={editedCompany["Intro Origin"] ?? ""} 
-                    onChange={(e) => updateField("Intro Origin", e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>IPA Year</Label>
-                  <Input 
-                    type="number"
-                    value={editedCompany["IPA Year"] ?? ""} 
-                    onChange={(e) => updateField("IPA Year", e.target.value ? parseInt(e.target.value) : null)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Current Company Valuation</Label>
-                  <Input 
-                    type="number"
-                    value={editedCompany["Current Company Valuation"] ?? ""} 
-                    onChange={(e) => updateField("Current Company Valuation", e.target.value ? parseFloat(e.target.value) : null)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Current Venture Office Valuation</Label>
-                  <Input 
-                    type="number"
-                    value={editedCompany["Current HLV Valuation"] ?? ""} 
-                    onChange={(e) => updateField("Current HLV Valuation", e.target.value ? parseFloat(e.target.value) : null)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Venture Office Ownership Percentage</Label>
-                  <Input 
-                    value={editedCompany["HLV Ownership Percentage"] ?? ""} 
-                    onChange={(e) => updateField("HLV Ownership Percentage", e.target.value)}
-                  />
                 </div>
               </div>
 
