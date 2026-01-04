@@ -215,7 +215,7 @@ const Projections = () => {
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
-  const [costsYear, setCostsYear] = useState<number | null>(null);
+  const [costsContractYear, setCostsContractYear] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("revenues");
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
@@ -721,8 +721,9 @@ const Projections = () => {
             <TabsContent value="costs">
               <CostsTable
                 selectedVentureOffice={selectedVentureOffice}
-                selectedYear={costsYear}
-                onYearChange={setCostsYear}
+                selectedContractYear={costsContractYear}
+                onContractYearChange={setCostsContractYear}
+                initiationDate={ventureOfficeDetails?.venture_office_initiation_date}
               />
             </TabsContent>
           )}
