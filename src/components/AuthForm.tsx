@@ -226,7 +226,7 @@ export function AuthForm() {
           </div>
 
           {/* Screenshot 2 - top left, in front */}
-          <div className="absolute -top-4 -left-4 w-1/2 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-20">
+          <div className="absolute -top-12 -left-4 w-1/2 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-20">
             <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 border-b border-border/50">
               <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
               <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
@@ -236,7 +236,7 @@ export function AuthForm() {
           </div>
 
           {/* Screenshot 3 - bottom right, in front */}
-          <div className="absolute -bottom-4 -right-4 w-1/2 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-20">
+          <div className="absolute -bottom-12 -right-4 w-1/2 rounded-xl shadow-xl overflow-hidden border border-border/50 bg-background z-20">
             <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 border-b border-border/50">
               <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
               <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
