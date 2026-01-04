@@ -116,7 +116,7 @@ export function CostsTable({ selectedVentureOffice, selectedContractYear, onCont
       {/* Separator and Sub-header */}
       <div className="space-y-4">
         <Separator />
-        <h3 className="text-sm font-semibold text-foreground">Contract Details</h3>
+        <h3 className="text-sm font-semibold text-foreground">Contract Costs Details</h3>
       </div>
 
       {/* Contract Year Selector */}
