@@ -181,7 +181,7 @@ export function AuthForm() {
               <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
               <Input id="password" type="password" placeholder={isSignUp ? "Create a password (min. 4 characters)" : "••••••••"} value={password} onChange={e => setPassword(e.target.value)} required minLength={4} disabled={isLoading} className="h-12 border-border" />
             </div>
-            <Button type="submit" className="w-full h-12 bg-[hsl(220,60%,25%)] hover:bg-[hsl(220,60%,20%)] text-white font-medium" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 font-medium" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSignUp ? "Sign Up" : "Log In"}
             </Button>
