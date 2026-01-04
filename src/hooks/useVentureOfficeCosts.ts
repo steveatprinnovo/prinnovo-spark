@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { parse, isValid, addYears, startOfMonth, isBefore, format, endOfMonth } from "date-fns";
 
@@ -28,6 +28,11 @@ export function useVentureOfficeCosts(
 ) {
   const [costs, setCosts] = useState<VentureOfficeCost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refetch = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   // Calculate available contract years based on initiation date
   const contractYearOptions = useMemo((): ContractYearOption[] => {
@@ -109,7 +114,7 @@ export function useVentureOfficeCosts(
     };
 
     fetchCosts();
-  }, [selectedVentureOffice, selectedContractYear, initiationDate, contractYearOptions.length]);
+  }, [selectedVentureOffice, selectedContractYear, initiationDate, contractYearOptions.length, refreshTrigger]);
 
   // Filter costs by selected contract year date range
   const filteredCosts = useMemo(() => {
@@ -197,5 +202,5 @@ export function useVentureOfficeCosts(
     });
   }, [costs]);
 
-  return { costs: filteredCosts, monthlyCosts, totals, overallTotals, loading, contractYearOptions };
+  return { costs: filteredCosts, monthlyCosts, totals, overallTotals, loading, contractYearOptions, refetch };
 }

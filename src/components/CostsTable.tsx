@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +13,8 @@ interface CostsTableProps {
   selectedContractYear: number | null;
   onContractYearChange: (year: number) => void;
   initiationDate: string | null | undefined;
+  officeId: number | undefined;
+  refreshKey?: number;
 }
 
 const formatCurrency = (value: number) => {
@@ -36,13 +38,20 @@ const OPERATING_COSTS = [
 
 type CostKey = "venture_team_services_cost" | "it_team_services_cost" | "operating_expenses" | "legal_costs";
 
-export function CostsTable({ selectedVentureOffice, selectedContractYear, onContractYearChange, initiationDate }: CostsTableProps) {
-  const { monthlyCosts, totals, overallTotals, loading, contractYearOptions } = useVentureOfficeCosts(
+export function CostsTable({ selectedVentureOffice, selectedContractYear, onContractYearChange, initiationDate, officeId, refreshKey }: CostsTableProps) {
+  const { monthlyCosts, totals, overallTotals, loading, contractYearOptions, refetch } = useVentureOfficeCosts(
     selectedVentureOffice,
     selectedContractYear,
     initiationDate,
     onContractYearChange // Pass callback to set default year when detected
   );
+
+  // Refetch when refreshKey changes
+  useEffect(() => {
+    if (refreshKey !== undefined && refreshKey > 0) {
+      refetch();
+    }
+  }, [refreshKey, refetch]);
 
   // Calculate overall subtotals for KPI cards (across all data)
   const overallServicesTotal = overallTotals.venture_team_services_cost + overallTotals.it_team_services_cost;
