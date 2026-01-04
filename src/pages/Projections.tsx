@@ -215,7 +215,7 @@ const Projections = () => {
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
-  const [costsYear, setCostsYear] = useState<number>(new Date().getFullYear());
+  const [costsYear, setCostsYear] = useState<number | null>(null);
   
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
