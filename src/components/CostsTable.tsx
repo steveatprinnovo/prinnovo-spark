@@ -21,14 +21,17 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const COST_CATEGORIES = [
+const SERVICES_COSTS = [
   { key: "venture_team_services_cost", label: "Venture Team Services Cost" },
   { key: "it_team_services_cost", label: "IT Team Services Cost" },
+] as const;
+
+const OPERATING_COSTS = [
   { key: "operating_expenses", label: "Operating Expenses" },
   { key: "legal_costs", label: "Legal Costs" },
 ] as const;
 
-type CostKey = typeof COST_CATEGORIES[number]["key"];
+type CostKey = "venture_team_services_cost" | "it_team_services_cost" | "operating_expenses" | "legal_costs";
 
 export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }: CostsTableProps) {
   const { monthlyCosts, totals, loading, availableYears } = useVentureOfficeCosts(
@@ -44,6 +47,25 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
       rateAdjust: cost.rate_adjust,
     }));
   }, [monthlyCosts]);
+
+  // Calculate subtotals for each section
+  const servicesSubtotals = useMemo(() => {
+    return {
+      monthly: monthlyCosts.map(cost => 
+        cost.venture_team_services_cost + cost.it_team_services_cost
+      ),
+      total: totals.venture_team_services_cost + totals.it_team_services_cost,
+    };
+  }, [monthlyCosts, totals]);
+
+  const operatingSubtotals = useMemo(() => {
+    return {
+      monthly: monthlyCosts.map(cost => 
+        cost.operating_expenses + cost.legal_costs
+      ),
+      total: totals.operating_expenses + totals.legal_costs,
+    };
+  }, [monthlyCosts, totals]);
 
   if (loading) {
     return (
@@ -117,11 +139,20 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {COST_CATEGORIES.map(({ key, label }) => {
+              {/* Services Costs Section */}
+              <TableRow className="bg-primary/10">
+                <TableCell 
+                  colSpan={monthLabels.length + 2} 
+                  className="sticky left-0 z-10 font-bold text-xs py-1.5 text-primary"
+                >
+                  Services Costs
+                </TableCell>
+              </TableRow>
+              {SERVICES_COSTS.map(({ key, label }) => {
                 const rowTotal = totals[key];
                 return (
                   <TableRow key={key}>
-                    <TableCell className="sticky left-0 z-10 bg-background font-medium text-xs py-2">
+                    <TableCell className="sticky left-0 z-10 bg-background font-medium text-xs py-2 pl-4">
                       {label}
                     </TableCell>
                     {monthlyCosts.map((cost, index) => (
@@ -135,10 +166,67 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                   </TableRow>
                 );
               })}
+              {/* Services Costs Subtotal */}
+              <TableRow className="bg-primary/5 font-semibold">
+                <TableCell className="sticky left-0 z-10 bg-primary/5 font-bold text-xs py-2 pl-4">
+                  Services Costs Total
+                </TableCell>
+                {servicesSubtotals.monthly.map((subtotal, index) => (
+                  <TableCell key={index} className="text-center font-semibold text-xs py-2">
+                    {formatCurrency(subtotal)}
+                  </TableCell>
+                ))}
+                <TableCell className="text-center bg-primary/10 font-bold text-xs py-2">
+                  {formatCurrency(servicesSubtotals.total)}
+                </TableCell>
+              </TableRow>
+
+              {/* Operating Costs Section */}
+              <TableRow className="bg-secondary/30">
+                <TableCell 
+                  colSpan={monthLabels.length + 2} 
+                  className="sticky left-0 z-10 font-bold text-xs py-1.5 text-secondary-foreground"
+                >
+                  Operating Costs
+                </TableCell>
+              </TableRow>
+              {OPERATING_COSTS.map(({ key, label }) => {
+                const rowTotal = totals[key];
+                return (
+                  <TableRow key={key}>
+                    <TableCell className="sticky left-0 z-10 bg-background font-medium text-xs py-2 pl-4">
+                      {label}
+                    </TableCell>
+                    {monthlyCosts.map((cost, index) => (
+                      <TableCell key={index} className="text-center text-xs py-2">
+                        {formatCurrency(cost[key as CostKey])}
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-center bg-muted/50 font-semibold text-xs py-2">
+                      {formatCurrency(rowTotal)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {/* Operating Costs Subtotal */}
+              <TableRow className="bg-secondary/10 font-semibold">
+                <TableCell className="sticky left-0 z-10 bg-secondary/10 font-bold text-xs py-2 pl-4">
+                  Operating Costs Total
+                </TableCell>
+                {operatingSubtotals.monthly.map((subtotal, index) => (
+                  <TableCell key={index} className="text-center font-semibold text-xs py-2">
+                    {formatCurrency(subtotal)}
+                  </TableCell>
+                ))}
+                <TableCell className="text-center bg-secondary/20 font-bold text-xs py-2">
+                  {formatCurrency(operatingSubtotals.total)}
+                </TableCell>
+              </TableRow>
+
               {/* Grand Total Row */}
               <TableRow className="bg-muted/30 font-semibold">
                 <TableCell className="sticky left-0 z-10 bg-muted/30 font-bold text-xs py-2">
-                  Total
+                  Grand Total
                 </TableCell>
                 {monthlyCosts.map((cost, index) => {
                   const monthTotal = 
@@ -153,12 +241,7 @@ export function CostsTable({ selectedVentureOffice, selectedYear, onYearChange }
                   );
                 })}
                 <TableCell className="text-center bg-muted font-bold text-xs py-2">
-                  {formatCurrency(
-                    totals.venture_team_services_cost +
-                    totals.it_team_services_cost +
-                    totals.operating_expenses +
-                    totals.legal_costs
-                  )}
+                  {formatCurrency(servicesSubtotals.total + operatingSubtotals.total)}
                 </TableCell>
               </TableRow>
             </TableBody>
