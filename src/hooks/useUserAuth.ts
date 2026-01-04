@@ -24,27 +24,16 @@ export function useUserAuth() {
       }
 
       try {
-        // Check if user is admin
+        // Get user role and venture office assignment from user_roles table
         const { data: roleData } = await supabase
           .from("user_roles")
-          .select("role")
+          .select("role, venture_office_assignment")
           .eq("user_id", user.id)
-          .eq("role", "admin")
           .maybeSingle();
 
-        const isAdmin = !!roleData;
-
-        // Get user's venture office if not admin
-        let ventureOffice = null;
-        if (!isAdmin) {
-          const { data: ventureOfficeData } = await supabase
-            .from("user_venture_offices")
-            .select("venture_office")
-            .eq("user_id", user.id)
-            .maybeSingle();
-
-          ventureOffice = ventureOfficeData?.venture_office || null;
-        }
+        const isAdmin = roleData?.role === "admin";
+        // Non-admin users get their venture office from venture_office_assignment
+        const ventureOffice = !isAdmin ? (roleData?.venture_office_assignment || null) : null;
 
         setAuthorization({ isAdmin, ventureOffice, loading: false });
       } catch (error) {
