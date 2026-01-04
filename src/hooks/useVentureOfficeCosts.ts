@@ -146,10 +146,8 @@ export function useVentureOfficeCosts(
     filteredCosts.forEach(cost => {
       if (!cost.month) return;
       
-      // Normalize the month key to YYYY-MM-01 format for consistent grouping
-      const costDate = new Date(cost.month);
-      const monthKey = format(startOfMonth(costDate), "yyyy-MM-dd");
-      
+      // Use the month directly from the database as the key
+      const monthKey = cost.month;
       const existing = monthMap.get(monthKey) || {
         month: monthKey,
         venture_team_services_cost: 0,
@@ -165,7 +163,7 @@ export function useVentureOfficeCosts(
         it_team_services_cost: existing.it_team_services_cost + (cost.it_team_services_cost || 0),
         operating_expenses: existing.operating_expenses + (cost.operating_expenses || 0),
         legal_costs: existing.legal_costs + (cost.legal_costs || 0),
-        rate_adjust: existing.rate_adjust || (cost.rate_adjust === true),
+        rate_adjust: cost.rate_adjust === true,
       });
     });
 
