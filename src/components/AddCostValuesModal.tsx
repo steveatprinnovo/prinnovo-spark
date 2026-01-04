@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -48,6 +49,7 @@ export function AddCostValuesModal({
   const [itTeamServicesCost, setItTeamServicesCost] = useState("");
   const [operatingExpenses, setOperatingExpenses] = useState("");
   const [legalCosts, setLegalCosts] = useState("");
+  const [rateAdjust, setRateAdjust] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingRecord, setExistingRecord] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -146,12 +148,14 @@ export function AddCostValuesModal({
           setItTeamServicesCost(data.it_team_services_cost?.toString() || "");
           setOperatingExpenses(data.operating_expenses?.toString() || "");
           setLegalCosts(data.legal_costs?.toString() || "");
+          setRateAdjust(data.rate_adjust === true);
         } else {
           setExistingRecord(null);
           setVentureTeamServicesCost("");
           setItTeamServicesCost("");
           setOperatingExpenses("");
           setLegalCosts("");
+          setRateAdjust(false);
         }
       } catch (err) {
         console.error("Error:", err);
@@ -190,6 +194,7 @@ export function AddCostValuesModal({
         it_team_services_cost: itTeamServicesCost ? parseFloat(itTeamServicesCost) : 0,
         operating_expenses: operatingExpenses ? parseFloat(operatingExpenses) : 0,
         legal_costs: legalCosts ? parseFloat(legalCosts) : 0,
+        rate_adjust: rateAdjust,
       };
 
       let error;
@@ -203,6 +208,7 @@ export function AddCostValuesModal({
             it_team_services_cost: payload.it_team_services_cost,
             operating_expenses: payload.operating_expenses,
             legal_costs: payload.legal_costs,
+            rate_adjust: payload.rate_adjust,
           })
           .eq("cost_id", costId);
         error = updateError;
@@ -237,6 +243,7 @@ export function AddCostValuesModal({
     setItTeamServicesCost("");
     setOperatingExpenses("");
     setLegalCosts("");
+    setRateAdjust(false);
     setExistingRecord(null);
     onOpenChange(false);
   };
@@ -362,6 +369,17 @@ export function AddCostValuesModal({
                     onChange={(e) => setLegalCosts(e.target.value)}
                     placeholder="0.00"
                   />
+                </div>
+
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox
+                    id="rateAdjust"
+                    checked={rateAdjust}
+                    onCheckedChange={(checked) => setRateAdjust(checked === true)}
+                  />
+                  <Label htmlFor="rateAdjust" className="text-sm font-normal cursor-pointer">
+                    Rate Adjust (mark this month as having a rate adjustment)
+                  </Label>
                 </div>
               </div>
             </>
