@@ -13,6 +13,7 @@ import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
 import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
+import { useAllVentureOffices } from "@/hooks/useAllVentureOffices";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -224,12 +225,10 @@ const Projections = () => {
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
   const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
+  const { ventureOffices: allVentureOffices } = useAllVentureOffices();
 
-  // Get unique venture offices
-  const ventureOffices = useMemo(() => 
-    Array.from(new Set(companies.filter(c => c["Target IPA Return"]).map(c => c.venture_office).filter(Boolean))) as string[],
-    [companies]
-  );
+  // Use all venture offices from the database (so offices without companies still appear)
+  const ventureOffices = allVentureOffices;
 
   // Redirect to auth if not authenticated
   useEffect(() => {
