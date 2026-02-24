@@ -191,7 +191,7 @@ const Index = () => {
           {/* Right: Interactive Map - Expanded 10% to the left */}
           <div className="-ml-[calc(10%-40px)]">{/* Narrowed by 40px total from the left */}
             <CountryMap 
-              companies={companies}
+              companies={ventureOfficeFilteredCompanies}
               onCountryClick={handleCountryClick}
               selectedCountry={filters.countryOfOrigin}
               selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || "all"}
