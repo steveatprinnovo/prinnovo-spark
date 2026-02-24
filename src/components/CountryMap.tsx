@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
@@ -24,12 +24,24 @@ export const CountryMap: React.FC<CountryMapProps> = ({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [mapboxToken, setMapboxToken] = useState<string>('');
 
-  // Get unique countries from companies data
-  const countriesWithCompanies = Array.from(new Set(
-    companies
-      .map(company => company["Country of Origin"])
-      .filter((country): country is string => country !== null)
-  ));
+  // Filter companies by selected venture office (for highlighted countries)
+  const filteredCompanies = useMemo(() => {
+    if (!selectedVentureOffice || selectedVentureOffice === "all") return companies;
+    return companies.filter((company) => company.venture_office === selectedVentureOffice);
+  }, [companies, selectedVentureOffice]);
+
+  // Get unique countries from filtered companies data
+  const countriesWithCompanies = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          filteredCompanies
+            .map((company) => company["Country of Origin"])
+            .filter((country): country is string => country !== null)
+        )
+      ),
+    [filteredCompanies]
+  );
 
   useEffect(() => {
     // Fetch Mapbox token from Supabase secrets
