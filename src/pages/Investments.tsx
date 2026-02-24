@@ -9,6 +9,7 @@ import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
 import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
+import { useAllVentureOffices } from "@/hooks/useAllVentureOffices";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,12 +46,10 @@ export default function Investments() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
   const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
+  const { ventureOffices: allVentureOffices } = useAllVentureOffices();
 
-  // Get unique venture offices
-  const ventureOffices = useMemo(() => 
-    Array.from(new Set(companies.filter(c => c["Investment Tracker Stage"]).map(c => c.venture_office).filter(Boolean))) as string[],
-    [companies]
-  );
+  // Use all venture offices from the database (so offices without companies still appear)
+  const ventureOffices = allVentureOffices;
 
   // Redirect to auth if not authenticated
   useEffect(() => {
