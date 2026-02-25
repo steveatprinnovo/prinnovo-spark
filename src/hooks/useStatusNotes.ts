@@ -67,15 +67,9 @@ export function useStatusNotes() {
     loadStatusNotes();
   }, [user]);
 
-  // Get status note - first check by deal_id, then fall back to company_name
-  const getStatusNote = (dealId: number, companyName: string): string => {
-    if (statusNotes[dealId]) {
-      return statusNotes[dealId];
-    }
-    if (companyName && statusNotesByName[companyName]) {
-      return statusNotesByName[companyName];
-    }
-    return '';
+  // Get status note strictly by deal_id (not company name, since names can be shared across offices)
+  const getStatusNote = (dealId: number, _companyName?: string): string => {
+    return statusNotes[dealId] || '';
   };
 
   // Save or update status note by deal_id
