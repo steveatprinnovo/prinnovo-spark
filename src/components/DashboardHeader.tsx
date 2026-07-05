@@ -39,7 +39,7 @@ export function DashboardHeader() {
       return logoUrl;
     }
     // Fallback to default
-    return "/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png";
+    return "/uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png";
   };
 
   const getLogoAlt = () => {

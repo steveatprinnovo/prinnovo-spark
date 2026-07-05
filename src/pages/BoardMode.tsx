@@ -688,7 +688,7 @@ export default function BoardMode() {
                         </div>
                         <div className="flex items-center gap-2">
                           <img 
-                            src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
+                            src="/uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
                             alt="Healthliant Ventures"
                             className="h-8 w-auto object-contain"
                           />
@@ -855,7 +855,7 @@ export default function BoardMode() {
                            </div>
                            <div className="flex items-center gap-2">
                              <img 
-                               src="/lovable-uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
+                               src="/uploads/eca45e5a-5531-4df2-9100-f1abdac3ca74.png"
                                alt="Healthliant Ventures"
                                className="h-8 w-auto object-contain"
                              />
