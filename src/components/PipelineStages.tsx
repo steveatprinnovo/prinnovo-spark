@@ -1,17 +1,19 @@
 import { Company } from "@/hooks/useCompanies";
 import { FilterState } from "@/components/FilterBar";
 import { ChevronRight } from "lucide-react";
-import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
+import { useDealStageCounts } from "@/hooks/useDealStageCounts";
 
 interface PipelineStagesProps {
   companies: Company[];
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
   selectedVentureOffice?: string;
+  dealsOffice?: string | null;
 }
 
-export function PipelineStages({ companies, filters, onFilterChange, selectedVentureOffice }: PipelineStagesProps) {
-  const { details } = useVentureOfficeDetails(selectedVentureOffice);
+export function PipelineStages({ companies, filters, onFilterChange, selectedVentureOffice, dealsOffice }: PipelineStagesProps) {
+  // Live counts from the Dealflow deals table, scoped to the selected office
+  const dealCounts = useDealStageCounts(dealsOffice ?? selectedVentureOffice);
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
   
@@ -52,9 +54,9 @@ export function PipelineStages({ companies, filters, onFilterChange, selectedVen
   };
 
   const stages = [
-    { name: "Qualified Leads", count: hasActiveFilters ? 0 : (details?.["Qualified Leads"] || 0), isClickable: false },
-    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : (details?.["Term Sheet Negotiations"] || 0), isClickable: false },
-    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : (details?.["IPA Negotiations"] || 0), isClickable: false },
+    { name: "Qualified Leads", count: hasActiveFilters ? 0 : dealCounts.qualifiedLead, isClickable: false },
+    { name: "Term Sheet Negotiations", count: hasActiveFilters ? 0 : dealCounts.termSheet, isClickable: false },
+    { name: "IPA Negotiations", count: hasActiveFilters ? 0 : dealCounts.ipaNegotiation, isClickable: false },
     { name: "IT Implementation", count: implementationCount, isClickable: true },
     { name: "Pilot", count: pilotCount, isClickable: true },
     { name: "Validated Company", count: portfolioCount, isClickable: true },

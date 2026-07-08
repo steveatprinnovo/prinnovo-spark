@@ -17,6 +17,7 @@ import { PipelineStages } from "@/components/PipelineStages";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { PREVIEW } from "@/preview/previewMode";
 
 const Index = () => {
   usePageTitle("Home");
@@ -43,7 +44,7 @@ const Index = () => {
 
   // Redirect to auth if not authenticated
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!PREVIEW && !authLoading && !user) {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
@@ -144,7 +145,7 @@ const Index = () => {
   }
 
   // Don't render dashboard if not authenticated
-  if (!user) {
+  if (!PREVIEW && !user) {
     return null;
   }
 
@@ -203,7 +204,7 @@ const Index = () => {
         <Separator className="my-6" />
         
         {/* Pipeline Stages */}
-        <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} />
+        <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} dealsOffice={isAdmin ? selectedVentureOffice : ventureOffice} />
         
         {/* Filters */}
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={ventureOfficeFilteredCompanies} />

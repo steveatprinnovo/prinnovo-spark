@@ -11,7 +11,7 @@ const navigationItems = [
   { path: "/projections", icon: TrendingUp, label: "Projections" },
   { path: "/focus-areas", icon: Target, label: "Focus Areas" },
   { path: "/dealflow", icon: Layers, label: "Dealflow" },
-  { path: "/taskboard", icon: Kanban, label: "Taskboard" },
+  { path: "/taskboard", icon: Kanban, label: "IT Taskboard" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 

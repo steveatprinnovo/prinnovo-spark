@@ -119,7 +119,7 @@ function CardModal({ c, api, onClose }: { c: KanbanCard; api: ReturnType<typeof 
 export default function Taskboard() {
   const location = useLocation();
   const isArchive = location.pathname.endsWith("/archive");
-  usePageTitle(isArchive ? "Taskboard Archive" : "Taskboard");
+  usePageTitle(isArchive ? "IT Taskboard Archive" : "IT Taskboard");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: authzLoading } = useUserAuth();
@@ -162,7 +162,7 @@ export default function Taskboard() {
       <div className="min-h-screen bg-background">
         <DashboardHeader />
         <div className="container mx-auto p-6">
-          <h1 className="text-2xl font-bold mb-2">Taskboard</h1>
+          <h1 className="text-2xl font-bold mb-2">IT Taskboard</h1>
           <p className="text-muted-foreground">The taskboard is currently limited to administrators.</p>
         </div>
       </div>
@@ -224,7 +224,7 @@ export default function Taskboard() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Taskboard</h1>
+            <h1 className="text-3xl font-bold text-foreground">IT Taskboard</h1>
             <p className="text-sm text-muted-foreground mt-1">{open.length} open card{open.length === 1 ? "" : "s"}</p>
           </div>
           <Link to="/taskboard/archive">

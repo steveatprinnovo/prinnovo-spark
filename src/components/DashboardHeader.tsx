@@ -128,7 +128,7 @@ export function DashboardHeader() {
                   }`}
                 >
                   <Kanban className="h-4 w-4" />
-                  Taskboard
+                  IT Taskboard
                 </Link>
               )}
               <Link 
