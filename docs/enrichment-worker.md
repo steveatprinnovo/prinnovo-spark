@@ -12,7 +12,11 @@ Active + staged deals first, Pass-only companies excluded.
 - Supabase MCP connected (project hkmffnxempcmbbdaicyd).
 
 ## Procedure (per run)
-1. Refresh confirmed candidates first:
+0. Priority requests first: `select * from enrichment_queue where priority limit 25;`
+   These are companies just added through the app's Add Deal flow
+   (pitchbook_enrichment rows with status='pending' and priority=true).
+   Process them before anything else, then continue with remaining budget.
+1. Refresh confirmed candidates next:
    `select id, company_name, pbid from pitchbook_enrichment where status='pending' and pbid is not null limit 25;`
    For each: fetch profile + deals by PBID (steps 4-5) and mark `matched`.
 2. Pull queue (remaining budget of the 25):

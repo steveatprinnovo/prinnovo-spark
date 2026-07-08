@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { EnrichmentPanel } from "@/components/EnrichmentPanel";
+import { DealDocuments } from "@/components/DealDocuments";
 import { OfficeTag } from "@/components/OfficeTag";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { ArrowLeft, Globe, MapPin, Users, Building2, Mail, Phone } from "lucide-react";
@@ -186,6 +187,7 @@ export default function DealDetail() {
                 ))}
               </CardContent>
             </Card>
+            <DealDocuments dealId={deal.id} />
             <EnrichmentPanel companyName={deal.company_name} />
           </div>
         </div>

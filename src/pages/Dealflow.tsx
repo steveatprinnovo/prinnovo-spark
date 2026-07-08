@@ -15,7 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { OfficeTag } from "@/components/OfficeTag";
 import { CompanyLogo } from "@/components/CompanyLogo";
-import { Search, List as ListIcon, Kanban, ChevronLeft, ChevronRight } from "lucide-react";
+import { AddDealDialog } from "@/components/AddDealDialog";
+import { Search, List as ListIcon, Kanban, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 const PAGE_SIZE = 100;
 
@@ -48,7 +49,7 @@ export default function Dealflow() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice } = useUserAuth();
-  const { deals, loading, updateDeal } = useDeals();
+  const { deals, loading, updateDeal, addDeal } = useDeals();
 
   const [view, setView] = useState<"list" | "kanban">("list");
   const [search, setSearch] = useState("");
@@ -57,6 +58,7 @@ export default function Dealflow() {
   const [officeFilter, setOfficeFilter] = useState("all");
   const [page, setPage] = useState(0);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     if (!PREVIEW && !authLoading && !user) navigate("/auth");
@@ -127,6 +129,9 @@ export default function Dealflow() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="sm" className="gap-2" onClick={() => setShowAdd(true)}>
+              <Plus className="h-4 w-4" /> Add Deal
+            </Button>
             <Button variant={view === "list" ? "default" : "outline"} size="sm" className="gap-2" onClick={() => setView("list")}>
               <ListIcon className="h-4 w-4" /> List
             </Button>
@@ -293,6 +298,16 @@ export default function Dealflow() {
           </div>
         )}
       </div>
+      <AddDealDialog
+        open={showAdd}
+        onClose={() => setShowAdd(false)}
+        defaultOffice={isAdmin ? null : ventureOffice}
+        isAdmin={isAdmin || PREVIEW}
+        onCreate={async fields => {
+          const id = await addDeal(fields);
+          if (id) navigate(`/dealflow/${id}`);
+        }}
+      />
     </div>
   );
 }

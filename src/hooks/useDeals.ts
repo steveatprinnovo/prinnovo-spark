@@ -34,6 +34,22 @@ export interface Deal {
   portfolio_update: string | null;
 }
 
+export interface DealDocument {
+  id: string;
+  deal_id: string;
+  doc_type: "term_sheet" | "ipa" | "other";
+  title: string;
+  drive_url: string;
+  added_by: string | null;
+  created_at: string;
+}
+
+export const DOC_TYPES = [
+  { key: "term_sheet", label: "Signed Term Sheet" },
+  { key: "ipa", label: "Signed IPA" },
+  { key: "other", label: "Other" },
+] as const;
+
 export interface DealContact {
   id: string;
   deal_id: string;
@@ -154,7 +170,81 @@ export function useDeals() {
     }
   }, [fetchDeals]);
 
-  return { deals, loading, updateDeal, refetch: fetchDeals };
+  const addDeal = useCallback(async (fields: Partial<Deal>): Promise<string | null> => {
+    if (PREVIEW) {
+      const d = { ...fields, id: `preview-new-${Date.now()}` } as Deal;
+      setDeals(prev => [d, ...prev]);
+      return d.id;
+    }
+    const { data, error } = await supabase
+      .from("deals" as any)
+      .insert(fields as any)
+      .select("id")
+      .single();
+    if (error) {
+      console.error("Error creating deal:", error);
+      toast.error("Failed to create deal");
+      return null;
+    }
+    // Jump the PitchBook enrichment queue for this company (worker processes
+    // priority-pending rows first; company logo resolves instantly from the
+    // website domain, no queue involved).
+    if (fields.company_name) {
+      const { error: e2 } = await supabase.from("pitchbook_enrichment" as any).insert({
+        company_name: fields.company_name,
+        domain: fields.website ? fields.website.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0].toLowerCase() : null,
+        status: "pending",
+        priority: true,
+      } as any);
+      if (e2 && !`${e2.code}`.startsWith("23")) console.warn("Enrichment request skipped:", e2.message);
+    }
+    toast.success("Deal created");
+    fetchDeals();
+    return (data as any).id as string;
+  }, [fetchDeals]);
+
+  return { deals, loading, updateDeal, addDeal, refetch: fetchDeals };
+}
+
+export function useDealDocuments(dealId: string | null) {
+  const [documents, setDocuments] = useState<DealDocument[]>([]);
+
+  const fetchDocs = useCallback(async () => {
+    if (!dealId) { setDocuments([]); return; }
+    if (PREVIEW) {
+      setDocuments(dealId === "preview-0" ? [
+        { id: "pd1", deal_id: dealId, doc_type: "term_sheet", title: "Assort Health — Executed Term Sheet (SVHV)", drive_url: "https://drive.google.com/file/d/sample1", added_by: "steve@prinnovo.com", created_at: "2026-07-01T12:00:00Z" },
+        { id: "pd2", deal_id: dealId, doc_type: "ipa", title: "Assort Health — Signed IPA v3 (SVHV)", drive_url: "https://drive.google.com/file/d/sample2", added_by: "steve@prinnovo.com", created_at: "2026-07-03T12:00:00Z" },
+      ] as DealDocument[] : []);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("deal_documents" as any).select("*").eq("deal_id", dealId).order("created_at");
+    if (error) console.error(error);
+    setDocuments((data as unknown as DealDocument[]) || []);
+  }, [dealId]);
+
+  useEffect(() => { fetchDocs(); }, [fetchDocs]);
+
+  const addDocument = useCallback(async (doc: { doc_type: string; title: string; drive_url: string; added_by: string | null }) => {
+    if (!dealId) return;
+    if (PREVIEW) {
+      setDocuments(prev => [...prev, { ...doc, id: `pd-${Date.now()}`, deal_id: dealId, created_at: new Date().toISOString() } as DealDocument]);
+      return;
+    }
+    const { error } = await supabase.from("deal_documents" as any).insert({ ...doc, deal_id: dealId } as any);
+    if (error) { console.error(error); toast.error("Failed to add document link"); return; }
+    fetchDocs();
+  }, [dealId, fetchDocs]);
+
+  const removeDocument = useCallback(async (id: string) => {
+    setDocuments(prev => prev.filter(d => d.id !== id));
+    if (PREVIEW) return;
+    const { error } = await supabase.from("deal_documents" as any).delete().eq("id", id);
+    if (error) { console.error(error); fetchDocs(); }
+  }, [fetchDocs]);
+
+  return { documents, addDocument, removeDocument };
 }
 
 export function useDealContacts(deal: Deal | null) {
