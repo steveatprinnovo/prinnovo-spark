@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { EnrichmentPanel } from "@/components/EnrichmentPanel";
 import { ArrowLeft, Globe, MapPin, Users, Building2, Mail, Phone } from "lucide-react";
 
 function formatDate(d: string | null): string {
@@ -180,15 +181,7 @@ export default function DealDetail() {
                 ))}
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-base">Enrichment</CardTitle></CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  PitchBook funding history, investors, and team data will appear here once the enrichment
-                  worker is connected (PRD §4.4).
-                </p>
-              </CardContent>
-            </Card>
+            <EnrichmentPanel companyName={deal.company_name} />
           </div>
         </div>
       </div>

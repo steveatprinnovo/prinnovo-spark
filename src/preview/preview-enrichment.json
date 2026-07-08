@@ -1,0 +1,35 @@
+{
+  "rows": [
+    {
+      "id": "pe-1",
+      "company_name": "Assort Health",
+      "pbid": "494327-93",
+      "status": "matched",
+      "candidates": null,
+      "description": "Developer of generative-AI voice agents designed to answer and route healthcare call-center volume, integrating with major EHR scheduling systems to reduce cost per call and boost appointment conversion.",
+      "year_founded": 2023,
+      "employees": 38,
+      "employees_as_of": "2026-03-31",
+      "hq_location": "San Francisco, CA",
+      "business_status": "Generating Revenue",
+      "ownership_status": "Privately Held (backing)",
+      "total_raised_usd": 101500000,
+      "last_round_type": "Series B",
+      "last_round_date": "2025-08-01",
+      "last_round_amount_usd": 76000000,
+      "post_valuation_usd": 726000000,
+      "investors": ["Lightspeed Venture Partners", "First Round Capital", "Chemistry", "Four Acres Venture Capital", "Tau Ventures"],
+      "funding_rounds": [
+        { "date": "2025-08-01", "type": "Series B", "amount_usd": 76000000, "investors": ["Lightspeed Venture Partners"], "synopsis": "The company raised $76M of Series B venture funding led by Lightspeed Venture Partners." },
+        { "date": "2025-04-01", "type": "Series A", "amount_usd": 22000000, "investors": ["First Round Capital", "Chemistry"], "synopsis": "The company raised $22M of Series A venture funding co-led by First Round Capital and Chemistry." },
+        { "date": "2024-03-01", "type": "Seed", "amount_usd": 3500000, "investors": ["Four Acres Venture Capital", "Tau Ventures", "Aditya Khosla", "Matt Humphrey"], "synopsis": "The company raised $3.5M of seed funding." }
+      ],
+      "team": [
+        { "name": "Arman Yekta", "title": "Co-Founder & CEO" },
+        { "name": "Jeff Liu", "title": "Co-Founder & CTO" },
+        { "name": "CJ Ekstrom", "title": "Head of Sales" }
+      ],
+      "fetched_at": "2026-07-08T07:05:00Z"
+    }
+  ]
+}
