@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { OfficeTag } from "@/components/OfficeTag";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { Search, List as ListIcon, Kanban, ChevronLeft, ChevronRight } from "lucide-react";
 
 const PAGE_SIZE = 100;
@@ -164,7 +166,7 @@ export default function Dealflow() {
               <SelectTrigger className="w-64"><SelectValue placeholder="Venture office" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All venture offices</SelectItem>
-                {offices.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                {offices.map(o => <SelectItem key={o} value={o}><OfficeTag office={o} /></SelectItem>)}
               </SelectContent>
             </Select>
           )}
@@ -211,7 +213,12 @@ export default function Dealflow() {
                       className="cursor-pointer"
                       onClick={() => navigate(`/dealflow/${d.id}`)}
                     >
-                      <TableCell className="font-medium">{d.company_name}</TableCell>
+                      <TableCell className="font-medium">
+                        <span className="inline-flex items-center gap-2">
+                          <CompanyLogo website={d.website} name={d.company_name} size={18} />
+                          {d.company_name}
+                        </span>
+                      </TableCell>
                       <TableCell>{d.deal_name}</TableCell>
                       <TableCell>{d.assigned_to || "—"}</TableCell>
                       <TableCell>
@@ -224,7 +231,7 @@ export default function Dealflow() {
                           </span>
                         ) : <span className="text-muted-foreground">—</span>}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{d.office_code || d.venture_office || "—"}</TableCell>
+                      <TableCell><OfficeTag office={d.venture_office} short className="text-muted-foreground" /></TableCell>
                       <TableCell>{formatDate(d.date_received)}</TableCell>
                       <TableCell>{formatDate(d.last_interaction)}</TableCell>
                     </TableRow>
@@ -261,10 +268,13 @@ export default function Dealflow() {
                         onClick={() => navigate(`/dealflow/${d.id}`)}
                         className="rounded-md border bg-card p-3 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
                       >
-                        <div className="font-medium text-sm">{d.company_name}</div>
+                        <div className="font-medium text-sm inline-flex items-center gap-1.5">
+                          <CompanyLogo website={d.website} name={d.company_name} size={14} />
+                          {d.company_name}
+                        </div>
                         <div className="text-xs text-muted-foreground truncate">{d.deal_name}</div>
                         <div className="flex items-center gap-2 mt-2">
-                          {d.office_code && <Badge variant="outline" className="text-[10px]">{d.office_code}</Badge>}
+                          {d.venture_office && <Badge variant="outline" className="text-[10px]"><OfficeTag office={d.venture_office} short /></Badge>}
                           {d.status && (
                             <span className={`inline-flex items-center rounded-full border px-2 py-0 text-[10px] font-medium ${statusColor(d.status)}`}>
                               {d.status}

@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Plus, Archive, ArchiveRestore, Trash2, CalendarDays, User, ArrowLeft, ArrowDownToLine } from "lucide-react";
+import { OfficeTag } from "@/components/OfficeTag";
 
 function CardFace({ c, onOpen, onDragStart }: { c: KanbanCard; onOpen: () => void; onDragStart: () => void }) {
   return (
@@ -27,7 +28,7 @@ function CardFace({ c, onOpen, onDragStart }: { c: KanbanCard; onOpen: () => voi
     >
       <div className="flex items-start justify-between gap-2">
         <div className="text-sm font-medium leading-snug">{c.title}</div>
-        {c.venture_office && <Badge variant="outline" className="text-[10px] shrink-0">{officeCode(c.venture_office)}</Badge>}
+        {c.venture_office && <Badge variant="outline" className="text-[10px] shrink-0"><OfficeTag office={c.venture_office} short /></Badge>}
       </div>
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         {c.assignee && <span className="inline-flex items-center gap-1"><User className="h-3 w-3" />{c.assignee}</span>}
@@ -80,7 +81,7 @@ function CardModal({ c, api, onClose }: { c: KanbanCard; api: ReturnType<typeof 
                 <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {VENTURE_OFFICES.map(o => <SelectItem key={o.code} value={o.name}>{o.name}</SelectItem>)}
+                  {VENTURE_OFFICES.map(o => <SelectItem key={o.code} value={o.name}><OfficeTag office={o.name} /></SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -194,7 +195,7 @@ export default function Taskboard() {
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.title}</TableCell>
                       <TableCell>{c.assignee || "—"}</TableCell>
-                      <TableCell>{c.venture_office ? officeCode(c.venture_office) : "—"}</TableCell>
+                      <TableCell><OfficeTag office={c.venture_office} short /></TableCell>
                       <TableCell className="text-muted-foreground">
                         {c.archived_at ? new Date(c.archived_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                       </TableCell>

@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { EnrichmentPanel } from "@/components/EnrichmentPanel";
+import { OfficeTag } from "@/components/OfficeTag";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { ArrowLeft, Globe, MapPin, Users, Building2, Mail, Phone } from "lucide-react";
 
 function formatDate(d: string | null): string {
@@ -76,7 +78,10 @@ export default function DealDetail() {
           <CardContent className="pt-6">
             <div className="flex flex-wrap justify-between gap-4">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold text-foreground">{deal.deal_name}</h1>
+                <div className="flex items-center gap-3">
+                  <CompanyLogo website={deal.website} name={deal.company_name} size={36} />
+                  <h1 className="text-3xl font-bold text-foreground">{deal.deal_name}</h1>
+                </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" />{deal.company_name}</span>
                   {deal.location && <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" />{deal.location}</span>}
@@ -118,7 +123,7 @@ export default function DealDetail() {
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Venture Office</div>
-                  <div className="text-sm font-medium">{deal.venture_office || "—"}</div>
+                  <div className="text-sm font-medium"><OfficeTag office={deal.venture_office} /></div>
                 </div>
               </div>
             </div>
