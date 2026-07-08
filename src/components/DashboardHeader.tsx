@@ -118,7 +118,7 @@ export function DashboardHeader() {
                 }`}
               >
                 <Layers className="h-4 w-4" />
-                Dealflow
+                Dealflow CRM
               </Link>
               {(isAdmin || PREVIEW) && (
                 <Link

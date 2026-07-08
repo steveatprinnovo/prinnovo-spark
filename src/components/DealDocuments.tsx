@@ -18,7 +18,7 @@ function isDriveUrl(u: string): boolean {
   return /^https:\/\/(drive|docs)\.google\.com\//.test(u.trim());
 }
 
-export function DealDocuments({ dealId }: { dealId: string }) {
+export function DealDocuments({ dealId, officeName }: { dealId: string; officeName?: string | null }) {
   const { documents, addDocument, removeDocument } = useDealDocuments(dealId);
   const { user } = useAuth();
   const [adding, setAdding] = useState(false);
@@ -66,7 +66,6 @@ export function DealDocuments({ dealId }: { dealId: string }) {
                   {d.title} <ExternalLink className="h-3 w-3 shrink-0" />
                 </a>
               </div>
-              {d.added_by && <div className="text-[11px] text-muted-foreground mt-0.5">Added by {d.added_by}</div>}
             </div>
             <button onClick={() => removeDocument(d.id)} className="p-1 text-muted-foreground/50 hover:text-rose-600 shrink-0" title="Remove link">
               <Trash2 className="h-3.5 w-3.5" />
@@ -89,7 +88,7 @@ export function DealDocuments({ dealId }: { dealId: string }) {
           </div>
         )}
         <p className="text-[11px] text-muted-foreground border-t pt-2">
-          Files live in your venture office's Google Drive; access follows Drive permissions.
+          {`Files live in ${officeName || "your venture office"}'s Google Drive; access follows Drive permissions.`}
         </p>
       </CardContent>
     </Card>

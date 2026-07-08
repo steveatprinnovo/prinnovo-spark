@@ -45,7 +45,7 @@ function formatDate(d: string | null): string {
 }
 
 export default function Dealflow() {
-  usePageTitle("Dealflow");
+  usePageTitle("Dealflow CRM");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice } = useUserAuth();
@@ -123,7 +123,7 @@ export default function Dealflow() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dealflow</h1>
+            <h1 className="text-3xl font-bold text-foreground">Dealflow CRM</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {isAdmin ? "All venture offices" : ventureOffice || ""} · {filtered.length} deal{filtered.length === 1 ? "" : "s"}
             </p>

@@ -10,7 +10,7 @@ const navigationItems = [
   { path: "/investments", icon: DollarSign, label: "Investments" },
   { path: "/projections", icon: TrendingUp, label: "Projections" },
   { path: "/focus-areas", icon: Target, label: "Focus Areas" },
-  { path: "/dealflow", icon: Layers, label: "Dealflow" },
+  { path: "/dealflow", icon: Layers, label: "Dealflow CRM" },
   { path: "/taskboard", icon: Kanban, label: "IT Taskboard" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];

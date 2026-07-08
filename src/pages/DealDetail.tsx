@@ -71,7 +71,7 @@ export default function DealDetail() {
       <DashboardHeader />
       <div className="container mx-auto p-6 space-y-6">
         <Link to="/dealflow" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to Dealflow
+          <ArrowLeft className="h-4 w-4" /> Back to Dealflow CRM
         </Link>
 
         {/* Header card */}
@@ -187,7 +187,7 @@ export default function DealDetail() {
                 ))}
               </CardContent>
             </Card>
-            <DealDocuments dealId={deal.id} />
+            <DealDocuments dealId={deal.id} officeName={deal.venture_office} />
             <EnrichmentPanel companyName={deal.company_name} />
           </div>
         </div>
