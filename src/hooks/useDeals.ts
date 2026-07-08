@@ -143,12 +143,23 @@ export function useDeals() {
       return;
     }
     try {
-      const { data, error } = await supabase
-        .from("deals" as any)
-        .select("*")
-        .order("company_name", { ascending: true });
-      if (error) throw error;
-      setDeals((data as unknown as Deal[]) || []);
+      // Page through in 1000-row chunks: Supabase's API caps single responses
+      // at 1000 rows, and the pipeline exceeds that.
+      const PAGE = 1000;
+      let all: Deal[] = [];
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await supabase
+          .from("deals" as any)
+          .select("*")
+          .order("company_name", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        const page = (data as unknown as Deal[]) || [];
+        all = all.concat(page);
+        if (page.length < PAGE) break;
+      }
+      setDeals(all);
     } catch (e) {
       console.error("Error fetching deals:", e);
       toast.error("Failed to load deals");
