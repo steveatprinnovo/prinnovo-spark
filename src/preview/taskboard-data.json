@@ -1,0 +1,162 @@
+{
+  "cards": [
+    {
+      "id": "m1",
+      "title": "Draft Q3 pipeline review deck",
+      "notes": "Pull stage counts from Dealflow; one slide per office.",
+      "assignee": "Steve",
+      "due": "2026-07-21",
+      "board_column": "backlog",
+      "sort_order": 1,
+      "archived": false,
+      "venture_office": "Healthliant Ventures",
+      "intake_date": "2026-07-01"
+    },
+    {
+      "id": "m2",
+      "title": "Refresh standard NDA template",
+      "notes": "",
+      "assignee": "Thomas",
+      "due": null,
+      "board_column": "backlog",
+      "sort_order": 2,
+      "archived": false,
+      "venture_office": null,
+      "intake_date": "2026-06-24"
+    },
+    {
+      "id": "m3",
+      "title": "Vendor security questionnaire",
+      "notes": "Blocked on IT contact.",
+      "assignee": "Steve",
+      "due": "2026-07-30",
+      "board_column": "backlog",
+      "sort_order": 3,
+      "archived": false,
+      "venture_office": "Cone Health Ventures",
+      "intake_date": "2026-06-30"
+    },
+    {
+      "id": "m4",
+      "title": "Scope PitchBook enrichment worker",
+      "notes": "Nightly refresh vs on-demand; respect run caps.",
+      "assignee": "Thomas",
+      "due": "2026-07-15",
+      "board_column": "scoping",
+      "sort_order": 1,
+      "archived": false,
+      "venture_office": "Healthliant Ventures",
+      "intake_date": "2026-07-02"
+    },
+    {
+      "id": "m5",
+      "title": "Evaluate e-signature options",
+      "notes": "",
+      "assignee": "Steve",
+      "due": null,
+      "board_column": "scoping",
+      "sort_order": 2,
+      "archived": false,
+      "venture_office": null,
+      "intake_date": "2026-06-29"
+    },
+    {
+      "id": "m6",
+      "title": "Board update email draft",
+      "notes": "Circulate to David before sending.",
+      "assignee": "Steve",
+      "due": "2026-07-10",
+      "board_column": "on_deck",
+      "sort_order": 1,
+      "archived": false,
+      "venture_office": "Northeast Georgia Health Ventures",
+      "intake_date": "2026-07-03"
+    },
+    {
+      "id": "m7",
+      "title": "Migrate legal tracker to shared drive",
+      "notes": "",
+      "assignee": "Thomas",
+      "due": "2026-07-13",
+      "board_column": "on_deck",
+      "sort_order": 2,
+      "archived": false,
+      "venture_office": "Healthliant Ventures",
+      "intake_date": "2026-07-01"
+    },
+    {
+      "id": "m8",
+      "title": "Dealflow CSV import validation",
+      "notes": "Counts by office/stage must match source.",
+      "assignee": "Thomas",
+      "due": "2026-07-09",
+      "board_column": "in_progress",
+      "sort_order": 1,
+      "archived": false,
+      "venture_office": "Salinas Valley Health Ventures",
+      "intake_date": "2026-07-06"
+    },
+    {
+      "id": "m9",
+      "title": "Hostinger SSL + DNS check",
+      "notes": "",
+      "assignee": "Steve",
+      "due": "2026-07-08",
+      "board_column": "in_progress",
+      "sort_order": 2,
+      "archived": false,
+      "venture_office": null,
+      "intake_date": "2026-07-05"
+    },
+    {
+      "id": "m10",
+      "title": "Supabase RLS advisor review",
+      "notes": "Run advisors after new tables land.",
+      "assignee": "Thomas",
+      "due": null,
+      "board_column": "done",
+      "sort_order": 1,
+      "archived": false,
+      "venture_office": "Healthliant Ventures",
+      "intake_date": "2026-06-28"
+    },
+    {
+      "id": "m11",
+      "title": "Grant Thomas org access",
+      "notes": "",
+      "assignee": "Steve",
+      "due": null,
+      "board_column": "done",
+      "sort_order": 2,
+      "archived": false,
+      "venture_office": null,
+      "intake_date": "2026-06-27"
+    },
+    {
+      "id": "m12",
+      "title": "Choose kanban column names",
+      "notes": "Backlog / Scoping / On Deck / In Progress / Done.",
+      "assignee": "Steve",
+      "due": null,
+      "board_column": "done",
+      "sort_order": 3,
+      "archived": true,
+      "archived_at": "2026-07-06T15:00:00Z",
+      "venture_office": null,
+      "intake_date": "2026-07-01"
+    },
+    {
+      "id": "m13",
+      "title": "Create Supabase project",
+      "notes": "",
+      "assignee": "Steve",
+      "due": null,
+      "board_column": "done",
+      "sort_order": 4,
+      "archived": true,
+      "archived_at": "2026-07-05T12:00:00Z",
+      "venture_office": null,
+      "intake_date": "2026-07-02"
+    }
+  ]
+}

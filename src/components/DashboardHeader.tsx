@@ -4,11 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
-import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Target, Settings } from "lucide-react";
+import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Layers, Kanban } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
+import { PREVIEW } from "@/preview/previewMode";
 
 export function DashboardHeader() {
   const { signOut, user } = useAuth();
@@ -110,6 +111,26 @@ export function DashboardHeader() {
                 <Target className="h-4 w-4" />
                 Focus Areas
               </Link>
+              <Link
+                to="/dealflow"
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                  location.pathname.startsWith("/dealflow") ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <Layers className="h-4 w-4" />
+                Dealflow
+              </Link>
+              {(isAdmin || PREVIEW) && (
+                <Link
+                  to="/taskboard"
+                  className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                    location.pathname === "/taskboard" ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <Kanban className="h-4 w-4" />
+                  Taskboard
+                </Link>
+              )}
               <Link 
                 to="/settings" 
                 className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${

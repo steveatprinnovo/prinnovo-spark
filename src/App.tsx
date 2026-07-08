@@ -11,6 +11,9 @@ import Projections from "./pages/Projections";
 import FocusAreas from "./pages/FocusAreas";
 import BoardMode from "./pages/BoardMode";
 import Settings from "./pages/Settings";
+import Dealflow from "./pages/Dealflow";
+import DealDetail from "./pages/DealDetail";
+import Taskboard from "./pages/Taskboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +33,10 @@ const App = () => (
           <Route path="/focus-areas" element={<FocusAreas />} />
           <Route path="/board-mode" element={<BoardMode />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/dealflow" element={<Dealflow />} />
+          <Route path="/dealflow/:id" element={<DealDetail />} />
+          <Route path="/taskboard" element={<Taskboard />} />
+          <Route path="/taskboard/archive" element={<Taskboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
