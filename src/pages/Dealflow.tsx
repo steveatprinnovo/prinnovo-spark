@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useDeals, Deal, DEAL_STAGES, DEAL_STATUSES } from "@/hooks/useDeals";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,12 +51,32 @@ export default function Dealflow() {
   const { isAdmin, ventureOffice } = useUserAuth();
   const { deals, loading, updateDeal, addDeal } = useDeals();
 
-  const [view, setView] = useState<"list" | "kanban">("list");
-  const [search, setSearch] = useState("");
-  const [stageFilter, setStageFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [officeFilter, setOfficeFilter] = useState("all");
-  const [page, setPage] = useState(0);
+  // Toolbar state lives in the URL so browser back/forward restores the exact
+  // view (filters, search, page, list/kanban) when returning from a deal.
+  const [params, setParams] = useSearchParams();
+  const view = (params.get("view") === "kanban" ? "kanban" : "list") as "list" | "kanban";
+  const search = params.get("q") ?? "";
+  const stageFilter = params.get("stage") ?? "all";
+  const statusFilter = params.get("status") ?? "all";
+  const officeFilter = params.get("office") ?? "all";
+  const page = Math.max(0, parseInt(params.get("page") ?? "0", 10) || 0);
+  const setParam = (updates: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(updates)) {
+      if (v === null || v === "" || v === "all" || (k === "page" && v === "0") || (k === "view" && v === "list")) next.delete(k);
+      else next.set(k, v);
+    }
+    setParams(next, { replace: true });
+  };
+  const setView = (v: "list" | "kanban") => setParam({ view: v });
+  const setSearch = (v: string) => setParam({ q: v, page: null });
+  const setStageFilter = (v: string) => setParam({ stage: v, page: null });
+  const setStatusFilter = (v: string) => setParam({ status: v, page: null });
+  const setOfficeFilter = (v: string) => setParam({ office: v, page: null });
+  const setPage = (updater: number | ((p: number) => number)) => {
+    const v = typeof updater === "function" ? updater(page) : updater;
+    setParam({ page: String(v) });
+  };
   const [dragId, setDragId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
 
@@ -83,8 +103,6 @@ export default function Dealflow() {
       return true;
     });
   }, [deals, search, stageFilter, statusFilter, officeFilter]);
-
-  useEffect(() => { setPage(0); }, [search, stageFilter, statusFilter, officeFilter]);
 
   const pageDeals = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));

@@ -70,9 +70,12 @@ export default function DealDetail() {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       <div className="container mx-auto p-6 space-y-6">
-        <Link to="/dealflow" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+        <button
+          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/dealflow"))}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to Dealflow CRM
-        </Link>
+        </button>
 
         {/* Header card */}
         <Card>
