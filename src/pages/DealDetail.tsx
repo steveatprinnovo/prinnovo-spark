@@ -31,6 +31,33 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+
+// IPA Details renderer: each provision line gets a bold lead-in label
+// (text before the first colon) and a half-line gap between provisions,
+// so dense contract terms scan without losing density.
+function IpaDetails({ text }: { text: string | null }) {
+  if (!text) return null;
+  const lines = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+  return (
+    <div className="space-y-1.5">
+      {lines.map((line, i) => {
+        const m = line.match(/^([^:]{2,60}?):\s*(.*)$/);
+        return (
+          <p key={i} className="text-sm leading-relaxed text-foreground">
+            {m ? (
+              <>
+                <span className="font-semibold">{m[1]}:</span> {m[2]}
+              </>
+            ) : (
+              line
+            )}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DealDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -153,7 +180,7 @@ export default function DealDetail() {
                 <Field label="Clinical Status" value={deal.clinical_status} />
                 <Field label="Reimbursement Status" value={deal.reimbursement_status} />
                 <Field label="Technology Type" value={(deal.technology_type || []).join(", ") || null} />
-                <Field label="IPA Details" value={deal.ipa_details ? <span className="whitespace-pre-wrap">{deal.ipa_details}</span> : null} />
+                <Field label="IPA Details" value={<IpaDetails text={deal.ipa_details} />} />
                 <Field label="Source" value={deal.source} />
                 <Field label="Date Received" value={formatDate(deal.date_received)} />
                 <Field label="Last Interaction" value={formatDate(deal.last_interaction)} />
