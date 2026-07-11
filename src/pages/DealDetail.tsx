@@ -153,7 +153,7 @@ export default function DealDetail() {
                 <Field label="Clinical Status" value={deal.clinical_status} />
                 <Field label="Reimbursement Status" value={deal.reimbursement_status} />
                 <Field label="Technology Type" value={(deal.technology_type || []).join(", ") || null} />
-                <Field label="IPA Details" value={deal.ipa_details} />
+                <Field label="IPA Details" value={deal.ipa_details ? <span className="whitespace-pre-wrap">{deal.ipa_details}</span> : null} />
                 <Field label="Source" value={deal.source} />
                 <Field label="Date Received" value={formatDate(deal.date_received)} />
                 <Field label="Last Interaction" value={formatDate(deal.last_interaction)} />
