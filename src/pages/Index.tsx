@@ -12,7 +12,8 @@ import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
-import { CountryMap } from "@/components/CountryMap";
+import { lazy, Suspense } from "react";
+const CountryMap = lazy(() => import("@/components/CountryMap").then(m => ({ default: m.CountryMap })));
 import { PipelineStages } from "@/components/PipelineStages";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -191,12 +192,14 @@ const Index = () => {
           
           {/* Right: Interactive Map - Expanded 10% to the left */}
           <div className="-ml-[calc(10%-40px)]">{/* Narrowed by 40px total from the left */}
+            <Suspense fallback={<div className="h-[500px] rounded-lg border bg-muted/30 animate-pulse" />}>
             <CountryMap 
               companies={ventureOfficeFilteredCompanies}
               onCountryClick={handleCountryClick}
               selectedCountry={filters.countryOfOrigin}
               selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || "all"}
             />
+            </Suspense>
           </div>
         </div>
         

@@ -80,6 +80,18 @@ export const OFFICE_NAMES: Record<string, string> = {
   SVHV: "Salinas Valley Health Ventures",
 };
 
+// Columns the Dealflow list, kanban, and quick-search actually use.
+// Long-form fields (ipa_details, next_step, portfolio_update, ...) are
+// fetched per-deal by useDeal() on the detail page instead of shipping
+// them for all rows on every list load.
+const LIST_COLUMNS =
+  "id, fourd_id, company_name, deal_name, assigned_to, description, stage, status, venture_office, office_code, tags, date_received, last_interaction, website, employee_count";
+
+// Module-level cache: back/forward navigation between list and detail
+// reuses the last fetched list instead of re-downloading it. A background
+// refresh still runs on mount so data stays current.
+let dealsCache: Deal[] | null = null;
+
 // --- Preview data conversion (CSV row shape -> Deal) ---
 function fromCsvRow(r: Record<string, string>, i: number): Deal {
   const norm = (s: string) => s.replace("Negogiation", "Negotiation");
@@ -133,8 +145,8 @@ export function previewContactsFor(deal: Deal): DealContact[] {
 }
 
 export function useDeals() {
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [deals, setDeals] = useState<Deal[]>(dealsCache ?? []);
+  const [loading, setLoading] = useState(dealsCache === null);
 
   const fetchDeals = useCallback(async () => {
     if (PREVIEW) {
@@ -150,7 +162,7 @@ export function useDeals() {
       for (let from = 0; ; from += PAGE) {
         const { data, error } = await supabase
           .from("deals" as any)
-          .select("*")
+          .select(LIST_COLUMNS)
           .order("company_name", { ascending: true })
           .order("id", { ascending: true })
           .range(from, from + PAGE - 1);
@@ -159,6 +171,7 @@ export function useDeals() {
         all = all.concat(page);
         if (page.length < PAGE) break;
       }
+      dealsCache = all;
       setDeals(all);
     } catch (e) {
       console.error("Error fetching deals:", e);
@@ -215,6 +228,53 @@ export function useDeals() {
   }, [fetchDeals]);
 
   return { deals, loading, updateDeal, addDeal, refetch: fetchDeals };
+}
+
+// Full record for one deal (detail page): fetches a single row with all
+// columns instead of the whole table.
+export function useDeal(id: string | null) {
+  const [deal, setDeal] = useState<Deal | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDeal = useCallback(async () => {
+    if (!id) { setDeal(null); setLoading(false); return; }
+    if (PREVIEW) {
+      setDeal(previewDealList().find(d => d.id === id) || null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("deals" as any)
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      setDeal((data as unknown as Deal) || null);
+    } catch (e) {
+      console.error("Error fetching deal:", e);
+      toast.error("Failed to load deal");
+      setDeal(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => { setLoading(true); fetchDeal(); }, [fetchDeal]);
+
+  const updateDeal = useCallback(async (dealId: string, patch: Partial<Deal>) => {
+    setDeal(prev => (prev && prev.id === dealId ? { ...prev, ...patch } : prev));
+    if (dealsCache) dealsCache = dealsCache.map(d => (d.id === dealId ? { ...d, ...patch } : d));
+    if (PREVIEW) return;
+    const { error } = await supabase.from("deals" as any).update(patch as any).eq("id", dealId);
+    if (error) {
+      console.error("Error updating deal:", error);
+      toast.error("Update failed");
+      fetchDeal();
+    }
+  }, [fetchDeal]);
+
+  return { deal, loading, updateDeal };
 }
 
 export function useDealDocuments(dealId: string | null) {

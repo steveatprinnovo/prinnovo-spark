@@ -218,11 +218,23 @@ export default function BoardMode() {
     return styledTable;
   };
 
+  // Escape cell text before it enters the dangerouslySetInnerHTML sink.
+  // Workbooks arrive from user upload or a DB-stored URL, so cell content
+  // is untrusted: a cell like <img src=x onerror=...> must render as text.
+  const escapeHtml = (v: string): string =>
+    v
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
   // Convert XLSX ARGB or RGB to CSS hex (#RRGGBB)
   const xlsxColorToCss = (rgb?: { rgb?: string } | any): string | null => {
     const val: string | undefined = rgb?.rgb;
     if (!val) return null;
     const hex = val.length === 8 ? val.slice(2) : val; // strip alpha if present
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null; // untrusted input: hex only
     return `#${hex}`;
   };
 
@@ -307,9 +319,10 @@ export default function BoardMode() {
         const bgc = xlsxColorToCss(s?.fill?.fgColor);
         if (bgc) styles.push(`background-color:${bgc}`);
         const halign = s?.alignment?.horizontal;
-        if (halign) styles.push(`text-align:${halign}`);
+        if (halign && ["left", "right", "center", "justify"].includes(halign)) styles.push(`text-align:${halign}`);
         const valign = s?.alignment?.vertical;
-        if (valign) styles.push(`vertical-align:${valign === 'center' ? 'middle' : valign}`);
+        const v = valign === 'center' ? 'middle' : valign;
+        if (v && ["top", "middle", "bottom"].includes(v)) styles.push(`vertical-align:${v}`);
 
         const attrs: string[] = [`style="${styles.join(';')}"`];
         if (span) {
@@ -317,7 +330,7 @@ export default function BoardMode() {
           if (span.rowspan > 1) attrs.push(`rowspan="${span.rowspan}"`);
         }
 
-        html += `<td ${attrs.join(' ')}>${text}</td>`;
+        html += `<td ${attrs.join(' ')}>${escapeHtml(text)}</td>`;
       }
       html += '</tr>';
     }

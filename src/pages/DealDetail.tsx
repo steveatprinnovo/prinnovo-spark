@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
-import { useDeals, useDealContacts, DEAL_STAGES, DEAL_STATUSES } from "@/hooks/useDeals";
+import { useDeal, useDealContacts, DEAL_STAGES, DEAL_STATUSES } from "@/hooks/useDeals";
 import { useAuth } from "@/hooks/useAuth";
 import { PREVIEW } from "@/preview/previewMode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,13 +62,12 @@ export default function DealDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { deals, loading, updateDeal } = useDeals();
+  const { deal, loading, updateDeal } = useDeal(id ?? null);
 
   useEffect(() => {
     if (!PREVIEW && !authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
-  const deal = useMemo(() => deals.find(d => d.id === id) || null, [deals, id]);
   const contacts = useDealContacts(deal);
   usePageTitle(deal ? deal.deal_name : "Deal");
 
@@ -206,7 +205,7 @@ export default function DealDetail() {
                     <div className="font-medium text-sm">{c.name}</div>
                     {c.company && <div className="text-xs text-muted-foreground">{c.company}</div>}
                     {c.email && (
-                      <a href={`mailto:${c.email}`} className="text-xs text-primary inline-flex items-center gap-1 hover:underline">
+                      <a href={`mailto:${encodeURIComponent(c.email)}`} className="text-xs text-primary inline-flex items-center gap-1 hover:underline">
                         <Mail className="h-3 w-3" />{c.email}
                       </a>
                     )}

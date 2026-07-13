@@ -14,4 +14,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Keep heavyweight libraries out of the entry chunk; they load
+        // only with the routes that use them.
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-mapbox": ["mapbox-gl"],
+          "vendor-charts": ["recharts"],
+          "vendor-xlsx": ["xlsx"],
+        },
+      },
+    },
+  },
 });
