@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 // TooltipProvider removed to fix hook runtime issue
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { RoleGate } from "./components/RoleGate";
 import Index from "./pages/Index";
 
 // Route-level code splitting: each page loads on demand so the initial
@@ -38,18 +39,21 @@ const App = () => (
     <BrowserRouter>
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-          <Route path="/" element={<Index />} />
+          {/* Role access per RBAC design (2026-07-14): technical users are
+              limited to Taskboard + Implementations; all other roles keep
+              their pages. RLS enforces the same matrix server-side. */}
+          <Route path="/" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Index /></RoleGate>} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/implementations" element={<Implementations />} />
-          <Route path="/investments" element={<Investments />} />
-          <Route path="/projections" element={<Projections />} />
-          <Route path="/focus-areas" element={<FocusAreas />} />
-          <Route path="/board-mode" element={<BoardMode />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/dealflow" element={<Dealflow />} />
-          <Route path="/dealflow/:id" element={<DealDetail />} />
-          <Route path="/taskboard" element={<Taskboard />} />
-          <Route path="/taskboard/archive" element={<Taskboard />} />
+          <Route path="/implementations" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Implementations /></RoleGate>} />
+          <Route path="/investments" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Investments /></RoleGate>} />
+          <Route path="/projections" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Projections /></RoleGate>} />
+          <Route path="/focus-areas" element={<RoleGate allow={["admin", "user", "vo_leader"]}><FocusAreas /></RoleGate>} />
+          <Route path="/board-mode" element={<RoleGate allow={["admin", "user", "vo_leader"]}><BoardMode /></RoleGate>} />
+          <Route path="/settings" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Settings /></RoleGate>} />
+          <Route path="/dealflow" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Dealflow /></RoleGate>} />
+          <Route path="/dealflow/:id" element={<RoleGate allow={["admin", "user", "vo_leader"]}><DealDetail /></RoleGate>} />
+          <Route path="/taskboard" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
+          <Route path="/taskboard/archive" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

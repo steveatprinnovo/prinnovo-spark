@@ -29,12 +29,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
 import { useFocusAreas, FocusArea } from "@/hooks/useFocusAreas";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { UserManagementCard } from "@/components/UserManagementCard";
+import { PREVIEW } from "@/preview/previewMode";
 
 const Settings = () => {
   usePageTitle("Settings");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { isAdmin, role, ventureOffice, loading: authzLoading } = useUserAuth();
   const { selectedVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { companies, loading, refetch: refetchCompanies } = useCompanies();
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : ventureOffice || "");
@@ -144,14 +146,18 @@ const Settings = () => {
         </div>
 
         <div className="flex flex-col gap-6">
+          {/* User management — admins only (PREVIEW renders sample data for visual review) */}
+          {(isAdmin || PREVIEW) && <UserManagementCard />}
+
           {/* Venture Office Settings */}
-          <VentureOfficeSettingsCard 
-            selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || ""} 
+          <VentureOfficeSettingsCard
+            selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || ""}
             isAdmin={isAdmin}
+            canEdit={isAdmin || role === "vo_leader"}
           />
 
           {/* Company Settings */}
-          <CompanySettingsCard 
+          <CompanySettingsCard
             companies={filteredCompanies}
             refetchCompanies={refetchCompanies}
             selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || ""}
@@ -166,9 +172,11 @@ const Settings = () => {
 interface VentureOfficeSettingsCardProps {
   selectedVentureOffice: string;
   isAdmin: boolean;
+  /** VO leaders may edit their own office's details; base users are view-only. */
+  canEdit: boolean;
 }
 
-function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOfficeSettingsCardProps) {
+function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin, canEdit }: VentureOfficeSettingsCardProps) {
   const { details, loading } = useVentureOfficeDetails(selectedVentureOffice);
   const { logoUrl: ventureOfficeLogo } = useVentureOfficeLogo(selectedVentureOffice);
   const { focusAreas, loading: focusAreasLoading, addFocusArea, updateFocusArea, updateFocusAreaPriority, deleteFocusArea, addCompanyToFocusArea, removeCompanyFromFocusArea } = useFocusAreas(selectedVentureOffice);
@@ -263,12 +271,16 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
     
     setSaving(true);
     try {
-      const { error } = await supabase
+      // .select() so an RLS-filtered write (0 rows) is reported as a failure
+      // instead of a false success toast (pre-RBAC bug: no UPDATE policy existed).
+      const { data, error } = await supabase
         .from('venture_office_detail')
         .update(editedDetails)
-        .eq('Venture Office Name', selectedVentureOffice);
+        .eq('Venture Office Name', selectedVentureOffice)
+        .select('id');
 
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No rows updated — you may not have permission to edit this office");
       
       toast.success("Venture office details updated successfully");
       setIsEditing(false);
@@ -458,7 +470,7 @@ function VentureOfficeSettingsCard({ selectedVentureOffice, isAdmin }: VentureOf
               : `Edit details for ${selectedVentureOffice}`}
           </CardDescription>
         </div>
-        {!showAggregateView && !isEditing && (
+        {!showAggregateView && !isEditing && canEdit && (
           <Button variant="outline" size="sm" onClick={handleStartEdit}>
             <Pencil className="h-4 w-4 mr-2" />
             Edit

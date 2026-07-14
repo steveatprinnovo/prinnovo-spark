@@ -207,8 +207,11 @@ const Projections = () => {
   usePageTitle("Projections");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { isAdmin, role, ventureOffice, loading: authzLoading } = useUserAuth();
   const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
+  // VO leaders see the Costs tab read-only, scoped to their own office.
+  const isVoLeader = role === "vo_leader";
+  const costsOffice = isAdmin ? selectedVentureOffice : ventureOffice || "";
   const { companies, loading } = useCompanies();
   const [forecast, setForecast] = useState<ForecastType>("target");
   const [showTargetCashReturnAsPercent, setShowTargetCashReturnAsPercent] = useState(false);
@@ -222,7 +225,7 @@ const Projections = () => {
   const [showAddCostModal, setShowAddCostModal] = useState(false);
   const [costsRefreshKey, setCostsRefreshKey] = useState(0);
   
-  const { details: ventureOfficeDetails } = useVentureOfficeDetails(selectedVentureOffice);
+  const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : ventureOffice || "");
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
   const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
   const { ventureOffices: allVentureOffices } = useAllVentureOffices();
@@ -512,7 +515,7 @@ const Projections = () => {
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="revenues">Revenues</TabsTrigger>
-              {isAdmin && <TabsTrigger value="costs">Costs</TabsTrigger>}
+              {(isAdmin || isVoLeader) && <TabsTrigger value="costs">Costs</TabsTrigger>}
             </TabsList>
             
             {isAdmin && activeTab === "costs" && selectedVentureOffice !== "all" && (
@@ -728,10 +731,10 @@ const Projections = () => {
             </div>
           </TabsContent>
           
-          {isAdmin && (
+          {(isAdmin || isVoLeader) && (
             <TabsContent value="costs">
               <CostsTable
-                selectedVentureOffice={selectedVentureOffice}
+                selectedVentureOffice={costsOffice}
                 selectedContractYear={costsContractYear}
                 onContractYearChange={setCostsContractYear}
                 initiationDate={ventureOfficeDetails?.venture_office_initiation_date}

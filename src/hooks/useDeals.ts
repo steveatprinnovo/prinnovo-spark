@@ -186,10 +186,12 @@ export function useDeals() {
   const updateDeal = useCallback(async (id: string, patch: Partial<Deal>) => {
     setDeals(prev => prev.map(d => (d.id === id ? { ...d, ...patch } : d)));
     if (PREVIEW) return;
-    const { error } = await supabase.from("deals" as any).update(patch as any).eq("id", id);
-    if (error) {
+    // .select() so an RLS-filtered write (0 rows) surfaces as an error
+    // instead of silently no-oping — root cause of the pre-RBAC edit bug.
+    const { data, error } = await supabase.from("deals" as any).update(patch as any).eq("id", id).select("id");
+    if (error || !data || (data as any[]).length === 0) {
       console.error("Error updating deal:", error);
-      toast.error("Update failed");
+      toast.error(error ? "Update failed" : "You don't have permission to edit this deal");
       fetchDeals();
     }
   }, [fetchDeals]);
@@ -266,10 +268,11 @@ export function useDeal(id: string | null) {
     setDeal(prev => (prev && prev.id === dealId ? { ...prev, ...patch } : prev));
     if (dealsCache) dealsCache = dealsCache.map(d => (d.id === dealId ? { ...d, ...patch } : d));
     if (PREVIEW) return;
-    const { error } = await supabase.from("deals" as any).update(patch as any).eq("id", dealId);
-    if (error) {
+    // .select() so an RLS-filtered write (0 rows) surfaces as an error.
+    const { data, error } = await supabase.from("deals" as any).update(patch as any).eq("id", dealId).select("id");
+    if (error || !data || (data as any[]).length === 0) {
       console.error("Error updating deal:", error);
-      toast.error("Update failed");
+      toast.error(error ? "Update failed" : "You don't have permission to edit this deal");
       fetchDeal();
     }
   }, [fetchDeal]);

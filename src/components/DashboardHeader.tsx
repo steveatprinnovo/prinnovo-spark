@@ -4,8 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useVentureOfficeLogo } from "@/hooks/useVentureOfficeLogo";
-import { LogOut, Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Layers, Kanban } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { navItemsForRole } from "@/lib/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DonutMenu } from "./DonutMenu";
 import prinnovoLogo from "@/assets/prinnovo-logo.webp";
@@ -13,7 +14,7 @@ import { PREVIEW } from "@/preview/previewMode";
 
 export function DashboardHeader() {
   const { signOut, user } = useAuth();
-  const { isAdmin, ventureOffice } = useUserAuth();
+  const { isAdmin, role, ventureOffice } = useUserAuth();
   const { selectedVentureOffice } = useAdminVentureOffice();
   const location = useLocation();
   const navigate = useNavigate();
@@ -64,82 +65,27 @@ export function DashboardHeader() {
           
           {/* Navigation - Desktop vs Mobile/Tablet */}
           {!isMobile ? (
-            /* Desktop Navigation Links */
+            /* Desktop Navigation Links — visibility driven by role (lib/navigation.ts) */
             <nav className="flex items-center space-x-8">
-              <Link 
-                to="/" 
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname === "/" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Home className="h-4 w-4" />
-                Home
-              </Link>
-              <Link 
-                to="/implementations" 
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname === "/implementations" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <ClipboardList className="h-4 w-4" />
-                Implementations
-              </Link>
-              <Link 
-                to="/investments" 
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname === "/investments" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <DollarSign className="h-4 w-4" />
-                Investments
-              </Link>
-              <Link 
-                to="/projections" 
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname === "/projections" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <TrendingUp className="h-4 w-4" />
-                Projections
-              </Link>
-              <Link 
-                to="/focus-areas" 
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname === "/focus-areas" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Target className="h-4 w-4" />
-                Focus Areas
-              </Link>
-              <Link
-                to="/dealflow"
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname.startsWith("/dealflow") ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Layers className="h-4 w-4" />
-                Dealflow CRM
-              </Link>
-              {(isAdmin || PREVIEW) && (
-                <Link
-                  to="/taskboard"
-                  className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                    location.pathname === "/taskboard" ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <Kanban className="h-4 w-4" />
-                  IT Taskboard
-                </Link>
-              )}
-              <Link 
-                to="/settings" 
-                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
-                  location.pathname === "/settings" ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
+              {navItemsForRole(role, PREVIEW).map(item => {
+                const active = item.path === "/dealflow"
+                  ? location.pathname.startsWith("/dealflow")
+                  : item.path === "/taskboard"
+                    ? location.pathname.startsWith("/taskboard")
+                    : location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${
+                      active ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
           ) : (
             /* Mobile/Tablet Donut Menu */

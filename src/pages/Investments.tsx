@@ -316,13 +316,17 @@ export default function Investments() {
                   Current as of {formatISODate(lastUpdated)}
                 </div>
               )}
-              <Button
-                onClick={() => setIsUpdateModalOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <TrendingUp className="h-4 w-4" />
-                Update Valuation
-              </Button>
+              {/* Financial writes are admin-only (RBAC design, 2026-07-14);
+                  server-side the company_detail financial-column trigger enforces this. */}
+              {isAdmin && (
+                <Button
+                  onClick={() => setIsUpdateModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  Update Valuation
+                </Button>
+              )}
             </div>
           </div>
         </div>

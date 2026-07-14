@@ -94,11 +94,12 @@ export function useKanban() {
     persist(() => supabase.from("kanban_cards" as any).update(patch as any).eq("id", id));
   }, []);
 
-  const addCard = useCallback((column: ColumnKey, sortOrder: number) => {
+  const addCard = useCallback((column: ColumnKey, sortOrder: number, extra?: Partial<KanbanCard>) => {
     const card: KanbanCard = {
       id: uid(), title: "New card", notes: null, assignee: null, venture_office: null,
       intake_date: new Date().toISOString().slice(0, 10), due: null,
       board_column: column, sort_order: sortOrder, archived: false, archived_at: null,
+      ...extra,
     };
     setCards(prev => [...prev, card]);
     persist(() => supabase.from("kanban_cards" as any).insert(card as any));

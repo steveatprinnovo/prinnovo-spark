@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { DashboardHeader } from "@/components/DashboardHeader";
-import { useKanban, KanbanCard, KANBAN_COLUMNS, ColumnKey, isOverdue, formatDue, VENTURE_OFFICES, officeCode } from "@/hooks/useTaskboard";
+import { useKanban, KanbanCard, KANBAN_COLUMNS, ColumnKey, isOverdue, formatDue, VENTURE_OFFICES } from "@/hooks/useTaskboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { PREVIEW } from "@/preview/previewMode";
@@ -12,17 +12,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Plus, Archive, ArchiveRestore, Trash2, CalendarDays, User, ArrowLeft, ArrowDownToLine } from "lucide-react";
+import { Plus, Archive, ArchiveRestore, Trash2, CalendarDays, User, ArrowLeft, ArrowDownToLine, Eye } from "lucide-react";
 import { OfficeTag } from "@/components/OfficeTag";
 
-function CardFace({ c, onOpen, onDragStart }: { c: KanbanCard; onOpen: () => void; onDragStart: () => void }) {
+function CardFace({ c, canEdit, onOpen, onDragStart }: { c: KanbanCard; canEdit: boolean; onOpen: () => void; onDragStart: () => void }) {
   return (
     <div
-      draggable
-      onDragStart={onDragStart}
+      draggable={canEdit}
+      onDragStart={canEdit ? onDragStart : undefined}
       onClick={onOpen}
       className="rounded-md border bg-card p-3 shadow-sm cursor-pointer hover:border-primary/50 transition-colors space-y-1.5"
     >
@@ -116,31 +116,109 @@ function CardModal({ c, api, onClose }: { c: KanbanCard; api: ReturnType<typeof 
   );
 }
 
+/** Read-only card view for base users and VO leaders. */
+function CardViewModal({ c, onClose }: { c: KanbanCard; onClose: () => void }) {
+  const Row = ({ label, value }: { label: string; value: string | null }) => (
+    <div>
+      <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">{label}</div>
+      <div className="text-sm">{value || "—"}</div>
+    </div>
+  );
+  return (
+    <Dialog open onOpenChange={o => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{c.title}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Row label="Notes" value={c.notes} />
+          <div className="grid grid-cols-2 gap-4">
+            <Row label="Assignee" value={c.assignee} />
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Venture office</div>
+              <div className="text-sm"><OfficeTag office={c.venture_office} /></div>
+            </div>
+            <Row label="Intake date" value={c.intake_date ? formatDue(c.intake_date) : null} />
+            <Row label="Due date" value={c.due ? formatDue(c.due) : null} />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Office is required at creation so office-scoped visibility works (RBAC design, 2026-07-14). */
+function NewCardDialog({ column, onCreate, onClose }: { column: ColumnKey; onCreate: (title: string, office: string) => void; onClose: () => void }) {
+  const [title, setTitle] = useState("");
+  const [office, setOffice] = useState<string>("");
+  const label = KANBAN_COLUMNS.find(c => c.key === column)?.label ?? column;
+  return (
+    <Dialog open onOpenChange={o => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>New card in {label}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Title</div>
+            <Input autoFocus value={title} onChange={e => setTitle(e.target.value)} placeholder="Card title" />
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Venture office</div>
+            <Select value={office} onValueChange={setOffice}>
+              <SelectTrigger><SelectValue placeholder="Select office (required)" /></SelectTrigger>
+              <SelectContent>
+                {VENTURE_OFFICES.map(o => <SelectItem key={o.code} value={o.name}><OfficeTag office={o.name} /></SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button disabled={!title.trim() || !office} onClick={() => onCreate(title.trim(), office)}>Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function Taskboard() {
   const location = useLocation();
   const isArchive = location.pathname.endsWith("/archive");
   usePageTitle(isArchive ? "IT Taskboard Archive" : "IT Taskboard");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: authzLoading } = useUserAuth();
+  const { role, isAdmin, loading: authzLoading } = useUserAuth();
   const api = useKanban();
   const { cards, loading } = api;
   const [openCard, setOpenCard] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [newCardColumn, setNewCardColumn] = useState<ColumnKey | null>(null);
+  const [officeFilter, setOfficeFilter] = useState<string>("all");
+
+  // Admin and technical edit; base users and VO leaders view. RLS mirrors this.
+  const canEdit = PREVIEW || isAdmin || role === "technical";
+  // All-office viewers get a client-side office filter; base users already
+  // receive only their own office's cards from RLS.
+  const showOfficeFilter = PREVIEW || isAdmin || role === "technical" || role === "vo_leader";
 
   useEffect(() => {
     if (!PREVIEW && !authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
-  const open = useMemo(() => cards.filter(c => !c.archived), [cards]);
+  const visible = useMemo(
+    () => (officeFilter === "all" ? cards : cards.filter(c => c.venture_office === officeFilter)),
+    [cards, officeFilter]
+  );
+  const open = useMemo(() => visible.filter(c => !c.archived), [visible]);
   const archived = useMemo(
-    () => cards.filter(c => c.archived).sort((a, b) => (b.archived_at || "").localeCompare(a.archived_at || "")),
-    [cards]
+    () => visible.filter(c => c.archived).sort((a, b) => (b.archived_at || "").localeCompare(a.archived_at || "")),
+    [visible]
   );
   const byColumn = (k: ColumnKey) => open.filter(c => c.board_column === k).sort((a, b) => a.sort_order - b.sort_order);
 
   const onDropColumn = (k: ColumnKey) => {
-    if (!dragId) return;
+    if (!canEdit || !dragId) return;
     const maxSort = Math.max(0, ...byColumn(k).map(c => c.sort_order));
     api.updateCard(dragId, { board_column: k, sort_order: maxSort + 1 });
     setDragId(null);
@@ -153,18 +231,6 @@ export default function Taskboard() {
       <div className="min-h-screen bg-background">
         <DashboardHeader />
         <div className="container mx-auto p-6"><Skeleton className="h-96" /></div>
-      </div>
-    );
-  }
-
-  if (!PREVIEW && !isAdmin) {
-    return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6">
-          <h1 className="text-2xl font-bold mb-2">IT Taskboard</h1>
-          <p className="text-muted-foreground">The taskboard is currently limited to administrators.</p>
-        </div>
       </div>
     );
   }
@@ -187,7 +253,7 @@ export default function Taskboard() {
                     <TableHead>Assignee</TableHead>
                     <TableHead>Venture Office</TableHead>
                     <TableHead>Archived</TableHead>
-                    <TableHead className="w-32" />
+                    {canEdit && <TableHead className="w-32" />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -199,15 +265,17 @@ export default function Taskboard() {
                       <TableCell className="text-muted-foreground">
                         {c.archived_at ? new Date(c.archived_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                       </TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm" className="gap-2" onClick={() => api.restoreCard(c.id)}>
-                          <ArchiveRestore className="h-3.5 w-3.5" /> Restore
-                        </Button>
-                      </TableCell>
+                      {canEdit && (
+                        <TableCell>
+                          <Button variant="outline" size="sm" className="gap-2" onClick={() => api.restoreCard(c.id)}>
+                            <ArchiveRestore className="h-3.5 w-3.5" /> Restore
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                   {archived.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">Nothing archived yet.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={canEdit ? 5 : 4} className="text-center text-muted-foreground py-10">Nothing archived yet.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -224,44 +292,61 @@ export default function Taskboard() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">IT Taskboard</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-foreground">IT Taskboard</h1>
+              {!canEdit && (
+                <Badge variant="secondary" className="gap-1"><Eye className="h-3 w-3" /> View only</Badge>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground mt-1">{open.length} open card{open.length === 1 ? "" : "s"}</p>
           </div>
-          <Link to="/taskboard/archive">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Archive className="h-4 w-4" /> Archive {archived.length > 0 && <Badge variant="secondary">{archived.length}</Badge>}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            {showOfficeFilter && (
+              <Select value={officeFilter} onValueChange={setOfficeFilter}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All offices</SelectItem>
+                  {VENTURE_OFFICES.map(o => <SelectItem key={o.code} value={o.name}><OfficeTag office={o.name} /></SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
+            <Link to="/taskboard/archive">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Archive className="h-4 w-4" /> Archive {archived.length > 0 && <Badge variant="secondary">{archived.length}</Badge>}
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
           {KANBAN_COLUMNS.map(col => {
             const colCards = byColumn(col.key);
             return (
-              <div key={col.key} onDragOver={e => e.preventDefault()} onDrop={() => onDropColumn(col.key)}>
+              <div key={col.key} onDragOver={e => canEdit && e.preventDefault()} onDrop={() => onDropColumn(col.key)}>
                 <Card className="bg-muted/40">
                   <CardHeader className="py-3 px-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-semibold">{col.label}</CardTitle>
                       <div className="flex items-center gap-1">
                         <Badge variant="secondary">{colCards.length}</Badge>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground"
-                          title="Add card"
-                          onClick={() => {
-                            const id = api.addCard(col.key, Math.max(0, ...colCards.map(c => c.sort_order)) + 1);
-                            setOpenCard(id);
-                          }}>
-                          <Plus className="h-4 w-4" />
-                        </Button>
+                        {canEdit && (
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground"
+                            title="Add card"
+                            onClick={() => setNewCardColumn(col.key)}>
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="px-3 pb-3 space-y-2 min-h-24">
                     {colCards.map(c => (
-                      <CardFace key={c.id} c={c} onOpen={() => setOpenCard(c.id)} onDragStart={() => setDragId(c.id)} />
+                      <CardFace key={c.id} c={c} canEdit={canEdit} onOpen={() => setOpenCard(c.id)} onDragStart={() => setDragId(c.id)} />
                     ))}
                     {colCards.length === 0 && (
-                      <div className="text-xs text-muted-foreground text-center py-6 border border-dashed rounded-md">Drop cards here</div>
+                      <div className="text-xs text-muted-foreground text-center py-6 border border-dashed rounded-md">
+                        {canEdit ? "Drop cards here" : "No cards"}
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -270,7 +355,21 @@ export default function Taskboard() {
           })}
         </div>
       </div>
-      {modalCard && <CardModal c={modalCard} api={api} onClose={() => setOpenCard(null)} />}
+      {modalCard && (canEdit
+        ? <CardModal c={modalCard} api={api} onClose={() => setOpenCard(null)} />
+        : <CardViewModal c={modalCard} onClose={() => setOpenCard(null)} />)}
+      {newCardColumn && canEdit && (
+        <NewCardDialog
+          column={newCardColumn}
+          onClose={() => setNewCardColumn(null)}
+          onCreate={(title, office) => {
+            const colCards = byColumn(newCardColumn);
+            const id = api.addCard(newCardColumn, Math.max(0, ...colCards.map(c => c.sort_order)) + 1, { title, venture_office: office });
+            setNewCardColumn(null);
+            setOpenCard(id);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,25 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Menu, X, LogOut, Layers, Kanban } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-
-const navigationItems = [
-  { path: "/", icon: Home, label: "Home" },
-  { path: "/implementations", icon: ClipboardList, label: "Implementations" },
-  { path: "/investments", icon: DollarSign, label: "Investments" },
-  { path: "/projections", icon: TrendingUp, label: "Projections" },
-  { path: "/focus-areas", icon: Target, label: "Focus Areas" },
-  { path: "/dealflow", icon: Layers, label: "Dealflow CRM" },
-  { path: "/taskboard", icon: Kanban, label: "IT Taskboard" },
-  { path: "/settings", icon: Settings, label: "Settings" },
-];
-
+import { useUserAuth } from "@/hooks/useUserAuth";
+import { navItemsForRole } from "@/lib/navigation";
+import { PREVIEW } from "@/preview/previewMode";
 
 export function DonutMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { role } = useUserAuth();
+  const navigationItems = navItemsForRole(role, PREVIEW);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
