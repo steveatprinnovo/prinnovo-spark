@@ -1,4 +1,4 @@
-import { Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Layers, Kanban, LucideIcon } from "lucide-react";
+import { Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Layers, Kanban, BarChart3, LucideIcon } from "lucide-react";
 import { AppRole } from "@/hooks/useUserAuth";
 
 export interface NavItem {
@@ -18,6 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/focus-areas", icon: Target, label: "Focus Areas", roles: ["admin", "user", "vo_leader"] },
   { path: "/dealflow", icon: Layers, label: "Dealflow CRM", roles: ["admin", "user", "vo_leader"] },
   { path: "/taskboard", icon: Kanban, label: "IT Taskboard", roles: ["admin", "user", "vo_leader", "technical"] },
+  { path: "/reporting", icon: BarChart3, label: "Reporting", roles: ["admin", "user", "vo_leader", "technical"] },
   { path: "/settings", icon: Settings, label: "Settings", roles: ["admin", "user", "vo_leader"] },
 ];
 

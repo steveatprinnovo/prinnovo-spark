@@ -20,6 +20,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Dealflow = lazy(() => import("./pages/Dealflow"));
 const DealDetail = lazy(() => import("./pages/DealDetail"));
 const Taskboard = lazy(() => import("./pages/Taskboard"));
+const Reporting = lazy(() => import("./pages/Reporting"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/dealflow/:id" element={<RoleGate allow={["admin", "user", "vo_leader"]}><DealDetail /></RoleGate>} />
           <Route path="/taskboard" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
           <Route path="/taskboard/archive" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
+          <Route path="/reporting" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Reporting /></RoleGate>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

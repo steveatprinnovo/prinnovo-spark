@@ -7,7 +7,7 @@
  * live-check script; offline tests assert compilation, not data.
  */
 
-import { compile, validate, type ReportRequest } from "./compiler.ts";
+import { compile, validate, type ReportRequest, type AggregateRequest } from "./compiler.ts";
 
 let passed = 0, failed = 0;
 function check(name: string, fn: () => void) {
@@ -142,6 +142,59 @@ check("technical role may use kanban metric", () => {
 check("filter without value is rejected", () => {
   const errs = validate({ metric: "stage_count", dimensions: ["deals.stage"], filters: [{ field: "deals.status", op: "eq" }] }, "admin");
   assert(errs.some(e => e.code === "missing_value"), "must require a value");
+});
+
+// ── Pivot-style aggregate requests (Reporting page builder) ────────────────
+const pivot: AggregateRequest = {
+  measures: [{ field: "company_detail.current_hlv_valuation", agg: "sum" }, { field: "company_detail.company_name", agg: "count" }],
+  dimensions: ["company_detail.venture_office", "company_detail.pipeline_stage"],
+  filters: [{ field: "company_detail.ipa_year", op: "gte", value: 2024 }],
+};
+
+check("pivot: compiles measures + 2 dims + filter, parameterized, LIMIT-capped", () => {
+  const r = compile(pivot, "admin");
+  assert(r.sql.includes('sum("Current HLV Valuation") AS sum_current_hlv_valuation'), "sum measure missing");
+  assert(r.sql.includes('count("Company Name") AS count_company_name'), "count measure missing");
+  assert(r.sql.includes('GROUP BY venture_office, "Pipeline Stage"'), "grouping missing");
+  assert(r.sql.includes('"IPA Year" >= $1') && r.params[0] === 2024, "filter must be parameterized");
+  assert(r.sql.includes("LIMIT 1000"), "row cap missing");
+  assert(r.metric === undefined, "aggregate reports carry no curated metric");
+});
+
+check("pivot: cross-table request rejected", () => {
+  const errs = validate({
+    measures: [{ field: "deals.employee_count", agg: "avg" }],
+    dimensions: ["company_detail.venture_office"],
+    filters: [],
+  } as AggregateRequest, "admin");
+  assert(errs.some(e => e.code === "cross_table"), "must reject cross-table");
+});
+
+check("pivot: disallowed aggregation rejected", () => {
+  const errs = validate({
+    measures: [{ field: "deals.stage", agg: "sum" }],
+    dimensions: [],
+    filters: [],
+  } as AggregateRequest, "admin");
+  assert(errs.some(e => e.code === "invalid_agg"), "sum over text must be rejected");
+});
+
+check("pivot: three dimensions rejected", () => {
+  const errs = validate({
+    measures: [{ field: "deals.company_name", agg: "count" }],
+    dimensions: ["deals.stage", "deals.venture_office", "deals.status"],
+    filters: [],
+  } as AggregateRequest, "admin");
+  assert(errs.some(e => e.code === "too_many_dimensions"), "must cap at 2 dims");
+});
+
+check("pivot: cost measures denied to base users", () => {
+  const errs = validate({
+    measures: [{ field: "costs.legal", agg: "sum" }],
+    dimensions: ["costs.venture_office"],
+    filters: [],
+  } as AggregateRequest, "user");
+  assert(errs.some(e => e.code === "field_forbidden"), "cost fields must be denied");
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

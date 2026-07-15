@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:reporting": "node --experimental-strip-types src/reporting/run-tests.ts"
+    "test:reporting": "node --experimental-strip-types src/reporting/run-tests.ts",
+    "sync:report-fn": "cp src/reporting/catalog.ts src/reporting/compiler.ts supabase/functions/run-report/"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
