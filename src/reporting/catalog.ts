@@ -84,6 +84,9 @@ export const FIELDS: CatalogField[] = [
   { id: "costs.operating", table: "venture_office_costs", column: "operating_expenses", label: "Operating expenses", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["sum", "avg", "count"] },
   { id: "costs.legal", table: "venture_office_costs", column: "legal_costs", label: "Legal costs", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["sum", "avg", "count"] },
 
+  // ── Stage history (capture began 2026-07-15) ──
+  { id: "history.stage", table: "deal_stage_history", column: "to_stage", label: "Stage (history)", type: "text", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count"] },
+
   // ── Taskboard — the technical role's one reporting surface ──
   { id: "kanban.board_column", table: "kanban_cards", column: "board_column", label: "Board column", type: "text", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["count"] },
   { id: "kanban.assignee", table: "kanban_cards", column: "assignee", label: "Assignee", type: "text", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["count"] },
@@ -391,7 +394,7 @@ WHERE {where}
   {
     id: "budget_vs_actual",
     label: "Budget vs actual by contract year",
-    definition: "Actual costs rolled up to contract years (year 1 starts at the office's initiation date) against venture_office_budgets. ASSUMPTION pending Steve's confirmation: services actual = venture team + IT team services; operating actual = operating expenses + legal. Returns one row per office × contract year; offices/years without a budget row show null budgets. Filterable by office only.",
+    definition: "Actual costs rolled up to contract years (year 1 starts at the office's initiation date) against venture_office_budgets. Mapping confirmed by Steve 2026-07-15: services actual = venture team + IT team services; operating actual = operating expenses + legal. Returns one row per office × contract year; offices/years without a budget row show null budgets. Filterable by office only.",
     allowedDims: [],
     roles: ["admin", "vo_leader"],
     officeScoped: true,
@@ -421,6 +424,27 @@ WHERE {where}
 ) t
 WHERE {where}
 ORDER BY venture_office, contract_year`,
+  },
+  {
+    id: "stage_dwell_days",
+    label: "Time in stage (dealflow)",
+    definition: "Average days a deal spends in each stage, from deal_stage_history. IMPORTANT: history capture began 2026-07-15 — the baseline was seeded at that moment and earlier dwell time is unknowable, so figures are provisional until several weeks of transitions accrue. Open (current) stage entries are measured to now; completed entries are also reported separately.",
+    allowedDims: ["history.stage"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: true,
+    exclusions: "dwell time before 2026-07-15 (pre-history) is not represented",
+    sql: `SELECT {dims}
+  count(*) AS stage_entries,
+  count(*) FILTER (WHERE next_at IS NOT NULL) AS completed_entries,
+  round((avg(EXTRACT(epoch FROM (coalesce(next_at, now()) - changed_at)) / 86400))::numeric, 1) AS avg_days_in_stage,
+  round((avg(EXTRACT(epoch FROM (next_at - changed_at)) / 86400) FILTER (WHERE next_at IS NOT NULL))::numeric, 1) AS avg_days_completed_only
+FROM (
+  SELECT h.to_stage, h.changed_at,
+         lead(h.changed_at) OVER (PARTITION BY h.deal_id ORDER BY h.changed_at) AS next_at
+  FROM public.deal_stage_history h
+) x
+WHERE {where}
+{dimGroup}`,
   },
   {
     id: "kanban_cycle_days",
