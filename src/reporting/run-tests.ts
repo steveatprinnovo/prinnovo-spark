@@ -8,6 +8,7 @@
  */
 
 import { compile, validate, type ReportRequest, type AggregateRequest } from "./compiler.ts";
+import { METRICS } from "./catalog.ts";
 
 let passed = 0, failed = 0;
 function check(name: string, fn: () => void) {
@@ -142,6 +143,19 @@ check("technical role may use kanban metric", () => {
 check("filter without value is rejected", () => {
   const errs = validate({ metric: "stage_count", dimensions: ["deals.stage"], filters: [{ field: "deals.status", op: "eq" }] }, "admin");
   assert(errs.some(e => e.code === "missing_value"), "must require a value");
+});
+
+// ── Catalog-wide: every curated metric must compile, bare and per-dim ──────
+check(`all ${METRICS.length} curated metrics compile (bare + every allowed dimension)`, () => {
+  for (const m of METRICS) {
+    const role = m.roles[0];
+    const bare = compile({ metric: m.id, dimensions: [], filters: [] }, role);
+    assert(bare.sql.length > 0 && !bare.sql.includes("{"), `${m.id}: unresolved template placeholder`);
+    for (const d of m.allowedDims) {
+      const withDim = compile({ metric: m.id, dimensions: [d], filters: [] }, role);
+      assert(withDim.sql.includes("GROUP BY"), `${m.id} + ${d}: missing GROUP BY`);
+    }
+  }
 });
 
 // ── Pivot-style aggregate requests (Reporting page builder) ────────────────
