@@ -48,6 +48,8 @@ export interface CompiledReport {
   params: (string | number)[];
   /** Present for curated-metric requests; undefined for pivot aggregates. */
   metric?: DerivedMetric;
+  /** Column aliases charts should plot; everything else is table-only context. */
+  chartKeys: string[];
   /** Text the renderer must include in the validation footer. */
   footer: { definition: string; exclusions: string; roleNotes: string[] };
 }
@@ -233,8 +235,10 @@ function compileMetric(req: MetricRequest, role: Role): CompiledReport {
     ? `${metric.definition} Statistic applied: ${agg}.`
     : metric.definition;
 
+  const chartKeys = metric.chartColumns.map(c => c.replace(/\{agg\}/g, agg));
+
   return {
-    sql, params, metric,
+    sql, params, metric, chartKeys,
     footer: { definition, exclusions: metric.exclusions, roleNotes },
   };
 }
@@ -270,8 +274,10 @@ function compileAggregate(req: AggregateRequest, role: Role): CompiledReport {
     (req.dimensions.length > 0 ? `, grouped by ${req.dimensions.map(d => fieldById.get(d)!.label).join(" and ")}` : "") +
     ". Aggregates ignore NULL values (count counts non-null entries).";
 
+  const chartKeys = req.measures.map(m => aggAlias(fieldById.get(m.field)!, m.agg));
+
   return {
-    sql, params,
+    sql, params, chartKeys,
     footer: { definition, exclusions: "NULL values are excluded by each aggregate", roleNotes: officeScopeNote(officeScoped, role) },
   };
 }

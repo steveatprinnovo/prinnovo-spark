@@ -63,6 +63,11 @@ export interface DerivedMetric {
   aggChoices?: Agg[];
   defaultAgg?: Agg;
   /**
+   * Column aliases (post-{agg} substitution) the chart should plot. All other
+   * returned columns are context/validation and appear only in the table.
+   */
+  chartColumns: string[];
+  /**
    * SQL template. Placeholders: {dims} (select-list dimension columns,
    * comma-suffixed), {dimGroup} (GROUP BY clause or empty), {where}
    * (compiled filters AND-ed into the base predicate, or 'true'),
@@ -137,6 +142,7 @@ function intervalMetric(id: string, label: string, fromCol: string, toCol: strin
     officeScoped: false,
     aggChoices: ["avg", "min", "max", "sum", "count"],
     defaultAgg: "avg",
+    chartColumns: ["{agg}_days"],
     exclusions: `rows with a missing ${fromName.toLowerCase()} or ${toName.toLowerCase()}`,
     sql: `SELECT {dims}
   count(*) AS companies_total,
@@ -165,6 +171,7 @@ export const METRICS: DerivedMetric[] = [
     allowedDims: ["company_detail.venture_office", "company_detail.focus_area", "company_detail.ipa_year"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
+    chartColumns: ["term_sheet_signed", "ipa_signed", "implementation_complete", "portfolio_decision_made"],
     exclusions: "none (missing dates simply don't count toward that milestone)",
     sql: `SELECT {dims}
   count(*) AS companies,
@@ -184,6 +191,7 @@ WHERE {where}
     allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
     roles: DEALFLOW_ROLES,
     officeScoped: true,
+    chartColumns: ["deals"],
     exclusions: "none",
     sql: `SELECT {dims}
   count(*) AS deals
@@ -201,6 +209,7 @@ WHERE {where}
     officeScoped: true,
     aggChoices: ["avg", "min", "max", "sum", "count"],
     defaultAgg: "avg",
+    chartColumns: ["{agg}_days_in_stage"],
     exclusions: "dwell time before 2026-07-15 (pre-history) is not represented",
     sql: `SELECT {dims}
   count(*) AS stage_entries,
@@ -227,6 +236,7 @@ WHERE {where}
     officeScoped: true,
     aggChoices: ["avg", "min", "max", "sum", "count"],
     defaultAgg: "avg",
+    chartColumns: ["{agg}_days"],
     exclusions: "deals with no date_received",
     sql: `SELECT {dims}
   count(*) FILTER (WHERE date_received IS NOT NULL) AS measurable,
@@ -246,6 +256,7 @@ WHERE {where}
     officeScoped: true,
     aggChoices: ["avg", "min", "max", "count"],
     defaultAgg: "avg",
+    chartColumns: ["{agg}_days_stale"],
     exclusions: "deals with no last_interaction (reported as never_contacted)",
     sql: `SELECT {dims}
   count(*) FILTER (WHERE last_interaction IS NOT NULL) AS measurable,
@@ -267,6 +278,7 @@ WHERE {where}
     allowedDims: ["deals.venture_office", "deals.ipa_structure", "deals.assigned_to"],
     roles: DEALFLOW_ROLES,
     officeScoped: true,
+    chartColumns: ["pct_of_adjudicated"],
     exclusions: "deals without executed IPA detail; unadjudicated (null) rows counted separately",
     sql: `SELECT {dims}
   count(*) FILTER (WHERE external_equity) AS external_equity_deals,
@@ -286,6 +298,7 @@ WHERE stage IN ('6 - Portfolio IPA','7 - Portfolio Fund') AND ipa_details IS NOT
     allowedDims: ["deals.ipa_structure", "deals.external_equity", "deals.venture_office", "deals.assigned_to"],
     roles: DEALFLOW_ROLES,
     officeScoped: true,
+    chartColumns: ["executed_ipas"],
     exclusions: "deals without executed IPA detail",
     sql: `SELECT {dims}
   count(*) AS executed_ipas
@@ -305,6 +318,7 @@ WHERE stage IN ('6 - Portfolio IPA','7 - Portfolio Fund') AND ipa_details IS NOT
     officeScoped: false,
     aggChoices: ["sum", "avg", "min", "max"],
     defaultAgg: "sum",
+    chartColumns: ["{agg}_portfolio_value"],
     exclusions: "companies without an Investment Tracker Stage; invested companies with no round valuation (counted as unvalued)",
     sql: `SELECT {dims}
   count(DISTINCT cd.deal_id) AS invested_companies,
@@ -334,6 +348,7 @@ WHERE cd."Investment Tracker Stage" IS NOT NULL AND {where}
     officeScoped: false,
     aggChoices: ["sum", "avg", "min", "max"],
     defaultAgg: "sum",
+    chartColumns: ["{agg}_invested"],
     exclusions: "companies without an Investment Tracker Stage",
     sql: `SELECT {dims}
   count(*) AS companies,
@@ -351,6 +366,7 @@ WHERE "Investment Tracker Stage" IS NOT NULL AND {where}
     allowedDims: ["company_detail.venture_office", "company_detail.tracker_stage"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
+    chartColumns: ["moic"],
     exclusions: "companies without an Investment Tracker Stage; ratio undefined where invested is zero",
     sql: `SELECT {dims}
   count(*) AS companies,
@@ -386,6 +402,7 @@ WHERE cd."Investment Tracker Stage" IS NOT NULL AND {where}
     officeScoped: true,
     aggChoices: ["sum", "avg", "min", "max", "count"],
     defaultAgg: "sum",
+    chartColumns: ["{agg}_legal"],
     exclusions: "months with no cost row (reported via coverage counts)",
     sql: `SELECT {dims}
   {agg}(legal_costs) AS {agg}_legal,
@@ -407,6 +424,7 @@ WHERE {where}
     officeScoped: true,
     aggChoices: ["sum", "avg", "min", "max"],
     defaultAgg: "sum",
+    chartColumns: ["venture_team", "it_team", "operating", "legal"],
     exclusions: "months with no cost row simply have no data point",
     sql: `SELECT {dims}
   {agg}(coalesce(venture_team_services_cost,0)) AS venture_team,
@@ -426,6 +444,7 @@ WHERE {where}
     allowedDims: [],
     roles: ["admin", "vo_leader"],
     officeScoped: true,
+    chartColumns: ["services_actual", "services_budget", "operating_actual", "operating_costs_budget"],
     exclusions: "cost months for offices missing an initiation date cannot be assigned a contract year",
     sql: `SELECT * FROM (
   SELECT
@@ -465,6 +484,7 @@ ORDER BY venture_office, contract_year`,
     officeScoped: true,
     aggChoices: ["avg", "min", "max", "sum", "count"],
     defaultAgg: "avg",
+    chartColumns: ["{agg}_cycle_days"],
     exclusions: "unarchived cards; cards missing intake date",
     sql: `SELECT {dims}
   count(*) FILTER (WHERE archived AND intake_date IS NOT NULL) AS measurable,

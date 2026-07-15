@@ -176,6 +176,31 @@ check("invalid statistic for a metric rejected", () => {
   assert(errs.some(e => e.code === "invalid_agg"), "count is not a portfolio_value statistic");
 });
 
+check("chartKeys carry only the selected statistic, never validation columns", () => {
+  const dflt = compile({ metric: "ts_to_ipa_days", dimensions: ["company_detail.venture_office"], filters: [] }, "admin");
+  assert(JSON.stringify(dflt.chartKeys) === JSON.stringify(["avg_days"]), `expected [avg_days], got ${JSON.stringify(dflt.chartKeys)}`);
+  const mx = compile({ metric: "ts_to_ipa_days", dimensions: [], filters: [], agg: "max" } as ReportRequest, "admin");
+  assert(JSON.stringify(mx.chartKeys) === JSON.stringify(["max_days"]), "agg must flow into chartKeys");
+  const funnel = compile({ metric: "milestone_funnel", dimensions: [], filters: [] }, "admin");
+  assert(funnel.chartKeys.length === 4 && !funnel.chartKeys.includes("companies"), "funnel charts milestones, not the companies counter");
+  for (const m of METRICS) {
+    const r = compile({ metric: m.id, dimensions: [], filters: [] }, m.roles[0]);
+    assert(r.chartKeys.length > 0 && r.chartKeys.every(k => !k.includes("{")), `${m.id}: unresolved/empty chartKeys`);
+    for (const bad of ["companies_total", "measurable", "negative_intervals", "unadjudicated", "cost_months", "never_contacted"]) {
+      assert(!r.chartKeys.includes(bad), `${m.id}: validation column ${bad} must not be charted`);
+    }
+  }
+});
+
+check("pivot chartKeys equal the requested measure aliases", () => {
+  const r = compile({
+    measures: [{ field: "company_detail.current_hlv_valuation", agg: "sum" }, { field: "company_detail.company_name", agg: "count" }],
+    dimensions: ["company_detail.venture_office"],
+    filters: [],
+  } as AggregateRequest, "admin");
+  assert(JSON.stringify(r.chartKeys) === JSON.stringify(["sum_current_hlv_valuation", "count_company_name"]), `got ${JSON.stringify(r.chartKeys)}`);
+});
+
 // ── Pivot-style aggregate requests (Reporting page builder) ────────────────
 const pivot: AggregateRequest = {
   measures: [{ field: "company_detail.current_hlv_valuation", agg: "sum" }, { field: "company_detail.company_name", agg: "count" }],

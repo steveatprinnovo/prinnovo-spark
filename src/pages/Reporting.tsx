@@ -14,11 +14,25 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Sparkles, Play, Plus, X, BarChart3, LineChart as LineIcon, Table as TableIcon, Loader2 } from "lucide-react";
+import { Sparkles, Play, Plus, X, Loader2 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, Tooltip as ChartTooltip, CartesianGrid, Legend,
+  PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  RadialBarChart, RadialBar, Treemap,
 } from "recharts";
+
+type ViewType = "bar" | "line" | "pie" | "radar" | "radialBar" | "treemap" | "table";
+
+const VIEW_LABELS: Record<ViewType, string> = {
+  bar: "Bar chart",
+  line: "Line chart",
+  pie: "Pie chart",
+  radar: "Radar chart",
+  radialBar: "Radial bar",
+  treemap: "Tree map",
+  table: "Table",
+};
 
 const SERIES_COLORS = ["#2a78d6", "#1baf7a", "#eda100", "#008300", "#4a3aa7", "#e34948", "#e87ba4", "#eb6834"];
 const AGG_LABELS: Record<Agg, string> = { count: "Count", sum: "Sum", avg: "Average", min: "Min", max: "Max" };
@@ -56,8 +70,9 @@ export default function Reporting() {
   // ── Results ──
   const [rows, setRows] = useState<Row[] | null>(null);
   const [footer, setFooter] = useState<Footer | null>(null);
+  const [chartKeys, setChartKeys] = useState<string[] | null>(null);
   const [lastRequest, setLastRequest] = useState<ReportRequest | null>(null);
-  const [view, setView] = useState<"bar" | "line" | "table">("bar");
+  const [view, setView] = useState<ViewType>("bar");
   const [loading, setLoading] = useState(false);
 
   const fields = useMemo(() => visibleFields(role), [role]);
@@ -116,6 +131,7 @@ export default function Reporting() {
       }
       setRows(data.rows as Row[]);
       setFooter(data.footer as Footer);
+      setChartKeys((data.chartKeys as string[] | undefined) ?? null);
       setLastRequest(data.request as ReportRequest);
       loadRequestIntoBuilder(data.request as ReportRequest);
       const dims = (data.request.dimensions ?? []) as string[];
@@ -135,11 +151,18 @@ export default function Reporting() {
     invoke({ mode: "nl", text: question.trim() });
   };
 
-  // ── Chart shaping: dim1 = x axis; numeric columns = series ──
+  // ── Chart shaping: dim1 = x axis; series = the SELECTED statistic only.
+  //    The server names the chart-worthy columns (chartKeys); validation
+  //    columns like companies_total/measurable/negative_intervals stay in
+  //    the table view. Numeric detection is only a fallback. ──
   const chart = useMemo(() => {
     if (!rows || rows.length === 0 || !lastRequest) return null;
     const dims = (lastRequest.dimensions ?? []).map(dimKey);
-    const numericKeys = Object.keys(rows[0]).filter(k => !dims.includes(k) && rows.some(r => typeof r[k] === "number" || (typeof r[k] === "string" && r[k] !== null && !isNaN(Number(r[k])))));
+    const present = new Set(Object.keys(rows[0]));
+    const served = (chartKeys ?? []).filter(k => present.has(k));
+    const numericKeys = served.length > 0
+      ? served
+      : Object.keys(rows[0]).filter(k => !dims.includes(k) && rows.some(r => typeof r[k] === "number" || (typeof r[k] === "string" && r[k] !== null && !isNaN(Number(r[k])))));
     if (dims.length === 0) return null; // single-row summary → metric cards
     const xKey = dims[0];
     if (dims.length === 2 && numericKeys.length >= 1) {
@@ -162,7 +185,24 @@ export default function Reporting() {
       return out;
     });
     return { data, xKey, seriesKeys: numericKeys };
-  }, [rows, lastRequest]);
+  }, [rows, lastRequest, chartKeys]);
+
+  // Single-value shape for pie / radial bar / treemap: first measure per
+  // category. Pie and radial cap at 11 slices + "Other" for readability.
+  const singleSeries = useMemo(() => {
+    if (!chart) return null;
+    const key = chart.seriesKeys[0];
+    if (!key) return null;
+    const entries = chart.data
+      .map(d => ({ name: String(d[chart.xKey] ?? "—"), value: Math.abs(Number(d[key] ?? 0)) }))
+      .filter(e => e.value > 0)
+      .sort((a, b) => b.value - a.value);
+    if (entries.length === 0) return null;
+    const capped = entries.length > 12
+      ? [...entries.slice(0, 11), { name: `Other (${entries.length - 11})`, value: entries.slice(11).reduce((s, e) => s + e.value, 0) }]
+      : entries;
+    return { all: entries, capped, measure: key };
+  }, [chart]);
 
   const summaryCards = useMemo(() => {
     if (!rows || rows.length !== 1 || !lastRequest || (lastRequest.dimensions ?? []).length > 0) return null;
@@ -374,10 +414,15 @@ export default function Reporting() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Results</CardTitle>
-                <div className="flex items-center gap-1">
-                  <Button variant={view === "bar" ? "default" : "outline"} size="sm" className="gap-1" onClick={() => setView("bar")}><BarChart3 className="h-4 w-4" /> Bar</Button>
-                  <Button variant={view === "line" ? "default" : "outline"} size="sm" className="gap-1" onClick={() => setView("line")}><LineIcon className="h-4 w-4" /> Line</Button>
-                  <Button variant={view === "table" ? "default" : "outline"} size="sm" className="gap-1" onClick={() => setView("table")}><TableIcon className="h-4 w-4" /> Table</Button>
+                <div className="w-44">
+                  <Select value={view} onValueChange={v => setView(v as ViewType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(VIEW_LABELS) as ViewType[]).map(v => (
+                        <SelectItem key={v} value={v}>{VIEW_LABELS[v]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardHeader>
@@ -407,7 +452,7 @@ export default function Reporting() {
                           <Bar key={k} dataKey={k} fill={SERIES_COLORS[i % SERIES_COLORS.length]} radius={[4, 4, 0, 0]} maxBarSize={48} />
                         ))}
                       </BarChart>
-                    ) : (
+                    ) : view === "line" ? (
                       <LineChart data={chart.data}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey={chart.xKey} tick={{ fontSize: 12 }} />
@@ -418,9 +463,63 @@ export default function Reporting() {
                           <Line key={k} type="monotone" dataKey={k} stroke={SERIES_COLORS[i % SERIES_COLORS.length]} strokeWidth={2} dot={{ r: 3 }} />
                         ))}
                       </LineChart>
+                    ) : view === "pie" && singleSeries ? (
+                      <PieChart>
+                        <Pie data={singleSeries.capped} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                          outerRadius="80%" label={(e: { name?: string }) => e.name ?? ""}>
+                          {singleSeries.capped.map((_, i) => (
+                            <Cell key={i} fill={SERIES_COLORS[i % SERIES_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <ChartTooltip />
+                      </PieChart>
+                    ) : view === "radar" ? (
+                      <RadarChart data={chart.data}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey={chart.xKey} tick={{ fontSize: 11 }} />
+                        <PolarRadiusAxis tick={{ fontSize: 10 }} />
+                        <ChartTooltip />
+                        {chart.seriesKeys.length > 1 && <Legend />}
+                        {chart.seriesKeys.map((k, i) => (
+                          <Radar key={k} name={k} dataKey={k}
+                            stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
+                            fill={SERIES_COLORS[i % SERIES_COLORS.length]} fillOpacity={0.25} />
+                        ))}
+                      </RadarChart>
+                    ) : view === "radialBar" && singleSeries ? (
+                      <RadialBarChart data={singleSeries.capped} innerRadius="15%" outerRadius="95%" startAngle={90} endAngle={-270}>
+                        <RadialBar dataKey="value" background label={{ position: "insideStart", fill: "#fff", fontSize: 11 }}>
+                          {singleSeries.capped.map((_, i) => (
+                            <Cell key={i} fill={SERIES_COLORS[i % SERIES_COLORS.length]} />
+                          ))}
+                        </RadialBar>
+                        <Legend layout="vertical" align="right" verticalAlign="middle"
+                          payload={singleSeries.capped.map((e, i) => ({ value: e.name, type: "square" as const, color: SERIES_COLORS[i % SERIES_COLORS.length] }))} />
+                        <ChartTooltip />
+                      </RadialBarChart>
+                    ) : view === "treemap" && singleSeries ? (
+                      <Treemap data={singleSeries.all.map((e, i) => ({ ...e, fill: SERIES_COLORS[i % SERIES_COLORS.length] }))}
+                        dataKey="value" nameKey="name" stroke="#fff" isAnimationActive={false}>
+                        <ChartTooltip />
+                      </Treemap>
+                    ) : (
+                      <BarChart data={chart.data}>
+                        <XAxis dataKey={chart.xKey} tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <ChartTooltip />
+                        {chart.seriesKeys.map((k, i) => (
+                          <Bar key={k} dataKey={k} fill={SERIES_COLORS[i % SERIES_COLORS.length]} radius={[4, 4, 0, 0]} maxBarSize={48} />
+                        ))}
+                      </BarChart>
                     )}
                   </ResponsiveContainer>
                 </div>
+              )}
+              {view !== "table" && chart && ["pie", "radialBar", "treemap"].includes(view) && (
+                <p className="text-xs text-muted-foreground">
+                  {VIEW_LABELS[view]} shows the first measure ({singleSeries?.measure ?? "value"}) per {fieldById.get((lastRequest && (lastRequest.dimensions ?? [])[0]) ?? "")?.label?.toLowerCase() ?? "group"}
+                  {view !== "treemap" && singleSeries && singleSeries.all.length > 12 ? "; smallest slices folded into Other" : ""}.
+                </p>
               )}
               {view !== "table" && !chart && !summaryCards && (
                 <p className="text-sm text-muted-foreground">This result has no grouping to chart — see the table view.</p>
