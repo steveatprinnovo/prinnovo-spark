@@ -21,6 +21,8 @@ export interface MetricRequest {
   metric: string;
   dimensions: string[];
   filters: ReportFilter[];
+  /** Summary statistic, only for metrics that declare aggChoices. */
+  agg?: Agg;
 }
 
 /**
@@ -81,6 +83,13 @@ function validateMetric(req: MetricRequest, role: Role): ValidationError[] {
   }
   if (!metric.roles.includes(role)) {
     errors.push({ code: "metric_forbidden", message: `Metric '${metric.id}' is not available to role '${role}'` });
+  }
+  if (req.agg !== undefined) {
+    if (!metric.aggChoices) {
+      errors.push({ code: "agg_not_supported", message: `Metric '${metric.id}' has fixed statistics — a summary-statistic choice does not apply` });
+    } else if (!metric.aggChoices.includes(req.agg)) {
+      errors.push({ code: "invalid_agg", message: `'${req.agg}' is not a valid statistic for '${metric.id}' (allowed: ${metric.aggChoices.join(", ")})` });
+    }
   }
   for (const dim of req.dimensions) {
     if (!metric.allowedDims.includes(dim)) {
@@ -208,15 +217,25 @@ function compileMetric(req: MetricRequest, role: Role): CompiledReport {
 
   const { where, params } = compileFilters(req.filters);
 
+  // Chosen summary statistic (validated above); metrics without aggChoices
+  // carry no {agg} placeholder, so the substitution is a no-op for them.
+  const agg: Agg = req.agg ?? metric.defaultAgg ?? "avg";
+
   const sql = metric.sql
     .replace("{dims}", dims)
     .replace("{where}", where)
     .replace("{dimGroup}", dimGroup)
+    .replace(/\{agg\}/g, agg)
     .trim();
+
+  const roleNotes = officeScopeNote(metric.officeScoped, role);
+  const definition = metric.aggChoices
+    ? `${metric.definition} Statistic applied: ${agg}.`
+    : metric.definition;
 
   return {
     sql, params, metric,
-    footer: { definition: metric.definition, exclusions: metric.exclusions, roleNotes: officeScopeNote(metric.officeScoped, role) },
+    footer: { definition, exclusions: metric.exclusions, roleNotes },
   };
 }
 

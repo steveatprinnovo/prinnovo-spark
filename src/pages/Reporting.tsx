@@ -3,14 +3,14 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { useUserAuth, AppRole } from "@/hooks/useUserAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { supabase } from "@/integrations/supabase/client";
-import { FIELDS, METRICS, fieldById, type Agg, type CatalogField } from "@/reporting/catalog";
+import { FIELDS, METRICS, METRIC_CATEGORIES, fieldById, metricById, type Agg, type CatalogField } from "@/reporting/catalog";
 import type { ReportRequest, ReportFilter, AggregateRequest, MetricRequest } from "@/reporting/compiler";
 import { isMetricRequest } from "@/reporting/compiler";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -47,6 +47,7 @@ export default function Reporting() {
   // ── Builder state ──
   const [mode, setMode] = useState<"metric" | "custom">("metric");
   const [metricId, setMetricId] = useState<string>("");
+  const [metricAgg, setMetricAgg] = useState<Agg | "">("");
   const [table, setTable] = useState<string>("");
   const [measures, setMeasures] = useState<{ field: string; agg: Agg }[]>([]);
   const [dimensions, setDimensions] = useState<string[]>([]);
@@ -74,7 +75,9 @@ export default function Reporting() {
   const buildRequest = (): ReportRequest | null => {
     if (mode === "metric") {
       if (!metricId) { toast.error("Pick a metric"); return null; }
-      return { metric: metricId, dimensions, filters } as MetricRequest;
+      const req: MetricRequest = { metric: metricId, dimensions, filters };
+      if (selectedMetric?.aggChoices && metricAgg) req.agg = metricAgg as Agg;
+      return req;
     }
     if (measures.length === 0) { toast.error("Add at least one measure"); return null; }
     return { measures, dimensions, filters } as AggregateRequest;
@@ -85,6 +88,8 @@ export default function Reporting() {
     if (isMetricRequest(req)) {
       setMode("metric");
       setMetricId(req.metric);
+      const m = metricById.get(req.metric);
+      setMetricAgg(m?.aggChoices ? (req.agg ?? m.defaultAgg ?? "avg") : "");
     } else {
       setMode("custom");
       setMeasures(req.measures);
@@ -210,16 +215,42 @@ export default function Reporting() {
           </CardHeader>
           <CardContent className="space-y-4">
             {mode === "metric" ? (
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-end gap-3">
                 <div className="w-96">
                   <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Metric</div>
-                  <Select value={metricId} onValueChange={v => { setMetricId(v); setDimensions([]); setFilters([]); }}>
+                  <Select value={metricId} onValueChange={v => {
+                    setMetricId(v);
+                    setDimensions([]);
+                    setFilters([]);
+                    const m = metricById.get(v);
+                    setMetricAgg(m?.aggChoices ? (m.defaultAgg ?? m.aggChoices[0]) : "");
+                  }}>
                     <SelectTrigger><SelectValue placeholder="Choose a metric" /></SelectTrigger>
                     <SelectContent>
-                      {metrics.map(m => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}
+                      {METRIC_CATEGORIES.map(cat => {
+                        const inCat = metrics.filter(m => m.category === cat);
+                        if (inCat.length === 0) return null;
+                        return (
+                          <SelectGroup key={cat}>
+                            <SelectLabel>{cat}</SelectLabel>
+                            {inCat.map(m => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}
+                          </SelectGroup>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
+                {selectedMetric?.aggChoices && (
+                  <div className="w-44">
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Summarize as</div>
+                    <Select value={metricAgg} onValueChange={v => setMetricAgg(v as Agg)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {selectedMetric.aggChoices.map(a => <SelectItem key={a} value={a}>{AGG_LABELS[a]}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-3">

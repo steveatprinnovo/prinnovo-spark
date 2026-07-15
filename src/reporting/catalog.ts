@@ -12,6 +12,25 @@ export type Role = "admin" | "user" | "vo_leader" | "technical";
 export type Agg = "count" | "sum" | "avg" | "min" | "max";
 export type FieldType = "text" | "numeric" | "date" | "boolean" | "text[]";
 
+export type MetricCategory =
+  | "Milestone intervals"
+  | "Pipeline & funnel"
+  | "Dealflow timing"
+  | "IPA terms"
+  | "Investment economics"
+  | "Office costs"
+  | "IT taskboard";
+
+export const METRIC_CATEGORIES: MetricCategory[] = [
+  "Milestone intervals",
+  "Pipeline & funnel",
+  "Dealflow timing",
+  "IPA terms",
+  "Investment economics",
+  "Office costs",
+  "IT taskboard",
+];
+
 export interface CatalogField {
   id: string;
   table: string;
@@ -29,6 +48,7 @@ export interface CatalogField {
 export interface DerivedMetric {
   id: string;
   label: string;
+  category: MetricCategory;
   /** Human-readable definition — echoed verbatim in every validation footer. */
   definition: string;
   /** Fields permitted as GROUP BY dimensions for this metric. */
@@ -36,9 +56,17 @@ export interface DerivedMetric {
   roles: Role[];
   officeScoped: boolean;
   /**
+   * Summary-statistic choice. When present, the SQL template contains an
+   * {agg} placeholder and the request may carry `agg` (validated against
+   * this list); absent means the metric's statistics are fixed.
+   */
+  aggChoices?: Agg[];
+  defaultAgg?: Agg;
+  /**
    * SQL template. Placeholders: {dims} (select-list dimension columns,
    * comma-suffixed), {dimGroup} (GROUP BY clause or empty), {where}
-   * (compiled filters AND-ed into the base predicate, or 'true').
+   * (compiled filters AND-ed into the base predicate, or 'true'),
+   * {agg} (chosen summary statistic, metrics with aggChoices only).
    */
   sql: string;
   /** What the validation footer must report was excluded, and why. */
@@ -95,29 +123,146 @@ export const FIELDS: CatalogField[] = [
   { id: "kanban.due", table: "kanban_cards", column: "due", label: "Due date", type: "date", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["min", "max", "count"] },
 ];
 
-export const METRICS: DerivedMetric[] = [
-  {
-    id: "ts_to_ipa_days",
-    label: "Days from term sheet to IPA signature",
-    definition: "IPA Signature Date minus Term Sheet Signature Date, calendar days. Companies missing either date are excluded; negative intervals are flagged, not dropped.",
-    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area"],
+/** Shared shape for the four milestone-interval metrics. */
+function intervalMetric(id: string, label: string, fromCol: string, toCol: string, fromName: string, toName: string): DerivedMetric {
+  const both = `"${fromCol}" IS NOT NULL AND "${toCol}" IS NOT NULL`;
+  const delta = `"${toCol}" - "${fromCol}"`;
+  return {
+    id,
+    label,
+    category: "Milestone intervals",
+    definition: `${toName} minus ${fromName}, calendar days, summarized by your chosen statistic (default: average). Companies missing either date are excluded; negative intervals are flagged, not dropped.`,
+    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area", "company_detail.ipa_year"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
-    exclusions: "rows with a missing term-sheet or IPA signature date",
+    aggChoices: ["avg", "min", "max", "sum", "count"],
+    defaultAgg: "avg",
+    exclusions: `rows with a missing ${fromName.toLowerCase()} or ${toName.toLowerCase()}`,
     sql: `SELECT {dims}
   count(*) AS companies_total,
-  count(*) FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "IPA Signature Date" IS NOT NULL) AS measurable,
-  round(avg("IPA Signature Date" - "Term Sheet Signature Date") FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "IPA Signature Date" IS NOT NULL), 1) AS avg_days,
-  min("IPA Signature Date" - "Term Sheet Signature Date") FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "IPA Signature Date" IS NOT NULL) AS min_days,
-  max("IPA Signature Date" - "Term Sheet Signature Date") FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "IPA Signature Date" IS NOT NULL) AS max_days,
-  count(*) FILTER (WHERE "IPA Signature Date" < "Term Sheet Signature Date") AS negative_intervals
+  count(*) FILTER (WHERE ${both}) AS measurable,
+  round(({agg}(${delta}) FILTER (WHERE ${both}))::numeric, 1) AS {agg}_days,
+  count(*) FILTER (WHERE "${toCol}" < "${fromCol}") AS negative_intervals
+FROM public.company_detail
+WHERE {where}
+{dimGroup}`,
+  };
+}
+
+export const METRICS: DerivedMetric[] = [
+  // ── Milestone intervals ──
+  intervalMetric("ts_to_ipa_days", "Days from term sheet to IPA signature", "Term Sheet Signature Date", "IPA Signature Date", "Term Sheet Signature Date", "IPA Signature Date"),
+  intervalMetric("ipa_to_impl_days", "Days from IPA signature to implementation complete", "IPA Signature Date", "Implementation Completion Date", "IPA Signature Date", "Implementation Completion Date"),
+  intervalMetric("impl_to_decision_days", "Days from implementation complete to final portfolio decision", "Implementation Completion Date", "Final Portfolio Decision Date", "Implementation Completion Date", "Final Portfolio Decision Date"),
+  intervalMetric("ts_to_decision_days", "Days from term sheet to final portfolio decision (end to end)", "Term Sheet Signature Date", "Final Portfolio Decision Date", "Term Sheet Signature Date", "Final Portfolio Decision Date"),
+
+  // ── Pipeline & funnel ──
+  {
+    id: "milestone_funnel",
+    label: "Implementation milestone funnel",
+    category: "Pipeline & funnel",
+    definition: "Of portfolio companies, how many have reached each dated milestone: term sheet signed, IPA signed, implementation complete, final portfolio decision. A company counts for a milestone when that date is populated.",
+    allowedDims: ["company_detail.venture_office", "company_detail.focus_area", "company_detail.ipa_year"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: false,
+    exclusions: "none (missing dates simply don't count toward that milestone)",
+    sql: `SELECT {dims}
+  count(*) AS companies,
+  count("Term Sheet Signature Date") AS term_sheet_signed,
+  count("IPA Signature Date") AS ipa_signed,
+  count("Implementation Completion Date") AS implementation_complete,
+  count("Final Portfolio Decision Date") AS portfolio_decision_made
 FROM public.company_detail
 WHERE {where}
 {dimGroup}`,
   },
   {
+    id: "stage_count",
+    label: "Deal count by stage",
+    category: "Pipeline & funnel",
+    definition: "Count of deals grouped by pipeline stage (office-scoped for non-admins).",
+    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: true,
+    exclusions: "none",
+    sql: `SELECT {dims}
+  count(*) AS deals
+FROM public.deals
+WHERE {where}
+{dimGroup}`,
+  },
+  {
+    id: "stage_dwell_days",
+    label: "Time in stage (dealflow)",
+    category: "Pipeline & funnel",
+    definition: "Days a deal spends in each stage, from deal_stage_history, summarized by your chosen statistic (default: average). IMPORTANT: history capture began 2026-07-15 — the baseline was seeded at that moment and earlier dwell time is unknowable, so figures are provisional until several weeks of transitions accrue. Open (current) stage entries are measured to now; completed entries are also reported separately.",
+    allowedDims: ["history.stage"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: true,
+    aggChoices: ["avg", "min", "max", "sum", "count"],
+    defaultAgg: "avg",
+    exclusions: "dwell time before 2026-07-15 (pre-history) is not represented",
+    sql: `SELECT {dims}
+  count(*) AS stage_entries,
+  count(*) FILTER (WHERE next_at IS NOT NULL) AS completed_entries,
+  round(({agg}(EXTRACT(epoch FROM (coalesce(next_at, now()) - changed_at)) / 86400))::numeric, 1) AS {agg}_days_in_stage,
+  round(({agg}(EXTRACT(epoch FROM (next_at - changed_at)) / 86400) FILTER (WHERE next_at IS NOT NULL))::numeric, 1) AS {agg}_days_completed_only
+FROM (
+  SELECT h.to_stage, h.changed_at,
+         lead(h.changed_at) OVER (PARTITION BY h.deal_id ORDER BY h.changed_at) AS next_at
+  FROM public.deal_stage_history h
+) x
+WHERE {where}
+{dimGroup}`,
+  },
+
+  // ── Dealflow timing ──
+  {
+    id: "deal_age_days",
+    label: "Deal age (days since received)",
+    category: "Dealflow timing",
+    definition: "Days from date_received to today, per deal, summarized by your chosen statistic (default: average); the median is always reported alongside. Deals with no received date are excluded.",
+    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: true,
+    aggChoices: ["avg", "min", "max", "sum", "count"],
+    defaultAgg: "avg",
+    exclusions: "deals with no date_received",
+    sql: `SELECT {dims}
+  count(*) FILTER (WHERE date_received IS NOT NULL) AS measurable,
+  round(({agg}(CURRENT_DATE - date_received) FILTER (WHERE date_received IS NOT NULL))::numeric, 1) AS {agg}_days,
+  round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (CURRENT_DATE - date_received)) FILTER (WHERE date_received IS NOT NULL))::numeric, 1) AS median_days
+FROM public.deals
+WHERE {where}
+{dimGroup}`,
+  },
+  {
+    id: "deal_staleness",
+    label: "Deal staleness (days since last interaction)",
+    category: "Dealflow timing",
+    definition: "Days from last_interaction to today, per deal, summarized by your chosen statistic (default: average), plus counts of deals untouched for over 30 and over 90 days. Deals with no recorded interaction are counted separately, not mixed into the statistics.",
+    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: true,
+    aggChoices: ["avg", "min", "max", "count"],
+    defaultAgg: "avg",
+    exclusions: "deals with no last_interaction (reported as never_contacted)",
+    sql: `SELECT {dims}
+  count(*) FILTER (WHERE last_interaction IS NOT NULL) AS measurable,
+  round(({agg}(CURRENT_DATE - last_interaction) FILTER (WHERE last_interaction IS NOT NULL))::numeric, 1) AS {agg}_days_stale,
+  count(*) FILTER (WHERE CURRENT_DATE - last_interaction > 30) AS stale_over_30d,
+  count(*) FILTER (WHERE CURRENT_DATE - last_interaction > 90) AS stale_over_90d,
+  count(*) FILTER (WHERE last_interaction IS NULL) AS never_contacted
+FROM public.deals
+WHERE {where}
+{dimGroup}`,
+  },
+
+  // ── IPA terms ──
+  {
     id: "external_equity_share",
     label: "Deals granting external economics to other affiliate health systems",
+    category: "IPA terms",
     definition: "Count and share of executed-IPA deals whose provisions grant OTHER Prinnovo affiliates ANY external economics — equity (warrants/shares), revenue credits, or affiliate transfer rights — per deals.external_equity (definition broadened 2026-07-15 per Steve; includes Gradient Health credits and Ansana transfer rights). Denominator = adjudicated deals (external_equity not null); unadjudicated deals (Cone register-sourced pending source docs) are reported separately, never silently included.",
     allowedDims: ["deals.venture_office", "deals.ipa_structure", "deals.assigned_to"],
     roles: DEALFLOW_ROLES,
@@ -134,17 +279,37 @@ WHERE stage IN ('6 - Portfolio IPA','7 - Portfolio Fund') AND ipa_details IS NOT
 {dimGroup}`,
   },
   {
+    id: "ipa_facet_count",
+    label: "Executed IPA counts by facet",
+    category: "IPA terms",
+    definition: "Count of executed-IPA deals (portfolio stage with IPA detail populated), groupable by structure taxonomy, external-economics flag, office, or owner. Base population identical to the external-economics metric.",
+    allowedDims: ["deals.ipa_structure", "deals.external_equity", "deals.venture_office", "deals.assigned_to"],
+    roles: DEALFLOW_ROLES,
+    officeScoped: true,
+    exclusions: "deals without executed IPA detail",
+    sql: `SELECT {dims}
+  count(*) AS executed_ipas
+FROM public.deals
+WHERE stage IN ('6 - Portfolio IPA','7 - Portfolio Fund') AND ipa_details IS NOT NULL AND {where}
+{dimGroup}`,
+  },
+
+  // ── Investment economics ──
+  {
     id: "portfolio_value",
     label: "Portfolio value (most recent round valuations)",
-    definition: "Sum over companies with an Investment Tracker Stage of each company's most recent round valuation — dated valuations beat undated, newest date wins, later round breaks ties. Identical to the Investments page computation. Companies with no round valuation contribute nothing and are reported as unvalued.",
+    category: "Investment economics",
+    definition: "Each invested company's most recent round valuation — dated valuations beat undated, newest date wins, later round breaks ties — summarized by your chosen statistic (default: sum, matching the Investments page). Population: companies with an Investment Tracker Stage. Companies with no round valuation are reported as unvalued.",
     allowedDims: ["company_detail.venture_office", "company_detail.tracker_stage"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
+    aggChoices: ["sum", "avg", "min", "max"],
+    defaultAgg: "sum",
     exclusions: "companies without an Investment Tracker Stage; invested companies with no round valuation (counted as unvalued)",
     sql: `SELECT {dims}
   count(DISTINCT cd.deal_id) AS invested_companies,
   count(DISTINCT cd.deal_id) FILTER (WHERE x.v IS NULL) AS unvalued_companies,
-  sum(x.v) AS portfolio_value
+  {agg}(x.v) AS {agg}_portfolio_value
 FROM public.company_detail cd
 LEFT JOIN LATERAL (
   SELECT r.v FROM (VALUES
@@ -160,184 +325,20 @@ WHERE cd."Investment Tracker Stage" IS NOT NULL AND {where}
 {dimGroup}`,
   },
   {
-    id: "stage_count",
-    label: "Deal count by stage",
-    definition: "Count of deals grouped by pipeline stage (office-scoped for non-admins).",
-    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: true,
-    exclusions: "none",
-    sql: `SELECT {dims}
-  count(*) AS deals
-FROM public.deals
-WHERE {where}
-{dimGroup}`,
-  },
-  {
-    id: "legal_cost_total",
-    label: "Total legal costs",
-    definition: "Sum of venture_office_costs.legal_costs over the filtered month range. Coverage is reported (months present, months carrying a legal value) so partial-year data cannot masquerade as a full-year total.",
-    allowedDims: ["costs.venture_office", "costs.month"],
-    roles: ["admin", "vo_leader"],
-    officeScoped: true,
-    exclusions: "months with no cost row (reported via coverage counts)",
-    sql: `SELECT {dims}
-  sum(legal_costs) AS legal_total,
-  count(*) AS cost_months,
-  count(*) FILTER (WHERE legal_costs IS NOT NULL) AS months_with_legal,
-  min(month) AS first_month,
-  max(month) AS last_month
-FROM public.venture_office_costs
-WHERE {where}
-{dimGroup}`,
-  },
-  // ── Milestone intervals: every consecutive + end-to-end pair the four
-  //    dated milestones support. (Per-stage dealflow transitions are NOT
-  //    timestamped in the schema — only these four dates exist; a
-  //    stage_history table would be required for time-in-stage metrics.) ──
-  {
-    id: "ipa_to_impl_days",
-    label: "Days from IPA signature to implementation complete",
-    definition: "Implementation Completion Date minus IPA Signature Date, calendar days. Companies missing either date are excluded; negative intervals are flagged, not dropped.",
-    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area", "company_detail.ipa_year"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: false,
-    exclusions: "rows with a missing IPA signature or implementation completion date",
-    sql: `SELECT {dims}
-  count(*) AS companies_total,
-  count(*) FILTER (WHERE "IPA Signature Date" IS NOT NULL AND "Implementation Completion Date" IS NOT NULL) AS measurable,
-  round(avg("Implementation Completion Date" - "IPA Signature Date") FILTER (WHERE "IPA Signature Date" IS NOT NULL AND "Implementation Completion Date" IS NOT NULL), 1) AS avg_days,
-  min("Implementation Completion Date" - "IPA Signature Date") FILTER (WHERE "IPA Signature Date" IS NOT NULL AND "Implementation Completion Date" IS NOT NULL) AS min_days,
-  max("Implementation Completion Date" - "IPA Signature Date") FILTER (WHERE "IPA Signature Date" IS NOT NULL AND "Implementation Completion Date" IS NOT NULL) AS max_days,
-  count(*) FILTER (WHERE "Implementation Completion Date" < "IPA Signature Date") AS negative_intervals
-FROM public.company_detail
-WHERE {where}
-{dimGroup}`,
-  },
-  {
-    id: "impl_to_decision_days",
-    label: "Days from implementation complete to final portfolio decision",
-    definition: "Final Portfolio Decision Date minus Implementation Completion Date, calendar days. Companies missing either date are excluded; negative intervals are flagged, not dropped.",
-    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area", "company_detail.ipa_year"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: false,
-    exclusions: "rows with a missing implementation completion or final decision date",
-    sql: `SELECT {dims}
-  count(*) AS companies_total,
-  count(*) FILTER (WHERE "Implementation Completion Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL) AS measurable,
-  round(avg("Final Portfolio Decision Date" - "Implementation Completion Date") FILTER (WHERE "Implementation Completion Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL), 1) AS avg_days,
-  min("Final Portfolio Decision Date" - "Implementation Completion Date") FILTER (WHERE "Implementation Completion Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL) AS min_days,
-  max("Final Portfolio Decision Date" - "Implementation Completion Date") FILTER (WHERE "Implementation Completion Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL) AS max_days,
-  count(*) FILTER (WHERE "Final Portfolio Decision Date" < "Implementation Completion Date") AS negative_intervals
-FROM public.company_detail
-WHERE {where}
-{dimGroup}`,
-  },
-  {
-    id: "ts_to_decision_days",
-    label: "Days from term sheet to final portfolio decision (end to end)",
-    definition: "Final Portfolio Decision Date minus Term Sheet Signature Date, calendar days — the full journey through implementation. Companies missing either date are excluded; negative intervals are flagged, not dropped.",
-    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area", "company_detail.ipa_year"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: false,
-    exclusions: "rows with a missing term-sheet or final decision date",
-    sql: `SELECT {dims}
-  count(*) AS companies_total,
-  count(*) FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL) AS measurable,
-  round(avg("Final Portfolio Decision Date" - "Term Sheet Signature Date") FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL), 1) AS avg_days,
-  min("Final Portfolio Decision Date" - "Term Sheet Signature Date") FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL) AS min_days,
-  max("Final Portfolio Decision Date" - "Term Sheet Signature Date") FILTER (WHERE "Term Sheet Signature Date" IS NOT NULL AND "Final Portfolio Decision Date" IS NOT NULL) AS max_days,
-  count(*) FILTER (WHERE "Final Portfolio Decision Date" < "Term Sheet Signature Date") AS negative_intervals
-FROM public.company_detail
-WHERE {where}
-{dimGroup}`,
-  },
-  {
-    id: "milestone_funnel",
-    label: "Implementation milestone funnel",
-    definition: "Of portfolio companies, how many have reached each dated milestone: term sheet signed, IPA signed, implementation complete, final portfolio decision. A company counts for a milestone when that date is populated.",
-    allowedDims: ["company_detail.venture_office", "company_detail.focus_area", "company_detail.ipa_year"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: false,
-    exclusions: "none (missing dates simply don't count toward that milestone)",
-    sql: `SELECT {dims}
-  count(*) AS companies,
-  count("Term Sheet Signature Date") AS term_sheet_signed,
-  count("IPA Signature Date") AS ipa_signed,
-  count("Implementation Completion Date") AS implementation_complete,
-  count("Final Portfolio Decision Date") AS portfolio_decision_made
-FROM public.company_detail
-WHERE {where}
-{dimGroup}`,
-  },
-  // ── Dealflow timing ──
-  {
-    id: "deal_age_days",
-    label: "Deal age (days since received)",
-    definition: "Days from date_received to today, per deal. Median uses percentile_cont(0.5). Deals with no received date are excluded.",
-    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: true,
-    exclusions: "deals with no date_received",
-    sql: `SELECT {dims}
-  count(*) FILTER (WHERE date_received IS NOT NULL) AS measurable,
-  round(avg(CURRENT_DATE - date_received) FILTER (WHERE date_received IS NOT NULL), 1) AS avg_days,
-  round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (CURRENT_DATE - date_received)) FILTER (WHERE date_received IS NOT NULL))::numeric, 1) AS median_days,
-  min(CURRENT_DATE - date_received) FILTER (WHERE date_received IS NOT NULL) AS min_days,
-  max(CURRENT_DATE - date_received) FILTER (WHERE date_received IS NOT NULL) AS max_days
-FROM public.deals
-WHERE {where}
-{dimGroup}`,
-  },
-  {
-    id: "deal_staleness",
-    label: "Deal staleness (days since last interaction)",
-    definition: "Days from last_interaction to today, per deal, plus counts of deals untouched for over 30 and over 90 days. Deals with no recorded interaction are counted separately, not mixed into the averages.",
-    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: true,
-    exclusions: "deals with no last_interaction (reported as never_contacted)",
-    sql: `SELECT {dims}
-  count(*) FILTER (WHERE last_interaction IS NOT NULL) AS measurable,
-  round(avg(CURRENT_DATE - last_interaction) FILTER (WHERE last_interaction IS NOT NULL), 1) AS avg_days_stale,
-  round((percentile_cont(0.5) WITHIN GROUP (ORDER BY (CURRENT_DATE - last_interaction)) FILTER (WHERE last_interaction IS NOT NULL))::numeric, 1) AS median_days_stale,
-  count(*) FILTER (WHERE CURRENT_DATE - last_interaction > 30) AS stale_over_30d,
-  count(*) FILTER (WHERE CURRENT_DATE - last_interaction > 90) AS stale_over_90d,
-  count(*) FILTER (WHERE last_interaction IS NULL) AS never_contacted
-FROM public.deals
-WHERE {where}
-{dimGroup}`,
-  },
-  // ── IPA facets (structured ones; deeper facets like tier percentages and
-  //    term lengths live in ipa_details free text and would need column
-  //    promotion, as external_equity was) ──
-  {
-    id: "ipa_facet_count",
-    label: "Executed IPA counts by facet",
-    definition: "Count of executed-IPA deals (portfolio stage with IPA detail populated), groupable by structure taxonomy, external-economics flag, office, or owner. Base population identical to the external-economics metric.",
-    allowedDims: ["deals.ipa_structure", "deals.external_equity", "deals.venture_office", "deals.assigned_to"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: true,
-    exclusions: "deals without executed IPA detail",
-    sql: `SELECT {dims}
-  count(*) AS executed_ipas
-FROM public.deals
-WHERE stage IN ('6 - Portfolio IPA','7 - Portfolio Fund') AND ipa_details IS NOT NULL AND {where}
-{dimGroup}`,
-  },
-  // ── Investment economics ──
-  {
     id: "invested_total",
-    label: "Total invested (all rounds)",
-    definition: "Sum of Invested Amount + Invested Amount 2 + Invested Amount 3 (NULLs treated as zero) over companies with an Investment Tracker Stage — same population as the Investments page.",
+    label: "Invested capital (all rounds)",
+    category: "Investment economics",
+    definition: "Per-company invested capital (Invested Amount + 2 + 3, NULLs as zero) over companies with an Investment Tracker Stage, summarized by your chosen statistic (default: sum) — same population as the Investments page.",
     allowedDims: ["company_detail.venture_office", "company_detail.tracker_stage"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
+    aggChoices: ["sum", "avg", "min", "max"],
+    defaultAgg: "sum",
     exclusions: "companies without an Investment Tracker Stage",
     sql: `SELECT {dims}
   count(*) AS companies,
   count(*) FILTER (WHERE coalesce("Invested Amount",0)+coalesce("Invested Amount 2",0)+coalesce("Invested Amount 3",0) > 0) AS companies_with_investment,
-  sum(coalesce("Invested Amount",0)+coalesce("Invested Amount 2",0)+coalesce("Invested Amount 3",0)) AS invested_total
+  {agg}(coalesce("Invested Amount",0)+coalesce("Invested Amount 2",0)+coalesce("Invested Amount 3",0)) AS {agg}_invested
 FROM public.company_detail
 WHERE "Investment Tracker Stage" IS NOT NULL AND {where}
 {dimGroup}`,
@@ -345,7 +346,8 @@ WHERE "Investment Tracker Stage" IS NOT NULL AND {where}
   {
     id: "moic",
     label: "Portfolio multiple (MOIC)",
-    definition: "Portfolio value (most recent round valuation per company, same rule as the portfolio-value metric) divided by total invested (all rounds, NULLs as zero), over companies with an Investment Tracker Stage. Companies with zero invested are included in value but produce no ratio contribution denominator-side.",
+    category: "Investment economics",
+    definition: "Portfolio value (most recent round valuation per company, same rule as the portfolio-value metric) divided by total invested (all rounds, NULLs as zero), over companies with an Investment Tracker Stage. A ratio has one correct aggregation, so no statistic choice applies.",
     allowedDims: ["company_detail.venture_office", "company_detail.tracker_stage"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
@@ -372,21 +374,46 @@ LEFT JOIN LATERAL (
 WHERE cd."Investment Tracker Stage" IS NOT NULL AND {where}
 {dimGroup}`,
   },
-  // ── Office cost analytics ──
+
+  // ── Office costs ──
   {
-    id: "monthly_burn",
-    label: "Office cost burn",
-    definition: "Cost components (venture team services, IT team services, operating expenses, legal) and their total per office/month, NULLs as zero. Group by cost month for a time series.",
+    id: "legal_cost_total",
+    label: "Legal costs",
+    category: "Office costs",
+    definition: "venture_office_costs.legal_costs over the filtered month range, summarized by your chosen statistic (default: sum). Coverage is reported (months present, months carrying a legal value) so partial-year data cannot masquerade as a full-year total.",
     allowedDims: ["costs.venture_office", "costs.month"],
     roles: ["admin", "vo_leader"],
     officeScoped: true,
+    aggChoices: ["sum", "avg", "min", "max", "count"],
+    defaultAgg: "sum",
+    exclusions: "months with no cost row (reported via coverage counts)",
+    sql: `SELECT {dims}
+  {agg}(legal_costs) AS {agg}_legal,
+  count(*) AS cost_months,
+  count(*) FILTER (WHERE legal_costs IS NOT NULL) AS months_with_legal,
+  min(month) AS first_month,
+  max(month) AS last_month
+FROM public.venture_office_costs
+WHERE {where}
+{dimGroup}`,
+  },
+  {
+    id: "monthly_burn",
+    label: "Office cost burn",
+    category: "Office costs",
+    definition: "Cost components (venture team services, IT team services, operating expenses, legal, NULLs as zero) and their combined total, summarized by your chosen statistic (default: sum). Group by cost month for a time series; average with an office grouping gives mean monthly burn.",
+    allowedDims: ["costs.venture_office", "costs.month"],
+    roles: ["admin", "vo_leader"],
+    officeScoped: true,
+    aggChoices: ["sum", "avg", "min", "max"],
+    defaultAgg: "sum",
     exclusions: "months with no cost row simply have no data point",
     sql: `SELECT {dims}
-  sum(coalesce(venture_team_services_cost,0)) AS venture_team,
-  sum(coalesce(it_team_services_cost,0)) AS it_team,
-  sum(coalesce(operating_expenses,0)) AS operating,
-  sum(coalesce(legal_costs,0)) AS legal,
-  sum(coalesce(venture_team_services_cost,0)+coalesce(it_team_services_cost,0)+coalesce(operating_expenses,0)+coalesce(legal_costs,0)) AS total_cost
+  {agg}(coalesce(venture_team_services_cost,0)) AS venture_team,
+  {agg}(coalesce(it_team_services_cost,0)) AS it_team,
+  {agg}(coalesce(operating_expenses,0)) AS operating,
+  {agg}(coalesce(legal_costs,0)) AS legal,
+  {agg}(coalesce(venture_team_services_cost,0)+coalesce(it_team_services_cost,0)+coalesce(operating_expenses,0)+coalesce(legal_costs,0)) AS total_cost
 FROM public.venture_office_costs
 WHERE {where}
 {dimGroup}`,
@@ -394,7 +421,8 @@ WHERE {where}
   {
     id: "budget_vs_actual",
     label: "Budget vs actual by contract year",
-    definition: "Actual costs rolled up to contract years (year 1 starts at the office's initiation date) against venture_office_budgets. Mapping confirmed by Steve 2026-07-15: services actual = venture team + IT team services; operating actual = operating expenses + legal. Returns one row per office × contract year; offices/years without a budget row show null budgets. Filterable by office only.",
+    category: "Office costs",
+    definition: "Actual costs rolled up to contract years (year 1 starts at the office's initiation date) against venture_office_budgets. Mapping confirmed by Steve 2026-07-15: services actual = venture team + IT team services; operating actual = operating expenses + legal. Returns one row per office × contract year; offices/years without a budget row show null budgets. Filterable by office only; fixed statistics (variances are sums by construction).",
     allowedDims: [],
     roles: ["admin", "vo_leader"],
     officeScoped: true,
@@ -425,38 +453,22 @@ WHERE {where}
 WHERE {where}
 ORDER BY venture_office, contract_year`,
   },
-  {
-    id: "stage_dwell_days",
-    label: "Time in stage (dealflow)",
-    definition: "Average days a deal spends in each stage, from deal_stage_history. IMPORTANT: history capture began 2026-07-15 — the baseline was seeded at that moment and earlier dwell time is unknowable, so figures are provisional until several weeks of transitions accrue. Open (current) stage entries are measured to now; completed entries are also reported separately.",
-    allowedDims: ["history.stage"],
-    roles: DEALFLOW_ROLES,
-    officeScoped: true,
-    exclusions: "dwell time before 2026-07-15 (pre-history) is not represented",
-    sql: `SELECT {dims}
-  count(*) AS stage_entries,
-  count(*) FILTER (WHERE next_at IS NOT NULL) AS completed_entries,
-  round((avg(EXTRACT(epoch FROM (coalesce(next_at, now()) - changed_at)) / 86400))::numeric, 1) AS avg_days_in_stage,
-  round((avg(EXTRACT(epoch FROM (next_at - changed_at)) / 86400) FILTER (WHERE next_at IS NOT NULL))::numeric, 1) AS avg_days_completed_only
-FROM (
-  SELECT h.to_stage, h.changed_at,
-         lead(h.changed_at) OVER (PARTITION BY h.deal_id ORDER BY h.changed_at) AS next_at
-  FROM public.deal_stage_history h
-) x
-WHERE {where}
-{dimGroup}`,
-  },
+
+  // ── IT taskboard ──
   {
     id: "kanban_cycle_days",
     label: "Taskboard cycle time",
-    definition: "archived_at minus intake_date, calendar days, for archived cards with both dates.",
+    category: "IT taskboard",
+    definition: "archived_at minus intake_date, calendar days, for archived cards with both dates, summarized by your chosen statistic (default: average).",
     allowedDims: ["kanban.venture_office", "kanban.assignee", "kanban.board_column"],
     roles: ["admin", "user", "vo_leader", "technical"],
     officeScoped: true,
+    aggChoices: ["avg", "min", "max", "sum", "count"],
+    defaultAgg: "avg",
     exclusions: "unarchived cards; cards missing intake date",
     sql: `SELECT {dims}
   count(*) FILTER (WHERE archived AND intake_date IS NOT NULL) AS measurable,
-  round(avg(archived_at::date - intake_date) FILTER (WHERE archived AND intake_date IS NOT NULL), 1) AS avg_cycle_days
+  round(({agg}(archived_at::date - intake_date) FILTER (WHERE archived AND intake_date IS NOT NULL))::numeric, 1) AS {agg}_cycle_days
 FROM public.kanban_cards
 WHERE {where}
 {dimGroup}`,

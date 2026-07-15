@@ -83,6 +83,7 @@ check("Q3 compiles most-recent-valuation lateral with office filter", () => {
   const r = compile(q3, "admin");
   assert(r.sql.includes("ORDER BY r.d DESC NULLS LAST, r.i DESC"), "recency rule missing");
   assert(r.sql.includes("unvalued_companies"), "unvalued accounting missing");
+  assert(r.sql.includes("sum(x.v) AS sum_portfolio_value"), "default sum statistic missing");
   assert(r.sql.includes("venture_office = $1"), "office filter must be parameterized");
   assert(r.params[0] === "Healthliant Ventures", "param binding wrong");
   assert(r.sql.includes('"Investment Tracker Stage" IS NOT NULL'), "population rule missing");
@@ -103,7 +104,7 @@ const q4: ReportRequest = {
 
 check("Q4 compiles parameterized office + year-range filters with coverage columns", () => {
   const r = compile(q4, "admin");
-  assert(r.sql.includes("sum(legal_costs) AS legal_total"), "sum missing");
+  assert(r.sql.includes("sum(legal_costs) AS sum_legal"), "default sum statistic missing");
   assert(r.sql.includes("months_with_legal"), "coverage accounting missing");
   assert(r.sql.includes("venture_office = $1") && r.sql.includes("month >= $2") && r.sql.includes("month <= $3"), "filters must be parameterized");
   assert(r.params.length === 3 && r.params[0] === "Healthliant Ventures", "param binding wrong");
@@ -145,17 +146,34 @@ check("filter without value is rejected", () => {
   assert(errs.some(e => e.code === "missing_value"), "must require a value");
 });
 
-// ── Catalog-wide: every curated metric must compile, bare and per-dim ──────
-check(`all ${METRICS.length} curated metrics compile (bare + every allowed dimension)`, () => {
+// ── Catalog-wide: every curated metric must compile, bare, per-dim, per-agg ─
+check(`all ${METRICS.length} curated metrics compile (bare + every allowed dimension + every statistic)`, () => {
   for (const m of METRICS) {
     const role = m.roles[0];
     const bare = compile({ metric: m.id, dimensions: [], filters: [] }, role);
     assert(bare.sql.length > 0 && !bare.sql.includes("{"), `${m.id}: unresolved template placeholder`);
+    assert(m.category !== undefined, `${m.id}: missing category`);
     for (const d of m.allowedDims) {
       const withDim = compile({ metric: m.id, dimensions: [d], filters: [] }, role);
       assert(withDim.sql.includes("GROUP BY"), `${m.id} + ${d}: missing GROUP BY`);
     }
+    for (const a of m.aggChoices ?? []) {
+      const withAgg = compile({ metric: m.id, dimensions: [], filters: [], agg: a }, role);
+      assert(!withAgg.sql.includes("{"), `${m.id} + ${a}: unresolved placeholder`);
+      assert(withAgg.sql.includes(`${a}(`), `${m.id} + ${a}: statistic not applied in SQL`);
+      assert(withAgg.footer.definition.includes(`Statistic applied: ${a}`), `${m.id} + ${a}: footer must state the statistic`);
+    }
   }
+});
+
+check("statistic choice rejected on fixed-statistic metrics", () => {
+  const errs = validate({ metric: "moic", dimensions: [], filters: [], agg: "sum" } as ReportRequest, "admin");
+  assert(errs.some(e => e.code === "agg_not_supported"), "moic must reject agg choice");
+});
+
+check("invalid statistic for a metric rejected", () => {
+  const errs = validate({ metric: "portfolio_value", dimensions: [], filters: [], agg: "count" } as ReportRequest, "admin");
+  assert(errs.some(e => e.code === "invalid_agg"), "count is not a portfolio_value statistic");
 });
 
 // ── Pivot-style aggregate requests (Reporting page builder) ────────────────
