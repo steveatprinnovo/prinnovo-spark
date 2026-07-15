@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useUserAuth, AppRole } from "@/hooks/useUserAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -13,8 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { Sparkles, Play, Plus, X, Loader2 } from "lucide-react";
+import { Sparkles, Play, Plus, X, Loader2, Download } from "lucide-react";
+import { exportChartPng, exportChartPdf, exportRowsCsv, type LegendEntry } from "@/lib/chartExport";
 import {
   ResponsiveContainer, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, Tooltip as ChartTooltip, CartesianGrid, Legend,
@@ -208,6 +210,49 @@ export default function Reporting() {
     if (!rows || rows.length !== 1 || !lastRequest || (lastRequest.dimensions ?? []).length > 0) return null;
     return Object.entries(rows[0]).map(([k, v]) => ({ label: k.replace(/_/g, " "), value: v === null ? "—" : typeof v === "number" ? v.toLocaleString() : String(v) }));
   }, [rows, lastRequest]);
+
+  // ── Export ──
+  const chartAreaRef = useRef<HTMLDivElement>(null);
+  const canExportCsv = role === "admin" || role === "vo_leader";
+  const exportBase = mode === "metric" && selectedMetric ? selectedMetric.label : "custom-report";
+
+  const exportLegend = (): LegendEntry[] => {
+    if (!chart) return [];
+    if (["pie", "radialBar", "treemap"].includes(view) && singleSeries) {
+      const entries = view === "treemap" ? singleSeries.all : singleSeries.capped;
+      return entries.map((e, i) => ({ label: e.name, color: SERIES_COLORS[i % SERIES_COLORS.length] }));
+    }
+    return chart.seriesKeys.map((k, i) => ({ label: k.replace(/_/g, " "), color: SERIES_COLORS[i % SERIES_COLORS.length] }));
+  };
+
+  const findChartSvg = (): SVGSVGElement | null =>
+    chartAreaRef.current?.querySelector("svg") ?? null;
+
+  const handleExport = async (kind: "png" | "pdf" | "csv") => {
+    try {
+      if (kind === "csv") {
+        if (!rows || rows.length === 0) { toast.error("No rows to export"); return; }
+        exportRowsCsv(rows, exportBase);
+        return;
+      }
+      const svg = findChartSvg();
+      if (!svg) { toast.error("Render a chart first — table view has no chart to export"); return; }
+      if (kind === "png") {
+        await exportChartPng(svg, exportLegend(), exportBase);
+      } else {
+        await exportChartPdf(svg, exportLegend(), exportBase, {
+          title: exportBase,
+          definition: footer?.definition ?? "",
+          exclusions: footer?.exclusions ?? "",
+          roleNotes: footer?.roleNotes ?? [],
+          rowCount: rows?.length ?? 0,
+        });
+      }
+    } catch (e) {
+      console.error("Export failed:", e);
+      toast.error("Export failed");
+    }
+  };
 
   if (authzLoading) {
     return <div className="min-h-screen bg-background"><DashboardHeader /></div>;
@@ -414,15 +459,31 @@ export default function Reporting() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Results</CardTitle>
-                <div className="w-44">
-                  <Select value={view} onValueChange={v => setView(v as ViewType)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {(Object.keys(VIEW_LABELS) as ViewType[]).map(v => (
-                        <SelectItem key={v} value={v}>{VIEW_LABELS[v]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center gap-2">
+                  <div className="w-44">
+                    <Select value={view} onValueChange={v => setView(v as ViewType)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(VIEW_LABELS) as ViewType[]).map(v => (
+                          <SelectItem key={v} value={v}>{VIEW_LABELS[v]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Download className="h-4 w-4" /> Export
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleExport("png")}>PNG (high resolution)</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport("pdf")}>PDF</DropdownMenuItem>
+                      {canExportCsv && (
+                        <DropdownMenuItem onClick={() => handleExport("csv")}>CSV (underlying data)</DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </CardHeader>
@@ -439,7 +500,7 @@ export default function Reporting() {
               )}
 
               {view !== "table" && chart && (
-                <div className="h-80 w-full">
+                <div className="h-80 w-full" ref={chartAreaRef}>
                   <ResponsiveContainer width="100%" height="100%">
                     {view === "bar" ? (
                       <BarChart data={chart.data}>
