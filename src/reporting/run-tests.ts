@@ -43,11 +43,12 @@ check("Q1 denied to technical role", () => {
   assert(errs.some(e => e.code === "metric_forbidden"), "technical must be denied");
 });
 
-// ── Regression 2: external affiliate equity count + share by office ───────
-// Live values 2026-07-15 (admin, all offices): HLV 3/11 = 27.3%, NGHV 0/10,
-// SVHV 0/2, CHV 0 adjudicated + 9 unadjudicated; total 3/23 = 13.0%.
-// TRUE set: Robbie AI, Kent Imaging, Steadywell. Strict-equity reading:
-// Gradient Health (credits) and Ansana (transfer-only) = false.
+// ── Regression 2: external affiliate economics count + share by office ────
+// Definition = ANY external economics (broadened 2026-07-15 per Steve).
+// Live values 2026-07-15: HLV 4/11 = 36.4%, NGHV 0/10, SVHV 1/2 = 50.0%,
+// CHV 0 adjudicated + 9 unadjudicated; total 5/23 = 21.7%.
+// TRUE set: Robbie AI, Kent Imaging, Steadywell (warrants), Gradient Health
+// (Phase II revenue credits), Ansana (holder-affiliate transfer rights).
 const q2: ReportRequest = {
   metric: "external_equity_share",
   dimensions: ["deals.venture_office"],
@@ -84,6 +85,37 @@ check("Q3 compiles most-recent-valuation lateral with office filter", () => {
   assert(r.sql.includes("venture_office = $1"), "office filter must be parameterized");
   assert(r.params[0] === "Healthliant Ventures", "param binding wrong");
   assert(r.sql.includes('"Investment Tracker Stage" IS NOT NULL'), "population rule missing");
+});
+
+// ── Regression 4: total HLV legal costs, calendar year 2024 ────────────────
+// Live value 2026-07-15: $65,987.00 — 12 of 12 months present (Jan–Dec 2024),
+// all 12 carrying a legal_costs value (full-year coverage).
+const q4: ReportRequest = {
+  metric: "legal_cost_total",
+  dimensions: [],
+  filters: [
+    { field: "costs.venture_office", op: "eq", value: "Healthliant Ventures" },
+    { field: "costs.month", op: "gte", value: "2024-01-01" },
+    { field: "costs.month", op: "lte", value: "2024-12-31" },
+  ],
+};
+
+check("Q4 compiles parameterized office + year-range filters with coverage columns", () => {
+  const r = compile(q4, "admin");
+  assert(r.sql.includes("sum(legal_costs) AS legal_total"), "sum missing");
+  assert(r.sql.includes("months_with_legal"), "coverage accounting missing");
+  assert(r.sql.includes("venture_office = $1") && r.sql.includes("month >= $2") && r.sql.includes("month <= $3"), "filters must be parameterized");
+  assert(r.params.length === 3 && r.params[0] === "Healthliant Ventures", "param binding wrong");
+});
+
+check("Q4 available to VO leaders (own office via RLS) with scope note", () => {
+  const r = compile(q4, "vo_leader");
+  assert(r.footer.roleNotes.some(n => n.includes("your venture office only")), "office-scope note required");
+});
+
+check("Q4 denied to base users (costs are admin + VO leader only)", () => {
+  const errs = validate(q4, "user");
+  assert(errs.some(e => e.code === "metric_forbidden" || e.code === "field_forbidden"), "base user must be denied");
 });
 
 // ── Validator behavior ─────────────────────────────────────────────────────

@@ -114,8 +114,8 @@ WHERE {where}
   },
   {
     id: "external_equity_share",
-    label: "Deals granting equity to other affiliate health systems",
-    definition: "Count and share of executed-IPA deals whose provisions let OTHER Prinnovo affiliates earn or receive equity (warrants/shares), per deals.external_equity. Strict-equity reading: revenue credits (Gradient Health) and holder-affiliate transfer rights (Ansana) do not count. Denominator = adjudicated deals (external_equity not null); unadjudicated deals (Cone register-sourced pending source docs) are reported separately, never silently included.",
+    label: "Deals granting external economics to other affiliate health systems",
+    definition: "Count and share of executed-IPA deals whose provisions grant OTHER Prinnovo affiliates ANY external economics — equity (warrants/shares), revenue credits, or affiliate transfer rights — per deals.external_equity (definition broadened 2026-07-15 per Steve; includes Gradient Health credits and Ansana transfer rights). Denominator = adjudicated deals (external_equity not null); unadjudicated deals (Cone register-sourced pending source docs) are reported separately, never silently included.",
     allowedDims: ["deals.venture_office", "deals.ipa_structure", "deals.assigned_to"],
     roles: DEALFLOW_ROLES,
     officeScoped: true,
@@ -167,6 +167,24 @@ WHERE cd."Investment Tracker Stage" IS NOT NULL AND {where}
     sql: `SELECT {dims}
   count(*) AS deals
 FROM public.deals
+WHERE {where}
+{dimGroup}`,
+  },
+  {
+    id: "legal_cost_total",
+    label: "Total legal costs",
+    definition: "Sum of venture_office_costs.legal_costs over the filtered month range. Coverage is reported (months present, months carrying a legal value) so partial-year data cannot masquerade as a full-year total.",
+    allowedDims: ["costs.venture_office"],
+    roles: ["admin", "vo_leader"],
+    officeScoped: true,
+    exclusions: "months with no cost row (reported via coverage counts)",
+    sql: `SELECT {dims}
+  sum(legal_costs) AS legal_total,
+  count(*) AS cost_months,
+  count(*) FILTER (WHERE legal_costs IS NOT NULL) AS months_with_legal,
+  min(month) AS first_month,
+  max(month) AS last_month
+FROM public.venture_office_costs
 WHERE {where}
 {dimGroup}`,
   },
