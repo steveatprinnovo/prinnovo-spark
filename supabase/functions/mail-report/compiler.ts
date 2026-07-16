@@ -217,12 +217,22 @@ export function compile(rawReq: ReportRequest, role: Role): CompiledReport {
   return isMetricRequest(req) ? compileMetric(req, role) : compileAggregate(req, role);
 }
 
+/** Select-list / GROUP BY fragments for dimensions; derived (expression)
+ *  fields carry an alias so result columns stay readable and unambiguous. */
+function dimFragments(dimensions: string[]): { dims: string; dimGroup: string } {
+  const fields = dimensions.map(d => fieldById.get(d)!);
+  const select = fields.map(f => (f.alias ? `${f.column} AS ${f.alias}` : f.column));
+  const group = fields.map(f => f.alias ?? f.column);
+  return {
+    dims: select.length > 0 ? select.join(", ") + "," : "",
+    dimGroup: group.length > 0 ? `GROUP BY ${group.join(", ")}\nORDER BY ${group.join(", ")}` : "",
+  };
+}
+
 function compileMetric(req: MetricRequest, role: Role): CompiledReport {
   const metric = metricById.get(req.metric)!;
 
-  const dimCols = req.dimensions.map(d => fieldById.get(d)!.column);
-  const dims = dimCols.length > 0 ? dimCols.join(", ") + "," : "";
-  const dimGroup = dimCols.length > 0 ? `GROUP BY ${dimCols.join(", ")}\nORDER BY ${dimCols.join(", ")}` : "";
+  const { dims, dimGroup } = dimFragments(req.dimensions);
 
   const { where, params } = compileFilters(req.filters);
 
@@ -262,7 +272,9 @@ function compileAggregate(req: AggregateRequest, role: Role): CompiledReport {
     ...req.dimensions.map(d => fieldById.get(d)!),
   ].some(f => f.officeScoped);
 
-  const dimCols = req.dimensions.map(d => fieldById.get(d)!.column);
+  const dimFields = req.dimensions.map(d => fieldById.get(d)!);
+  const dimCols = dimFields.map(f => (f.alias ? `${f.column} AS ${f.alias}` : f.column));
+  const groupCols = dimFields.map(f => f.alias ?? f.column);
   const measureCols = req.measures.map(m => {
     const f = fieldById.get(m.field)!;
     return `${m.agg}(${f.column}) AS ${aggAlias(f, m.agg)}`;
@@ -271,7 +283,7 @@ function compileAggregate(req: AggregateRequest, role: Role): CompiledReport {
   const { where, params } = compileFilters(req.filters);
 
   const select = [...dimCols, ...measureCols].join(",\n  ");
-  const group = dimCols.length > 0 ? `GROUP BY ${dimCols.join(", ")}\nORDER BY ${dimCols.join(", ")}` : "";
+  const group = groupCols.length > 0 ? `GROUP BY ${groupCols.join(", ")}\nORDER BY ${groupCols.join(", ")}` : "";
   const sql = `SELECT ${select}\nFROM public.${table}\nWHERE ${where}\n${group}\nLIMIT 1000`.trim();
 
   const measureText = req.measures

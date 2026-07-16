@@ -141,6 +141,36 @@ check("technical role may use kanban metric", () => {
   assert(errs.length === 0, "kanban is technical's one reporting surface");
 });
 
+// ── Time-cut dimensions: year / quarter / month-of-year (Steve, 2026-07-16) ─
+check("Steve's legal question compiles: sum legal by year for April–June", () => {
+  const r = compile({
+    metric: "legal_cost_total",
+    dimensions: ["costs.year"],
+    filters: [{ field: "costs.month_of_year", op: "in", value: [4, 5, 6] }],
+    agg: "sum",
+  } as ReportRequest, "admin");
+  assert(r.sql.includes("(EXTRACT(YEAR FROM month))::int AS cost_year"), "derived year dim must be aliased");
+  assert(r.sql.includes("GROUP BY cost_year"), "must group by the alias");
+  assert(r.sql.includes("(EXTRACT(MONTH FROM month))::int IN ($1, $2, $3)"), "month-of-year IN filter must be parameterized");
+  assert(JSON.stringify(r.params) === "[4,5,6]", "params must carry the month numbers");
+});
+
+check("interval metric groups by IPA signature quarter", () => {
+  const r = compile({ metric: "ts_to_ipa_days", dimensions: ["company_detail.ipa_signed_quarter"], filters: [] } as ReportRequest, "admin");
+  assert(r.sql.includes("AS ipa_signed_quarter"), "quarter alias missing");
+  assert(r.sql.includes("GROUP BY ipa_signed_quarter"), "quarter grouping missing");
+});
+
+check("pivot request with derived time dimension aliases correctly", () => {
+  const r = compile({
+    measures: [{ field: "deals.company_name", agg: "count" }],
+    dimensions: ["deals.received_year"],
+    filters: [],
+  } as AggregateRequest, "admin");
+  assert(r.sql.includes("(EXTRACT(YEAR FROM date_received))::int AS received_year"), "pivot derived dim must alias");
+  assert(r.sql.includes("GROUP BY received_year"), "pivot must group by alias");
+});
+
 check("requests missing dimensions/filters arrays compile (NL models omit empties)", () => {
   const r = compile({ metric: "ts_to_ipa_days", dimensions: ["company_detail.venture_office"] } as unknown as ReportRequest, "admin");
   assert(r.sql.includes("WHERE true"), "missing filters must compile as unfiltered");

@@ -34,8 +34,10 @@ export const METRIC_CATEGORIES: MetricCategory[] = [
 export interface CatalogField {
   id: string;
   table: string;
-  /** Quoted SQL identifier, exactly as the column exists. */
+  /** Quoted SQL identifier, or a SQL expression for derived fields. */
   column: string;
+  /** Result-column alias, REQUIRED when column is an expression. */
+  alias?: string;
   label: string;
   type: FieldType;
   tab: string;
@@ -94,6 +96,10 @@ export const FIELDS: CatalogField[] = [
   { id: "deals.external_equity", table: "deals", column: "external_equity", label: "External affiliate equity", type: "boolean", tab: "Deal detail", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count"] },
   { id: "deals.source", table: "deals", column: "source", label: "Deal source", type: "text", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count"] },
   { id: "deals.employee_count", table: "deals", column: "employee_count", label: "Employee count", type: "numeric", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["avg", "min", "max", "sum", "count"] },
+  // Derived time cuts over date_received
+  { id: "deals.received_year", table: "deals", column: "(EXTRACT(YEAR FROM date_received))::int", alias: "received_year", label: "Year received", type: "numeric", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count", "min", "max"] },
+  { id: "deals.received_quarter", table: "deals", column: "to_char(date_received, 'YYYY-\"Q\"Q')", alias: "received_quarter", label: "Quarter received (e.g. 2025-Q2)", type: "text", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count"] },
+  { id: "deals.received_month_of_year", table: "deals", column: "(EXTRACT(MONTH FROM date_received))::int", alias: "received_month_of_year", label: "Month of year received (1-12)", type: "numeric", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count", "min", "max"] },
 
   // ── Portfolio / company detail — all-office read for Dealflow roles ──
   { id: "company_detail.company_name", table: "company_detail", column: "\"Company Name\"", label: "Portfolio company", type: "text", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count"] },
@@ -108,6 +114,13 @@ export const FIELDS: CatalogField[] = [
   { id: "company_detail.ipa_year", table: "company_detail", column: "\"IPA Year\"", label: "IPA year", type: "numeric", tab: "Projections", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count", "min", "max"] },
   { id: "company_detail.focus_area", table: "company_detail", column: "\"High-Level Focus Area\"", label: "High-level focus area", type: "text", tab: "Projections", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count"] },
   { id: "company_detail.country", table: "company_detail", column: "\"Country of Origin\"", label: "Country of origin", type: "text", tab: "Home", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count"] },
+  // Derived time cuts over signature dates
+  { id: "company_detail.ts_signed_year", table: "company_detail", column: "(EXTRACT(YEAR FROM \"Term Sheet Signature Date\"))::int", alias: "ts_signed_year", label: "Term sheet year", type: "numeric", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count", "min", "max"] },
+  { id: "company_detail.ts_signed_quarter", table: "company_detail", column: "to_char(\"Term Sheet Signature Date\", 'YYYY-\"Q\"Q')", alias: "ts_signed_quarter", label: "Term sheet quarter", type: "text", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count"] },
+  { id: "company_detail.ts_signed_month_of_year", table: "company_detail", column: "(EXTRACT(MONTH FROM \"Term Sheet Signature Date\"))::int", alias: "ts_signed_month_of_year", label: "Term sheet month of year (1-12)", type: "numeric", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count", "min", "max"] },
+  { id: "company_detail.ipa_signed_year", table: "company_detail", column: "(EXTRACT(YEAR FROM \"IPA Signature Date\"))::int", alias: "ipa_signed_year", label: "IPA signature year", type: "numeric", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count", "min", "max"] },
+  { id: "company_detail.ipa_signed_quarter", table: "company_detail", column: "to_char(\"IPA Signature Date\", 'YYYY-\"Q\"Q')", alias: "ipa_signed_quarter", label: "IPA signature quarter", type: "text", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count"] },
+  { id: "company_detail.ipa_signed_month_of_year", table: "company_detail", column: "(EXTRACT(MONTH FROM \"IPA Signature Date\"))::int", alias: "ipa_signed_month_of_year", label: "IPA signature month of year (1-12)", type: "numeric", tab: "Implementations", roles: DEALFLOW_ROLES, officeScoped: false, aggs: ["count", "min", "max"] },
 
   // ── Office financials — costs admin + vo_leader(own office) ──
   { id: "costs.venture_office", table: "venture_office_costs", column: "venture_office", label: "Venture office", type: "text", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["count"] },
@@ -116,6 +129,10 @@ export const FIELDS: CatalogField[] = [
   { id: "costs.it_team", table: "venture_office_costs", column: "it_team_services_cost", label: "IT team services cost", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["sum", "avg", "count"] },
   { id: "costs.operating", table: "venture_office_costs", column: "operating_expenses", label: "Operating expenses", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["sum", "avg", "count"] },
   { id: "costs.legal", table: "venture_office_costs", column: "legal_costs", label: "Legal costs", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["sum", "avg", "count"] },
+  // Derived time cuts (expression-backed) over the cost month
+  { id: "costs.year", table: "venture_office_costs", column: "(EXTRACT(YEAR FROM month))::int", alias: "cost_year", label: "Cost year", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["count", "min", "max"] },
+  { id: "costs.quarter", table: "venture_office_costs", column: "to_char(month, 'YYYY-\"Q\"Q')", alias: "cost_quarter", label: "Cost quarter (e.g. 2025-Q2)", type: "text", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["count"] },
+  { id: "costs.month_of_year", table: "venture_office_costs", column: "(EXTRACT(MONTH FROM month))::int", alias: "cost_month_of_year", label: "Cost month of year (1-12)", type: "numeric", tab: "Projections·Costs", roles: ["admin", "vo_leader"], officeScoped: true, aggs: ["count", "min", "max"] },
 
   // ── Stage history (capture began 2026-07-15) ──
   { id: "history.stage", table: "deal_stage_history", column: "to_stage", label: "Stage (history)", type: "text", tab: "Dealflow", roles: DEALFLOW_ROLES, officeScoped: true, aggs: ["count"] },
@@ -126,6 +143,10 @@ export const FIELDS: CatalogField[] = [
   { id: "kanban.venture_office", table: "kanban_cards", column: "venture_office", label: "Venture office", type: "text", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["count"] },
   { id: "kanban.intake_date", table: "kanban_cards", column: "intake_date", label: "Intake date", type: "date", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["min", "max", "count"] },
   { id: "kanban.due", table: "kanban_cards", column: "due", label: "Due date", type: "date", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["min", "max", "count"] },
+  // Derived time cuts over intake_date
+  { id: "kanban.intake_year", table: "kanban_cards", column: "(EXTRACT(YEAR FROM intake_date))::int", alias: "intake_year", label: "Intake year", type: "numeric", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["count", "min", "max"] },
+  { id: "kanban.intake_quarter", table: "kanban_cards", column: "to_char(intake_date, 'YYYY-\"Q\"Q')", alias: "intake_quarter", label: "Intake quarter", type: "text", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["count"] },
+  { id: "kanban.intake_month_of_year", table: "kanban_cards", column: "(EXTRACT(MONTH FROM intake_date))::int", alias: "intake_month_of_year", label: "Intake month of year (1-12)", type: "numeric", tab: "Taskboard", roles: ["admin", "user", "vo_leader", "technical"], officeScoped: true, aggs: ["count", "min", "max"] },
 ];
 
 /** Shared shape for the four milestone-interval metrics. */
@@ -137,7 +158,7 @@ function intervalMetric(id: string, label: string, fromCol: string, toCol: strin
     label,
     category: "Milestone intervals",
     definition: `${toName} minus ${fromName}, calendar days, summarized by your chosen statistic (default: average). Companies missing either date are excluded; negative intervals are flagged, not dropped.`,
-    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area", "company_detail.ipa_year"],
+    allowedDims: ["company_detail.venture_office", "company_detail.pipeline_stage", "company_detail.focus_area", "company_detail.ipa_year", "company_detail.ipa_signed_year", "company_detail.ipa_signed_quarter", "company_detail.ipa_signed_month_of_year", "company_detail.ts_signed_year", "company_detail.ts_signed_quarter", "company_detail.ts_signed_month_of_year"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
     aggChoices: ["avg", "min", "max", "sum", "count"],
@@ -168,7 +189,7 @@ export const METRICS: DerivedMetric[] = [
     label: "Implementation milestone funnel",
     category: "Pipeline & funnel",
     definition: "Of portfolio companies, how many have reached each dated milestone: term sheet signed, IPA signed, implementation complete, final portfolio decision. A company counts for a milestone when that date is populated.",
-    allowedDims: ["company_detail.venture_office", "company_detail.focus_area", "company_detail.ipa_year"],
+    allowedDims: ["company_detail.venture_office", "company_detail.focus_area", "company_detail.ipa_year", "company_detail.ipa_signed_year", "company_detail.ipa_signed_quarter", "company_detail.ts_signed_year", "company_detail.ts_signed_quarter"],
     roles: DEALFLOW_ROLES,
     officeScoped: false,
     chartColumns: ["term_sheet_signed", "ipa_signed", "implementation_complete", "portfolio_decision_made"],
@@ -188,7 +209,7 @@ WHERE {where}
     label: "Deal count by stage",
     category: "Pipeline & funnel",
     definition: "Count of deals grouped by pipeline stage (office-scoped for non-admins).",
-    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
+    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source", "deals.received_year", "deals.received_quarter", "deals.received_month_of_year"],
     roles: DEALFLOW_ROLES,
     officeScoped: true,
     chartColumns: ["deals"],
@@ -231,7 +252,7 @@ WHERE {where}
     label: "Deal age (days since received)",
     category: "Dealflow timing",
     definition: "Days from date_received to today, per deal, summarized by your chosen statistic (default: average); the median is always reported alongside. Deals with no received date are excluded.",
-    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source"],
+    allowedDims: ["deals.stage", "deals.venture_office", "deals.status", "deals.assigned_to", "deals.source", "deals.received_year", "deals.received_quarter", "deals.received_month_of_year"],
     roles: DEALFLOW_ROLES,
     officeScoped: true,
     aggChoices: ["avg", "min", "max", "sum", "count"],
@@ -397,7 +418,7 @@ WHERE cd."Investment Tracker Stage" IS NOT NULL AND {where}
     label: "Legal costs",
     category: "Office costs",
     definition: "venture_office_costs.legal_costs over the filtered month range, summarized by your chosen statistic (default: sum). Coverage is reported (months present, months carrying a legal value) so partial-year data cannot masquerade as a full-year total.",
-    allowedDims: ["costs.venture_office", "costs.month"],
+    allowedDims: ["costs.venture_office", "costs.month", "costs.year", "costs.quarter", "costs.month_of_year"],
     roles: ["admin", "vo_leader"],
     officeScoped: true,
     aggChoices: ["sum", "avg", "min", "max", "count"],
@@ -419,7 +440,7 @@ WHERE {where}
     label: "Office cost burn",
     category: "Office costs",
     definition: "Cost components (venture team services, IT team services, operating expenses, legal, NULLs as zero) and their combined total, summarized by your chosen statistic (default: sum). Group by cost month for a time series; average with an office grouping gives mean monthly burn.",
-    allowedDims: ["costs.venture_office", "costs.month"],
+    allowedDims: ["costs.venture_office", "costs.month", "costs.year", "costs.quarter", "costs.month_of_year"],
     roles: ["admin", "vo_leader"],
     officeScoped: true,
     aggChoices: ["sum", "avg", "min", "max"],
@@ -479,7 +500,7 @@ ORDER BY venture_office, contract_year`,
     label: "Taskboard cycle time",
     category: "IT taskboard",
     definition: "archived_at minus intake_date, calendar days, for archived cards with both dates, summarized by your chosen statistic (default: average).",
-    allowedDims: ["kanban.venture_office", "kanban.assignee", "kanban.board_column"],
+    allowedDims: ["kanban.venture_office", "kanban.assignee", "kanban.board_column", "kanban.intake_year", "kanban.intake_quarter", "kanban.intake_month_of_year"],
     roles: ["admin", "user", "vo_leader", "technical"],
     officeScoped: true,
     aggChoices: ["avg", "min", "max", "sum", "count"],

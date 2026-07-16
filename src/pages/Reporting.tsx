@@ -47,10 +47,12 @@ function visibleFields(role: AppRole | null): CatalogField[] {
   return FIELDS.filter(f => f.roles.includes(role));
 }
 
-/** Column key the server returns for a dimension (unquoted identifier). */
+/** Column key the server returns for a dimension: the alias for derived
+ *  (expression) fields, otherwise the unquoted identifier. */
 function dimKey(fieldId: string): string {
-  const col = fieldById.get(fieldId)?.column ?? fieldId;
-  return col.replace(/"/g, "");
+  const f = fieldById.get(fieldId);
+  if (f?.alias) return f.alias;
+  return (f?.column ?? fieldId).replace(/"/g, "");
 }
 
 export default function Reporting() {
