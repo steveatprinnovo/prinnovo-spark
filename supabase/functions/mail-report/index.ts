@@ -156,7 +156,11 @@ Deno.serve(async (req: Request) => {
     return new Response("ignored", { status: 200 });
   }
 
-  const sender = extractEmail(String((message.from_ as string[] | undefined)?.[0] ?? ""));
+  // AgentMail delivers from_ as a string in live webhooks (docs show an
+  // array); handle both, plus a plain `from` fallback.
+  const fromField = (message.from_ ?? (message as Record<string, unknown>).from) as string[] | string | undefined;
+  const fromRaw = Array.isArray(fromField) ? (fromField[0] ?? "") : (fromField ?? "");
+  const sender = extractEmail(String(fromRaw));
   const subject = String(message.subject ?? "").trim();
   const bodyText = cleanBody(String(message.text ?? message.preview ?? ""));
   const question = [subject.replace(/^(re|fwd?):\s*/i, ""), bodyText].filter(Boolean).join("\n").trim();
