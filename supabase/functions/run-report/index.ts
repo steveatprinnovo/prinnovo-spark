@@ -112,7 +112,7 @@ Deno.serve(async (req: Request) => {
       return await tx.unsafe(compiled.sql, compiled.params as never[]);
     });
 
-    return json(200, { rows, footer: compiled.footer, request, rowCount: rows.length });
+    return json(200, { rows, footer: compiled.footer, request, chartKeys: compiled.chartKeys, rowCount: rows.length });
   } catch (e) {
     if (e instanceof HttpError) return json(e.status, { error: e.message });
     console.error("run-report error:", e);

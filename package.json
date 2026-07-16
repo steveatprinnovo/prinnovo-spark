@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:reporting": "node --experimental-strip-types src/reporting/run-tests.ts",
-    "sync:report-fn": "cp src/reporting/catalog.ts src/reporting/compiler.ts supabase/functions/run-report/"
+    "sync:report-fn": "cp src/reporting/catalog.ts src/reporting/compiler.ts supabase/functions/run-report/ && cp src/reporting/catalog.ts src/reporting/compiler.ts supabase/functions/mail-report/"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

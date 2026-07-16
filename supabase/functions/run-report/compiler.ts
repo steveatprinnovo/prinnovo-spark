@@ -68,7 +68,13 @@ function nearest(id: string, candidates: string[]): string | undefined {
   return bestScore >= 3 ? best : undefined;
 }
 
-export function validate(req: ReportRequest, role: Role): ValidationError[] {
+/** NL models may omit empty arrays; treat missing dimensions/filters as empty. */
+function normalized<T extends ReportRequest>(req: T): T {
+  return { ...req, dimensions: req.dimensions ?? [], filters: req.filters ?? [] };
+}
+
+export function validate(rawReq: ReportRequest, role: Role): ValidationError[] {
+  const req = normalized(rawReq);
   return isMetricRequest(req) ? validateMetric(req, role) : validateAggregate(req, role);
 }
 
@@ -202,7 +208,8 @@ function officeScopeNote(officeScoped: boolean, role: Role): string[] {
     : [];
 }
 
-export function compile(req: ReportRequest, role: Role): CompiledReport {
+export function compile(rawReq: ReportRequest, role: Role): CompiledReport {
+  const req = normalized(rawReq);
   const errors = validate(req, role);
   if (errors.length > 0) {
     throw new ReportValidationError(errors);

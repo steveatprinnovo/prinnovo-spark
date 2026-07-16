@@ -141,6 +141,13 @@ check("technical role may use kanban metric", () => {
   assert(errs.length === 0, "kanban is technical's one reporting surface");
 });
 
+check("requests missing dimensions/filters arrays compile (NL models omit empties)", () => {
+  const r = compile({ metric: "ts_to_ipa_days", dimensions: ["company_detail.venture_office"] } as unknown as ReportRequest, "admin");
+  assert(r.sql.includes("WHERE true"), "missing filters must compile as unfiltered");
+  const r2 = compile({ metric: "portfolio_value" } as unknown as ReportRequest, "admin");
+  assert(!r2.sql.includes("GROUP BY"), "missing dimensions must compile bare");
+});
+
 check("filter without value is rejected", () => {
   const errs = validate({ metric: "stage_count", dimensions: ["deals.stage"], filters: [{ field: "deals.status", op: "eq" }] }, "admin");
   assert(errs.some(e => e.code === "missing_value"), "must require a value");
