@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RoleGate } from "./components/RoleGate";
+import { AppShell } from "./components/layout/AppShell";
 import Index from "./pages/Index";
 
 // Route-level code splitting: each page loads on demand so the initial
@@ -14,6 +15,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Implementations = lazy(() => import("./pages/Implementations"));
 const Investments = lazy(() => import("./pages/Investments"));
 const Projections = lazy(() => import("./pages/Projections"));
+const CostProjections = lazy(() => import("./pages/CostProjections"));
 const FocusAreas = lazy(() => import("./pages/FocusAreas"));
 const BoardMode = lazy(() => import("./pages/BoardMode"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -40,22 +42,27 @@ const App = () => (
     <BrowserRouter>
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-          {/* Role access per RBAC design (2026-07-14): technical users are
-              limited to Taskboard + Implementations; all other roles keep
-              their pages. RLS enforces the same matrix server-side. */}
-          <Route path="/" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Index /></RoleGate>} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/implementations" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Implementations /></RoleGate>} />
-          <Route path="/investments" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Investments /></RoleGate>} />
-          <Route path="/projections" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Projections /></RoleGate>} />
-          <Route path="/focus-areas" element={<RoleGate allow={["admin", "user", "vo_leader"]}><FocusAreas /></RoleGate>} />
-          <Route path="/board-mode" element={<RoleGate allow={["admin", "user", "vo_leader"]}><BoardMode /></RoleGate>} />
-          <Route path="/settings" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Settings /></RoleGate>} />
-          <Route path="/dealflow" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Dealflow /></RoleGate>} />
-          <Route path="/dealflow/:id" element={<RoleGate allow={["admin", "user", "vo_leader"]}><DealDetail /></RoleGate>} />
-          <Route path="/taskboard" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
-          <Route path="/taskboard/archive" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
-          <Route path="/reporting" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Reporting /></RoleGate>} />
+          {/* Authenticated app shell (sidebar layout, UX redesign 2026-07-18).
+              Role access per RBAC design (2026-07-14): technical users are
+              limited to Taskboard + Implementations + Reporting; Cost
+              Projections is admin + VO leader. RLS enforces the same matrix
+              server-side. */}
+          <Route element={<AppShell />}>
+            <Route path="/" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Index /></RoleGate>} />
+            <Route path="/implementations" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Implementations /></RoleGate>} />
+            <Route path="/investments" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Investments /></RoleGate>} />
+            <Route path="/projections" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Projections /></RoleGate>} />
+            <Route path="/costs" element={<RoleGate allow={["admin", "vo_leader"]}><CostProjections /></RoleGate>} />
+            <Route path="/focus-areas" element={<RoleGate allow={["admin", "user", "vo_leader"]}><FocusAreas /></RoleGate>} />
+            <Route path="/board-mode" element={<RoleGate allow={["admin", "user", "vo_leader"]}><BoardMode /></RoleGate>} />
+            <Route path="/settings" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Settings /></RoleGate>} />
+            <Route path="/dealflow" element={<RoleGate allow={["admin", "user", "vo_leader"]}><Dealflow /></RoleGate>} />
+            <Route path="/dealflow/:id" element={<RoleGate allow={["admin", "user", "vo_leader"]}><DealDetail /></RoleGate>} />
+            <Route path="/taskboard" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
+            <Route path="/taskboard/archive" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Taskboard /></RoleGate>} />
+            <Route path="/reporting" element={<RoleGate allow={["admin", "user", "vo_leader", "technical"]}><Reporting /></RoleGate>} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

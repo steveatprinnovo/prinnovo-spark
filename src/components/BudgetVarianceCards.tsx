@@ -1,6 +1,11 @@
 import { useMemo, useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+
+/** Variance-card accent colors (UX redesign 2026-07-18):
+ *  services teal / operating periwinkle / total navy. */
+const ACCENT_SERVICES = "#0299aa";
+const ACCENT_OPERATING = "#9295bc";
+const ACCENT_TOTAL = "#171d70";
 
 interface BudgetVarianceCardsProps {
   selectedVentureOffice: string;
@@ -34,50 +39,44 @@ const renderVarianceCard = (
   budgetValue: number,
   actualValue: number,
   variance: number,
-  colorClass: string
+  accentColor: string
 ) => {
   // Positive variance = under budget (good/green), Negative variance = over budget (bad/red)
   const isOverBudget = variance < 0;
-  const varianceColorClass = isOverBudget ? "text-destructive font-bold" : "text-green-600 dark:text-green-400 font-bold";
-  
+
   return (
-    <Card className={`bg-card/50 border ${colorClass}`}>
-      <CardContent className="p-4">
-        <h4 className="text-xs font-semibold text-foreground mb-3">{title}</h4>
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-muted-foreground">Budget:</span>
-            <span className="font-medium">{formatCurrency(budgetValue)}</span>
-          </div>
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-muted-foreground">Actual:</span>
-            <span className="font-medium">{formatCurrency(actualValue)}</span>
-          </div>
-          <div className="border-t border-border pt-1.5 mt-1.5">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground">Variance:</span>
-              <span className={varianceColorClass}>
-                {variance >= 0 ? '+' : ''}{formatCurrency(variance)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-lg border border-[#e2e3ec] bg-white px-[18px] py-4"
+      style={{ borderTop: `3px solid ${accentColor}` }}
+    >
+      <h4 className="mb-[11px] text-xs font-bold text-[#171d70]">{title}</h4>
+      <div className="flex items-center justify-between py-0.5 text-[12.5px] text-[#5c6178]">
+        <span>Budget</span>
+        <span className="font-semibold text-[#232842]">{formatCurrency(budgetValue)}</span>
+      </div>
+      <div className="flex items-center justify-between py-0.5 text-[12.5px] text-[#5c6178]">
+        <span>Actual</span>
+        <span className="font-semibold text-[#232842]">{formatCurrency(actualValue)}</span>
+      </div>
+      <div className="mt-[7px] flex items-center justify-between border-t border-[#f0f1f6] pt-[7px] text-[12.5px] text-[#5c6178]">
+        <span>Variance</span>
+        <span className={`font-bold ${isOverBudget ? "text-[#b3413f]" : "text-[#2e7d5b]"}`}>
+          {variance >= 0 ? '+' : ''}{formatCurrency(variance)}
+        </span>
+      </div>
+    </div>
   );
 };
 
 const LoadingCards = () => (
   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
     {[1, 2, 3].map(i => (
-      <Card key={i} className="bg-card/50">
-        <CardContent className="p-4">
-          <div className="animate-pulse space-y-2">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-6 bg-muted rounded w-1/2"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div key={i} className="rounded-lg border border-[#e2e3ec] bg-white px-[18px] py-4">
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-3/4 rounded bg-[#f3f4f8]"></div>
+          <div className="h-6 w-1/2 rounded bg-[#f3f4f8]"></div>
+        </div>
+      </div>
     ))}
   </div>
 );

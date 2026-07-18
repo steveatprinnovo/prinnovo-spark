@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { useUserAuth, AppRole } from "@/hooks/useUserAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +36,8 @@ const VIEW_LABELS: Record<ViewType, string> = {
   table: "Table",
 };
 
-const SERIES_COLORS = ["#2a78d6", "#1baf7a", "#eda100", "#008300", "#4a3aa7", "#e34948", "#e87ba4", "#eb6834"];
+/** Brand palette (UX redesign 2026-07-18). */
+const SERIES_COLORS = ["#171d70", "#0299aa", "#9295bc", "#80ccd5", "#2c3280", "#4db8c4", "#5a5f9c", "#b3e0e6"];
 const AGG_LABELS: Record<Agg, string> = { count: "Count", sum: "Sum", avg: "Average", min: "Min", max: "Max" };
 
 interface Footer { definition: string; exclusions: string; roleNotes: string[] }
@@ -257,17 +258,17 @@ export default function Reporting() {
   };
 
   if (authzLoading) {
-    return <div className="min-h-screen bg-background"><DashboardHeader /></div>;
+    return <PageContainer><PageHeader title="Reporting" officeSelector={false} /></PageContainer>;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      <div className="container mx-auto p-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Reporting</h1>
-          <p className="text-sm text-muted-foreground mt-1">Ask a question, or build a chart from groupings, filters, and aggregations. Every answer includes its definition and exclusions.</p>
-        </div>
+    <PageContainer>
+      <div className="space-y-6">
+        <PageHeader
+          title="Reporting"
+          subtitle="Ask a question, or build a chart from groupings, filters, and aggregations. Every answer includes its definition and exclusions."
+          officeSelector={false}
+        />
 
         {/* Natural-language bar */}
         <Card>
@@ -620,6 +621,6 @@ export default function Reporting() {
           </Card>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

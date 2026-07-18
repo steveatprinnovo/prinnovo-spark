@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
@@ -247,28 +247,28 @@ const Implementations = () => {
         title: "Total Companies",
         value: companyCount.toString(),
         subtitle: "Companies in venture office",
-        gradient: "var(--gradient-primary)"
+        gradient: "#171d70"
       },
       {
         title: "Term Sheet Signature to IPA Signature",
         value: `${calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date")} days`,
         monthsValue: `(~${Math.round(calculateAverageDays("Term Sheet Signature Date", "IPA Signature Date") / 30)} months)`,
         subtitle: "Average time between milestones",
-        gradient: "var(--gradient-accent)"
+        gradient: "#0299aa"
       },
       {
         title: "IPA Signature to Implementation Complete",
         value: `${calculateAverageDays("IPA Signature Date", "Implementation Completion Date")} days`,
         monthsValue: `(~${Math.round(calculateAverageDays("IPA Signature Date", "Implementation Completion Date") / 30)} months)`,
         subtitle: "Average time between milestones",
-        gradient: "var(--gradient-primary)"
+        gradient: "#171d70"
       },
       {
         title: "Implementation Complete to Pilot Complete",
         value: `${calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date")} days`,
         monthsValue: `(~${Math.round(calculateAverageDays("Implementation Completion Date", "Final Portfolio Decision Date") / 30)} months)`,
         subtitle: "Average time between milestones",
-        gradient: "var(--gradient-accent)"
+        gradient: "#0b0e3a"
       }
     ];
   }, [ventureOfficeFilteredCompanies, calculateDaysBetween]);
@@ -276,8 +276,7 @@ const Implementations = () => {
   // Show loading while checking authentication or loading data
   if (authLoading || authzLoading || loading || statusNotesLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
+      <div className="bg-background">
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-80" />
           <div className="space-y-8">
@@ -303,29 +302,12 @@ const Implementations = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
+    <PageContainer>
       {/* Venture Office Selector Modal for Admins */}
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
-      
-      <div className="container mx-auto p-6 space-y-8">
-        <div className="flex justify-between items-start mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Implementation Tracker</h1>
-          
-          {/* Admin Venture Office Selector */}
-          {isAdmin && (
-            <div>
-              <VentureOfficeDropdown
-                value={selectedVentureOffice}
-                onChange={changeVentureOffice}
-                ventureOffices={ventureOffices}
-                companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
-                totalCount={companies.length}
-              />
-            </div>
-          )}
-        </div>
+
+      <div className="space-y-8">
+        <PageHeader title="Implementations" subtitle="Milestone timelines for every portfolio company" />
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -335,7 +317,7 @@ const Implementations = () => {
               className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 h-32"
               style={{ 
                 background: kpi.gradient,
-                boxShadow: "var(--shadow-kpi)"
+                boxShadow: "var(--shadow-card)"
               }}
             >
               <CardContent className="p-4 h-full flex flex-col justify-center text-center">
@@ -427,7 +409,7 @@ const Implementations = () => {
           })}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

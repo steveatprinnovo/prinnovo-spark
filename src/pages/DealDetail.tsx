@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
 import { useDeal, useDealContacts, DEAL_STAGES, DEAL_STATUSES } from "@/hooks/useDeals";
+import { PageContainer } from "@/components/layout/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { PREVIEW } from "@/preview/previewMode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,32 +73,27 @@ export default function DealDetail() {
 
   if ((loading || authLoading) && !PREVIEW) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6"><Skeleton className="h-96" /></div>
-      </div>
+      <PageContainer>
+        <Skeleton className="h-96" />
+      </PageContainer>
     );
   }
 
   if (!deal) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6">
-          <p className="text-muted-foreground">Deal not found.</p>
-          <Link to="/dealflow" className="text-primary text-sm">Back to Dealflow</Link>
-        </div>
-      </div>
+      <PageContainer>
+        <p className="text-[#5c6178]">Deal not found.</p>
+        <Link to="/dealflow" className="text-sm text-[#0299aa] hover:text-[#027e8c]">Back to Dealflow</Link>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      <div className="container mx-auto p-6 space-y-6">
+    <PageContainer>
+      <div className="space-y-6">
         <button
           onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/dealflow"))}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-[#5c6178] transition-colors hover:text-[#0299aa]"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Dealflow CRM
         </button>
@@ -108,9 +103,10 @@ export default function DealDetail() {
           <CardContent className="pt-6">
             <div className="flex flex-wrap justify-between gap-4">
               <div className="space-y-2">
+                <div className="eyebrow">Dealflow</div>
                 <div className="flex items-center gap-3">
                   <CompanyLogo website={deal.website} name={deal.company_name} size={36} />
-                  <h1 className="text-3xl font-bold text-foreground">{deal.deal_name}</h1>
+                  <h1 className="text-[28px] font-bold leading-[1.15] text-[#171d70]">{deal.deal_name}</h1>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" />{deal.company_name}</span>
@@ -165,14 +161,14 @@ export default function DealDetail() {
           <div className="lg:col-span-2 space-y-6">
             {deal.next_step && (
               <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-base">Next Step</CardTitle></CardHeader>
+                <CardHeader className="pb-2"><CardTitle className="text-base font-bold text-[#171d70]">Next Step</CardTitle></CardHeader>
                 <CardContent>
                   <p className="text-sm whitespace-pre-wrap">{deal.next_step}</p>
                 </CardContent>
               </Card>
             )}
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-base">Deal Details</CardTitle></CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-base font-bold text-[#171d70]">Deal Details</CardTitle></CardHeader>
               <CardContent>
                 <Field label="Assigned To" value={deal.assigned_to} />
                 <Field label="IPA Structure" value={deal.ipa_structure} />
@@ -196,7 +192,7 @@ export default function DealDetail() {
           <div className="space-y-6">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Associated Contacts {contacts.length > 0 && <Badge variant="secondary" className="ml-2">{contacts.length}</Badge>}</CardTitle>
+                <CardTitle className="text-base font-bold text-[#171d70]">Associated Contacts {contacts.length > 0 && <Badge variant="secondary" className="ml-2">{contacts.length}</Badge>}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {contacts.length === 0 && <p className="text-sm text-muted-foreground">No contacts recorded.</p>}
@@ -221,6 +217,6 @@ export default function DealDetail() {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

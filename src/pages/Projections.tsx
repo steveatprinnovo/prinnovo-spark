@@ -1,10 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
-import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
-import { CostsTable } from "@/components/CostsTable";
-import { AddCostValuesModal } from "@/components/AddCostValuesModal";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -19,8 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, ChevronUp, ChevronDown, Plus } from "lucide-react";
+import { DollarSign, ChevronUp, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -69,11 +65,11 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-const CompanyRow = ({ 
-  company, 
-  forecast, 
-  showTargetCashReturnAsPercent, 
-  showEquityValueAsPercent, 
+const CompanyRow = ({
+  company,
+  forecast,
+  showTargetCashReturnAsPercent,
+  showEquityValueAsPercent,
   showDataMonetizationAsPercent,
   showVentureOfficeLogo,
   ventureOfficeLogos
@@ -81,34 +77,34 @@ const CompanyRow = ({
   const isPrinnovoHealth = company["Company Name"] === "Prinnovo Health";
   const { logoUrl: regularLogoUrl } = useCompanyLogo(company.imgurl);
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
-  
-  const ventureOfficeLogo = showVentureOfficeLogo 
-    ? ventureOfficeLogos?.find(l => l.name === company.venture_office)?.logoUrl 
+
+  const ventureOfficeLogo = showVentureOfficeLogo
+    ? ventureOfficeLogos?.find(l => l.name === company.venture_office)?.logoUrl
     : null;
-  
+
   useEffect(() => {
     if (isPrinnovoHealth) {
       const fetchPrinnovoLogo = async () => {
         const { data, error } = await supabase.storage
           .from('Company Logos')
           .createSignedUrl('prinnovo-logo.png', 60 * 60 * 24); // 24 hour expiry
-        
+
         if (data?.signedUrl && !error) {
           setPrinnovoLogoUrl(data.signedUrl);
         }
       };
-      
+
       fetchPrinnovoLogo();
     }
   }, [isPrinnovoHealth]);
-  
+
   const logoUrl = isPrinnovoHealth ? prinnovoLogoUrl : regularLogoUrl;
   const multiplier = FORECAST_MULTIPLIERS[forecast];
-  
+
   const targetIpaReturn = (company["Target IPA Return"] || 0) * multiplier;
   const targetCashReturn = (company["Target Cash Investment Return"] || 0) * multiplier;
   const dataMonetizationForecast = (company["Data Monetization Forecast"] || 0) * multiplier;
-  
+
   const equityValue = company["Current HLV Valuation"] || 0;
   const dataMonetizationDollars = company["Data Monetization Dollars"] || 0;
   const totalEnterpriseValue = equityValue + dataMonetizationDollars;
@@ -127,7 +123,7 @@ const CompanyRow = ({
             <DollarSign className="w-4 h-4 text-muted-foreground" />
           )}
         </div>
-        <span className="font-medium text-sm truncate">{company["Company Name"]}</span>
+        <span className="font-medium text-sm truncate text-[#171d70]">{company["Company Name"]}</span>
         {ventureOfficeLogo && (
           <TooltipProvider>
             <Tooltip>
@@ -145,7 +141,7 @@ const CompanyRow = ({
           </TooltipProvider>
         )}
       </TableCell>
-      <TableCell className="cell-2 transition-colors text-center text-sm">
+      <TableCell className="cell-2 transition-colors text-center text-sm text-[#232842]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -157,7 +153,7 @@ const CompanyRow = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="cell-3 transition-colors text-center text-sm">
+      <TableCell className="cell-3 transition-colors text-center text-sm text-[#232842]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -169,7 +165,7 @@ const CompanyRow = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="cell-4 transition-colors text-center text-sm">
+      <TableCell className="cell-4 transition-colors text-center text-sm text-[#232842]">
         {(company["Invested Amount"] || 0) === 0
           ? "N/A"
           : showTargetCashReturnAsPercent
@@ -179,16 +175,16 @@ const CompanyRow = ({
             : formatCurrency(targetCashReturn)
         }
       </TableCell>
-      <TableCell className="cell-5 transition-colors text-center text-sm">
+      <TableCell className="cell-5 transition-colors text-center text-sm text-[#232842]">
         {showEquityValueAsPercent && targetIpaReturn > 0
           ? formatPercentage((equityValue / targetIpaReturn) * 100)
           : formatCurrency(equityValue)
         }
       </TableCell>
-      <TableCell className="cell-6 transition-colors text-center text-sm">
+      <TableCell className="cell-6 transition-colors text-center text-sm text-[#232842]">
         {dataMonetizationForecast === 0 ? "N/A" : formatCurrency(dataMonetizationDollars)}
       </TableCell>
-      <TableCell className="cell-7 transition-colors text-center text-sm">
+      <TableCell className="cell-7 transition-colors text-center text-sm text-[#232842]">
         {dataMonetizationForecast === 0
           ? "N/A"
           : showDataMonetizationAsPercent
@@ -198,20 +194,17 @@ const CompanyRow = ({
             : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
-      <TableCell className="cell-8 transition-colors text-center text-sm">{formatCurrency(totalEnterpriseValue)}</TableCell>
+      <TableCell className="cell-8 transition-colors text-center text-sm font-semibold text-[#171d70]">{formatCurrency(totalEnterpriseValue)}</TableCell>
     </TableRow>
   );
 };
 
 const Projections = () => {
-  usePageTitle("Projections");
+  usePageTitle("Revenue Projections");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, role, ventureOffice, loading: authzLoading } = useUserAuth();
-  const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
-  // VO leaders see the Costs tab read-only, scoped to their own office.
-  const isVoLeader = role === "vo_leader";
-  const costsOffice = isAdmin ? selectedVentureOffice : ventureOffice || "";
+  const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
+  const { selectedVentureOffice, showSelector, selectVentureOffice } = useAdminVentureOffice();
   const { companies, loading } = useCompanies();
   const [forecast, setForecast] = useState<ForecastType>("target");
   const [showTargetCashReturnAsPercent, setShowTargetCashReturnAsPercent] = useState(false);
@@ -220,11 +213,7 @@ const Projections = () => {
   const [sortField, setSortField] = useState<SortField>("company");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [prinnovoLogoUrl, setPrinnovoLogoUrl] = useState<string | null>(null);
-  const [costsContractYear, setCostsContractYear] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("revenues");
-  const [showAddCostModal, setShowAddCostModal] = useState(false);
-  const [costsRefreshKey, setCostsRefreshKey] = useState(0);
-  
+
   const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : ventureOffice || "");
   const duplicatedCompanyNames = useDuplicatedCompanyNames(companies);
   const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
@@ -246,30 +235,14 @@ const Projections = () => {
       const { data } = await supabase.storage
         .from('Company Logos')
         .getPublicUrl('prinnovo-logo.png');
-      
+
       if (data?.publicUrl) {
         setPrinnovoLogoUrl(data.publicUrl);
       }
     };
-    
+
     fetchPrinnovoLogo();
   }, []);
-
-  // Get unique venture offices with company counts
-  const ventureOfficeOptions = useMemo(() => {
-    const offices = companies.reduce((acc, company) => {
-      if (company["Target IPA Return"] && company.venture_office) {
-        acc[company.venture_office] = (acc[company.venture_office] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
-    
-    return Object.entries(offices).map(([office, count]) => ({
-      value: office,
-      label: office,
-      count
-    }));
-  }, [companies]);
 
   // Filter and sort companies that have investment tracking data
   const projectionsCompanies = useMemo(() => {
@@ -282,12 +255,12 @@ const Projections = () => {
       if (selectedVentureOffice === "all") return true;
       return company.venture_office === selectedVentureOffice;
     });
-    
+
     // Check if we need to add Prinnovo Health
     const shouldAddPrinnovo = ventureOfficeDetails?.["Prinnovo Health Ownership"] === "Yes";
-    
+
     let companiesWithPrinnovo = [...filtered];
-    
+
     if (shouldAddPrinnovo && filtered.length > 0) {
       // Calculate sum of all values × 0.02
       const prinnovoData: Company = {
@@ -334,16 +307,16 @@ const Projections = () => {
         "Invested Amount Valuation 3": null,
         "Invested Amount Valuation Date 3": null,
       };
-      
+
       companiesWithPrinnovo.push(prinnovoData);
     }
-    
+
     const multiplier = FORECAST_MULTIPLIERS[forecast];
-    
+
     return companiesWithPrinnovo.sort((a, b) => {
       let aValue: any;
       let bValue: any;
-      
+
       switch (sortField) {
         case "company":
           aValue = a["Company Name"];
@@ -380,7 +353,7 @@ const Projections = () => {
         default:
           return 0;
       }
-      
+
       if (sortField === "company") {
         // String comparison
         const result = aValue.localeCompare(bValue);
@@ -405,14 +378,14 @@ const Projections = () => {
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <Button
       variant="ghost"
-      className="h-auto p-1 font-medium justify-center hover:bg-transparent hover:text-blue-500 transition-colors whitespace-normal text-center min-h-0 leading-tight"
+      className="h-auto p-1 justify-center hover:bg-transparent hover:text-[#0299aa] transition-colors whitespace-normal text-center min-h-0 leading-tight"
       onClick={() => handleSort(field)}
     >
       <div className="flex flex-col items-center gap-1">
-        <span className="text-xs leading-tight">{children}</span>
+        <span className="table-header-label leading-tight">{children}</span>
         {sortField === field && (
-          sortDirection === "asc" ? 
-            <ChevronUp className="h-3 w-3" /> : 
+          sortDirection === "asc" ?
+            <ChevronUp className="h-3 w-3" /> :
             <ChevronDown className="h-3 w-3" />
         )}
       </div>
@@ -422,14 +395,14 @@ const Projections = () => {
   // Calculate portfolio totals
   const portfolioTotals = useMemo(() => {
     const multiplier = FORECAST_MULTIPLIERS[forecast];
-    
+
     return projectionsCompanies.reduce((totals, company) => {
       const targetIpaReturn = (company["Target IPA Return"] || 0) * multiplier;
       const targetCashReturn = (company["Target Cash Investment Return"] || 0) * multiplier;
       const dataMonetizationForecast = (company["Data Monetization Forecast"] || 0) * multiplier;
       const equityValue = company["Current HLV Valuation"] || 0;
       const dataMonetizationDollars = company["Data Monetization Dollars"] || 0;
-      
+
       return {
         targetIpaReturn: totals.targetIpaReturn + targetIpaReturn,
         cashInvested: totals.cashInvested + (company["Invested Amount"] || 0),
@@ -453,14 +426,13 @@ const Projections = () => {
   // Show loading while checking authentication or loading data
   if (authLoading || authzLoading || loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6 space-y-6">
+      <PageContainer>
+        <div className="space-y-6">
           <Skeleton className="h-12 w-48" />
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-96 w-full" />
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -470,129 +442,105 @@ const Projections = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
+    <PageContainer>
       {/* Venture Office Selector Modal for Admins */}
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
-      
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-start mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Projections</h1>
-          
-          <div className="flex gap-4">
-            {activeTab !== "costs" && (
-              <div className="w-64">
-                <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="target">Target Forecast</SelectItem>
-                    <SelectItem value="very-conservative">Very Conservative</SelectItem>
-                    <SelectItem value="conservative">Conservative</SelectItem>
-                    <SelectItem value="aggressive">Aggressive</SelectItem>
-                    <SelectItem value="very-aggressive">Very Aggressive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {isAdmin && (
-              <div>
-                <VentureOfficeDropdown
-                  value={selectedVentureOffice}
-                  onChange={changeVentureOffice}
-                  ventureOffices={ventureOfficeOptions.map(o => o.value)}
-                  companyCounts={Object.fromEntries(ventureOfficeOptions.map(o => [o.value, o.count]))}
-                  totalCount={companies.filter(c => c["Target IPA Return"]).length}
-                />
-              </div>
-            )}
-          </div>
-        </div>
 
-        <Tabs defaultValue="revenues" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="revenues">Revenues</TabsTrigger>
-              {(isAdmin || isVoLeader) && <TabsTrigger value="costs">Costs</TabsTrigger>}
-            </TabsList>
-            
-            {isAdmin && activeTab === "costs" && selectedVentureOffice !== "all" && (
-              <Button onClick={() => setShowAddCostModal(true)} size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                Add New Values
-              </Button>
-            )}
+      <PageHeader
+        title="Revenue Projections"
+        subtitle="Target returns, equity value, and short-term revenue by company"
+        actions={
+          <div className="w-64">
+            <Select value={forecast} onValueChange={(value: ForecastType) => setForecast(value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="target">Target Forecast</SelectItem>
+                <SelectItem value="very-conservative">Very Conservative</SelectItem>
+                <SelectItem value="conservative">Conservative</SelectItem>
+                <SelectItem value="aggressive">Aggressive</SelectItem>
+                <SelectItem value="very-aggressive">Very Aggressive</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          <TabsContent value="revenues">
-            <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto h-[calc(100vh-250px)]">
+        }
+      />
+
+      <div className="overflow-hidden rounded-lg border border-[#e2e3ec]">
+        <div className="border-b border-[#e2e3ec] px-5 pb-3.5 pt-[18px]">
+          <span className="accent-rule mb-2.5" />
+          <div className="text-base font-bold text-[#171d70]">Revenue Capture by Company</div>
+        </div>
+        <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto h-[calc(100vh-330px)]">
           <style>{`
             /* Ensure sticky headers work: neutralize inner shadcn Table wrapper overflow */
             .projections-table-wrapper > div { overflow: visible !important; }
 
+            /* Row rules (redesign token #f0f1f6) */
+            .projections-table-wrapper .table-container tbody td { border-bottom: 1px solid #f0f1f6; }
+
             .table-container:hover .column-1:hover ~ tbody .cell-1,
             .table-container .column-1:hover ~ tbody .cell-1,
             .table-container .column-1:hover,
-            .table-container:has(.column-1:hover) .cell-1 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-1:hover) .cell-1 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-2:hover ~ tbody .cell-2,
             .table-container .column-2:hover ~ tbody .cell-2,
             .table-container .column-2:hover,
-            .table-container:has(.column-2:hover) .cell-2 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-2:hover) .cell-2 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-3:hover ~ tbody .cell-3,
             .table-container .column-3:hover ~ tbody .cell-3,
             .table-container .column-3:hover,
-            .table-container:has(.column-3:hover) .cell-3 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-3:hover) .cell-3 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-4:hover ~ tbody .cell-4,
             .table-container .column-4:hover ~ tbody .cell-4,
             .table-container .column-4:hover,
-            .table-container:has(.column-4:hover) .cell-4 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-4:hover) .cell-4 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-5:hover ~ tbody .cell-5,
             .table-container .column-5:hover ~ tbody .cell-5,
             .table-container .column-5:hover,
-            .table-container:has(.column-5:hover) .cell-5 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-5:hover) .cell-5 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-6:hover ~ tbody .cell-6,
             .table-container .column-6:hover ~ tbody .cell-6,
             .table-container .column-6:hover,
-            .table-container:has(.column-6:hover) .cell-6 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-6:hover) .cell-6 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-7:hover ~ tbody .cell-7,
             .table-container .column-7:hover ~ tbody .cell-7,
             .table-container .column-7:hover,
-            .table-container:has(.column-7:hover) .cell-7 { background-color: rgb(239 246 255) !important; }
-            
+            .table-container:has(.column-7:hover) .cell-7 { background-color: #e6f5f7 !important; }
+
             .table-container:hover .column-8:hover ~ tbody .cell-8,
             .table-container .column-8:hover ~ tbody .cell-8,
             .table-container .column-8:hover,
-            .table-container:has(.column-8:hover) .cell-8 { background-color: rgb(239 246 255) !important; }
+            .table-container:has(.column-8:hover) .cell-8 { background-color: #e6f5f7 !important; }
           `}</style>
           <Table className="min-w-full table-fixed table-container border-separate border-spacing-0">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[200px] column-1 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[200px] column-1 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[150px] column-2 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[150px] column-2 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[120px] column-3 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[120px] column-3 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-6 w-[180px] column-4 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-6 w-[180px] column-4 hover:bg-[#e6f5f7] transition-colors">
                   <div className="space-y-2">
                     <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
-                          !showTargetCashReturnAsPercent 
-                            ? "bg-green-100 text-green-700 border border-green-300" 
-                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                          !showTargetCashReturnAsPercent
+                            ? "bg-[#e6f5f7] text-[#027e8c] border border-[#80ccd5]"
+                            : "hover:bg-[#e6f5f7] hover:border hover:border-[#80ccd5]"
                         }`}
                         onClick={() => setShowTargetCashReturnAsPercent(false)}
                       >
@@ -601,9 +549,9 @@ const Projections = () => {
                       <span className="text-muted-foreground">|</span>
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
-                          showTargetCashReturnAsPercent 
-                            ? "bg-green-100 text-green-700 border border-green-300" 
-                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                          showTargetCashReturnAsPercent
+                            ? "bg-[#e6f5f7] text-[#027e8c] border border-[#80ccd5]"
+                            : "hover:bg-[#e6f5f7] hover:border hover:border-[#80ccd5]"
                         }`}
                         onClick={() => setShowTargetCashReturnAsPercent(true)}
                       >
@@ -612,15 +560,15 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-6 w-[160px] column-5 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-6 w-[160px] column-5 hover:bg-[#e6f5f7] transition-colors">
                   <div className="space-y-2">
                     <SortButton field="equityValue">Equity Value Captured</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
-                          !showEquityValueAsPercent 
-                            ? "bg-green-100 text-green-700 border border-green-300" 
-                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                          !showEquityValueAsPercent
+                            ? "bg-[#e6f5f7] text-[#027e8c] border border-[#80ccd5]"
+                            : "hover:bg-[#e6f5f7] hover:border hover:border-[#80ccd5]"
                         }`}
                         onClick={() => setShowEquityValueAsPercent(false)}
                       >
@@ -629,9 +577,9 @@ const Projections = () => {
                       <span className="text-muted-foreground">|</span>
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
-                          showEquityValueAsPercent 
-                            ? "bg-green-100 text-green-700 border border-green-300" 
-                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                          showEquityValueAsPercent
+                            ? "bg-[#e6f5f7] text-[#027e8c] border border-[#80ccd5]"
+                            : "hover:bg-[#e6f5f7] hover:border hover:border-[#80ccd5]"
                         }`}
                         onClick={() => setShowEquityValueAsPercent(true)}
                       >
@@ -640,18 +588,18 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[160px] column-6 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[160px] column-6 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="dataMonetizationDollars">Short Term Revenue Dollars Earned</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-6 w-[170px] column-7 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-6 w-[170px] column-7 hover:bg-[#e6f5f7] transition-colors">
                   <div className="space-y-2">
                     <SortButton field="dataMonetizationForecast">Short Term Revenue Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
-                          !showDataMonetizationAsPercent 
-                            ? "bg-green-100 text-green-700 border border-green-300" 
-                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                          !showDataMonetizationAsPercent
+                            ? "bg-[#e6f5f7] text-[#027e8c] border border-[#80ccd5]"
+                            : "hover:bg-[#e6f5f7] hover:border hover:border-[#80ccd5]"
                         }`}
                         onClick={() => setShowDataMonetizationAsPercent(false)}
                       >
@@ -660,9 +608,9 @@ const Projections = () => {
                       <span className="text-muted-foreground">|</span>
                       <button
                         className={`px-2 py-1 text-xs rounded transition-all ${
-                          showDataMonetizationAsPercent 
-                            ? "bg-green-100 text-green-700 border border-green-300" 
-                            : "hover:bg-green-50 hover:border hover:border-green-300"
+                          showDataMonetizationAsPercent
+                            ? "bg-[#e6f5f7] text-[#027e8c] border border-[#80ccd5]"
+                            : "hover:bg-[#e6f5f7] hover:border hover:border-[#80ccd5]"
                         }`}
                         onClick={() => setShowDataMonetizationAsPercent(true)}
                       >
@@ -671,7 +619,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-muted text-center py-4 w-[180px] column-8 hover:bg-blue-50 transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[180px] column-8 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
@@ -689,9 +637,9 @@ const Projections = () => {
                   ventureOfficeLogos={ventureOfficeLogos}
                 />
               ))}
-              
+
               {/* Portfolio Totals Row */}
-              <TableRow className="bg-muted/50 font-semibold">
+              <TableRow className="bg-[#f3f4f8] font-bold text-[#171d70]">
                 <TableCell className="text-left cell-1 transition-colors">Portfolio Total</TableCell>
                 <TableCell className="text-center cell-2 transition-colors">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
                 <TableCell className="text-center cell-3 transition-colors">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
@@ -728,34 +676,9 @@ const Projections = () => {
               </TableRow>
             </TableBody>
           </Table>
-            </div>
-          </TabsContent>
-          
-          {(isAdmin || isVoLeader) && (
-            <TabsContent value="costs">
-              <CostsTable
-                selectedVentureOffice={costsOffice}
-                selectedContractYear={costsContractYear}
-                onContractYearChange={setCostsContractYear}
-                initiationDate={ventureOfficeDetails?.venture_office_initiation_date}
-                officeId={ventureOfficeDetails?.office_id}
-                refreshKey={costsRefreshKey}
-              />
-            </TabsContent>
-          )}
-        </Tabs>
-
-        {/* Add Cost Values Modal */}
-        <AddCostValuesModal
-          open={showAddCostModal}
-          onOpenChange={setShowAddCostModal}
-          selectedVentureOffice={selectedVentureOffice}
-          officeId={ventureOfficeDetails?.office_id}
-          initiationDate={ventureOfficeDetails?.venture_office_initiation_date}
-          onSuccess={() => setCostsRefreshKey(prev => prev + 1)}
-        />
+        </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

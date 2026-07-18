@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
@@ -97,8 +97,7 @@ const Settings = () => {
   // Show loading state
   if (authLoading || authzLoading || loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
+      <div className="bg-background">
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-6 md:grid-cols-2">
@@ -115,35 +114,9 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Settings</h1>
-            <p className="text-muted-foreground">Manage venture office and portfolio company details</p>
-          </div>
-          <div className="flex flex-col items-end gap-3">
-            {/* Admin Venture Office Selector */}
-            {isAdmin && (
-              <div>
-                <VentureOfficeDropdown
-                  value={selectedVentureOffice}
-                  onChange={changeVentureOffice}
-                  ventureOffices={ventureOffices}
-                  companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
-                  totalCount={companies.length}
-                />
-              </div>
-            )}
-            {lastUpdated && (
-              <div className="text-sm text-muted-foreground italic">
-                Current as of {formatDate(lastUpdated)}
-              </div>
-            )}
-          </div>
-        </div>
+    <PageContainer>
+      <div className="space-y-6">
+        <PageHeader title="Settings" subtitle="Manage venture office and portfolio company details" />
 
         <div className="flex flex-col gap-6">
           {/* User management — admins only (PREVIEW renders sample data for visual review) */}
@@ -164,7 +137,7 @@ const Settings = () => {
           />
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

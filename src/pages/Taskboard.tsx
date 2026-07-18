@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { useKanban, KanbanCard, KANBAN_COLUMNS, ColumnKey, isOverdue, formatDue, VENTURE_OFFICES } from "@/hooks/useTaskboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -228,22 +228,18 @@ export default function Taskboard() {
 
   if ((authLoading || authzLoading || loading) && !PREVIEW) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6"><Skeleton className="h-96" /></div>
-      </div>
+      <div className="container mx-auto p-6"><Skeleton className="h-96" /></div>
     );
   }
 
   if (isArchive) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6 space-y-6">
-          <Link to="/taskboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+      <PageContainer>
+        <div className="space-y-6">
+          <Link to="/taskboard" className="inline-flex items-center gap-2 text-sm text-[#5c6178] hover:text-[#171d70] transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to board
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">Archive</h1>
+          <h1 className="m-0 text-[32px] font-bold leading-[1.1] text-[#171d70]">Archive</h1>
           <Card>
             <CardContent className="pt-6">
               <Table>
@@ -282,25 +278,18 @@ export default function Taskboard() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-foreground">IT Taskboard</h1>
-              {!canEdit && (
-                <Badge variant="secondary" className="gap-1"><Eye className="h-3 w-3" /> View only</Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">{open.length} open card{open.length === 1 ? "" : "s"}</p>
-          </div>
-          <div className="flex items-center gap-2">
+    <PageContainer>
+      <div className="space-y-6">
+        <PageHeader
+          title="IT Taskboard"
+          subtitle={`${open.length} open card${open.length === 1 ? "" : "s"}${canEdit ? "" : " · view only"}`}
+          officeSelector={false}
+          actions={<div className="flex items-center gap-2">
             {showOfficeFilter && (
               <Select value={officeFilter} onValueChange={setOfficeFilter}>
                 <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
@@ -315,8 +304,8 @@ export default function Taskboard() {
                 <Archive className="h-4 w-4" /> Archive {archived.length > 0 && <Badge variant="secondary">{archived.length}</Badge>}
               </Button>
             </Link>
-          </div>
-        </div>
+          </div>}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
           {KANBAN_COLUMNS.map(col => {
@@ -370,6 +359,6 @@ export default function Taskboard() {
           }}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
