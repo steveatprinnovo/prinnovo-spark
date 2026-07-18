@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -145,8 +145,7 @@ const FocusAreas = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
+      <div className="bg-background">
         <div className="container mx-auto p-6 space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -164,16 +163,13 @@ const FocusAreas = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Focus Areas</h1>
-            <p className="text-muted-foreground">Strategic focus areas across all venture offices</p>
-          </div>
-          <div className="relative w-full sm:w-80">
+    <PageContainer>
+      <div className="space-y-6">
+        <PageHeader
+          title="Focus Areas"
+          subtitle="Strategic focus areas across all venture offices"
+          officeSelector={false}
+          actions={<div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
@@ -182,8 +178,8 @@ const FocusAreas = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
-          </div>
-        </div>
+          </div>}
+        />
 
         {groupedByVentureOffice.length === 0 ? (
           <Card>
@@ -275,7 +271,7 @@ const FocusAreas = () => {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

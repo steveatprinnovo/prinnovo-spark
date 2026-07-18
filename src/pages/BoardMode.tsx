@@ -6,7 +6,6 @@ import { useBoardApprovals, type CompanyData } from "@/hooks/useBoardApprovals";
 import { useAgenda } from "@/hooks/useAgenda";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { DashboardHeader } from "@/components/DashboardHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -483,7 +482,6 @@ export default function BoardMode() {
           transform: rotateY(0deg);
         }
       `}</style>
-      <DashboardHeader />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">

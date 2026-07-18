@@ -18,7 +18,28 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['"Aptos"', '"Aptos Display"', '"Segoe UI Variable Display"', '"Segoe UI"', 'system-ui', '-apple-system', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+			},
+			boxShadow: {
+				card: 'var(--shadow-card)',
+				'card-hover': 'var(--shadow-card-hover)',
+				dropdown: 'var(--shadow-dropdown)',
+				dialog: 'var(--shadow-dialog)',
+			},
 			colors: {
+				success: 'hsl(var(--success))',
+				'muted-ink': 'hsl(var(--muted-ink))',
+				'surface-alt': 'hsl(var(--surface-alt))',
+				brand: {
+					navy: '#171d70',
+					'navy-hover': '#10154f',
+					'navy-deep': '#0b0e3a',
+					teal: '#0299aa',
+					'teal-hover': '#027e8c',
+					'teal-tint': '#80ccd5',
+					periwinkle: '#9295bc',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

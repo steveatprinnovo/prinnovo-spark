@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Building2 } from "lucide-react";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { Company } from "@/hooks/useCompanies";
@@ -22,48 +20,46 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
     }).format(value);
   };
 
+  // Stage pill: portfolio / validated companies get the success treatment,
+  // everything else the neutral navy-tint chip.
   const getStageColor = (stage: string | null) => {
     switch (stage?.toLowerCase()) {
       case 'portfolio':
-        return 'bg-accent text-accent-foreground';
-      case 'due diligence':
-        return 'bg-primary text-primary-foreground';
-      case 'term sheet':
-        return 'bg-chart-3 text-white';
-      case 'evaluation':
-        return 'bg-muted text-muted-foreground';
+      case 'portfolio company':
+      case 'validated company':
+        return 'bg-[#e9f4ef] text-[#2e7d5b]';
       default:
-        return 'bg-secondary text-secondary-foreground';
+        return 'bg-[#e8e9f1] text-[#5a5f9c]';
     }
   };
 
+  // 4px left border colored by High-Level Focus Area
   const getFocusAreaColor = (focusArea: string | null) => {
     switch (focusArea?.toLowerCase()) {
-      case 'operational':
-        return 'border-l-blue-500';
       case 'clinical':
-        return 'border-l-green-500';
+        return 'border-l-[#0299aa]';
       case 'financial':
-        return 'border-l-orange-500';
+        return 'border-l-[#171d70]';
+      case 'operational':
+        return 'border-l-[#8b8fa3]';
       default:
-        return 'border-l-blue-500'; // Default to blue
+        return 'border-l-[#8b8fa3]';
     }
   };
 
   return (
-    <Card 
-      className={`cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 ${getFocusAreaColor(company["High-Level Focus Area"])}`}
+    <div
+      className={`card-lift cursor-pointer rounded-lg border border-[#e2e3ec] border-l-4 bg-white shadow-card ${getFocusAreaColor(company["High-Level Focus Area"])}`}
       onClick={onClick}
-      style={{ boxShadow: "var(--shadow-card)" }}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center justify-center w-24 h-12 rounded-lg overflow-hidden">
+      <div className="p-4">
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <div className="flex h-10 w-[84px] items-center justify-start overflow-hidden">
             {!loading && logoUrl ? (
-              <img 
-                src={logoUrl} 
+              <img
+                src={logoUrl}
                 alt={`${company["Company Name"]} logo`}
-                className="w-full h-full object-contain"
+                className="h-full w-full object-contain"
                 onError={(e) => {
                   // Fallback to icon if image fails to load
                   e.currentTarget.style.display = 'none';
@@ -71,37 +67,35 @@ function CompanyCard({ company, onClick }: { company: Company; onClick: () => vo
                 }}
               />
             ) : null}
-            <Building2 
-              className={`h-6 w-6 text-primary ${!loading && logoUrl ? 'hidden' : ''}`} 
+            <Building2
+              className={`h-6 w-6 text-[#171d70] ${!loading && logoUrl ? 'hidden' : ''}`}
             />
           </div>
           {company["Pipeline Stage"] && (
-            <Badge className={`${getStageColor(company["Pipeline Stage"])} ${
-              company["Pipeline Stage"] === "Portfolio Company" ? "!text-green-600" : ""
-            }`}>
+            <span className={`whitespace-nowrap rounded-full px-[9px] py-[3px] text-[10.5px] font-semibold tracking-[0.06em] ${getStageColor(company["Pipeline Stage"])}`}>
               {company["Pipeline Stage"]}
-            </Badge>
+            </span>
           )}
         </div>
-        
-        <h3 className="font-semibold text-base mb-2 line-clamp-2">
+
+        <h3 className="mb-2 line-clamp-2 text-[15px] font-bold leading-[1.3] text-[#171d70]">
           {company["Company Name"]}
         </h3>
-        
-        <div className="space-y-2 text-xs text-muted-foreground">
+
+        <div className="flex flex-col gap-1 text-xs text-[#5c6178]">
           {company["High-Level Focus Area"] && (
-            <p>{company["High-Level Focus Area"]}</p>
+            <span>{company["High-Level Focus Area"]}</span>
           )}
           {company["Country of Origin"] && (
-            <p>{company["Country of Origin"]}</p>
+            <span className="text-[#8b8fa3]">{company["Country of Origin"]}</span>
           )}
-          <p>
-            <span className="italic text-muted-foreground">Current Company Valuation:</span>{" "}
-            <span className="font-medium text-foreground">{formatValuation(company["Current Company Valuation"])}</span>
-          </p>
+          <span>
+            <span className="italic text-[#8b8fa3]">Current Company Valuation:</span>{" "}
+            <span className="font-semibold text-[#232842]">{formatValuation(company["Current Company Valuation"])}</span>
+          </span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

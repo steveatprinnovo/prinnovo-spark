@@ -1,4 +1,4 @@
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
@@ -211,62 +211,62 @@ export default function Investments() {
         title: "Portfolio Value",
         value: portfolioValue,
         subtitle: `${portfolioGain > 0 ? '+' : ''}${portfolioGain.toFixed(1)}% gain`,
-        gradient: "var(--gradient-primary)"
+        gradient: "#171d70"
       },
       {
         title: "Total After Currently Invested Through 2025",
         value: investmentAllotment - committedSum,
         subtitle: `out of ${formatCurrency(investmentAllotment)} allocated`,
-        gradient: "var(--gradient-accent)"
+        gradient: "#0299aa"
       },
       {
         title: "Total After IPA Commitments Through 2025",
         value: investmentAllotment - committedSum - ipaObligationSum,
         subtitle: `out of ${formatCurrency(investmentAllotment)} allocated`,
-        gradient: "var(--gradient-primary)"
+        gradient: "#171d70"
       },
       {
         title: "Total After Term Sheets Proposed Through 2025",
         value: investmentAllotment - committedSum - ipaObligationSum - termSheetSum,
         subtitle: `out of ${formatCurrency(investmentAllotment)} allocated`,
-        gradient: "var(--gradient-accent)"
+        gradient: "#0299aa"
       },
       {
         title: "Total Operational Funding",
         value: operationalSum,
         subtitle: "loans, investments as payments",
-        gradient: "var(--gradient-primary)"
+        gradient: "#0b0e3a"
       }
     ] : [
       {
         title: "Portfolio Value",
         value: portfolioValue,
         subtitle: `${portfolioGain > 0 ? '+' : ''}${portfolioGain.toFixed(1)}% gain`,
-        gradient: "var(--gradient-primary)"
+        gradient: "#171d70"
       },
       {
         title: "Total Currently Invested",
         value: committedSum,
         subtitle: "To Date",
-        gradient: "var(--gradient-accent)"
+        gradient: "#0299aa"
       },
       {
         title: "Total IPA Commitments",
         value: ipaObligationSum,
         subtitle: "To Date",
-        gradient: "var(--gradient-primary)"
+        gradient: "#171d70"
       },
       {
         title: "Total Term Sheet Proposed Investments",
         value: termSheetSum,
         subtitle: "To Date",
-        gradient: "var(--gradient-accent)"
+        gradient: "#0299aa"
       },
       {
         title: "Total Operational Funding",
         value: operationalSum,
         subtitle: "loans, investments as payments",
-        gradient: "var(--gradient-primary)"
+        gradient: "#0b0e3a"
       }
     ];
 
@@ -275,61 +275,32 @@ export default function Investments() {
 
   if (authLoading || authzLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <DashboardHeader />
-        <div className="flex items-center justify-center h-96">
-          <div className="text-lg text-muted-foreground">Loading...</div>
-        </div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg text-[#5c6178]">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <DashboardHeader />
-      
+    <PageContainer>
       {/* Venture Office Selector Modal for Admins */}
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
-      
-      <main className="container mx-auto px-6 py-6">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Hard Dollar Investment Tracker</h1>
-            <p className="text-muted-foreground">Track and monitor hard dollar investment allocations and performance</p>
-          </div>
-          <div className="flex flex-col items-end gap-3">
-            {/* Admin Venture Office Selector */}
-            {isAdmin && (
-              <div>
-                <VentureOfficeDropdown
-                  value={selectedVentureOffice}
-                  onChange={changeVentureOffice}
-                  ventureOffices={ventureOffices}
-                  companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c["Investment Tracker Stage"] && c.venture_office === o).length]))}
-                  totalCount={companies.filter(c => c["Investment Tracker Stage"]).length}
-                />
-              </div>
-            )}
-            <div className="flex items-center gap-4">
-              {lastUpdated && (
-                <div className="text-sm text-muted-foreground italic">
-                  Current as of {formatISODate(lastUpdated)}
-                </div>
-              )}
-              {/* Financial writes are admin-only (RBAC design, 2026-07-14);
-                  server-side the company_detail financial-column trigger enforces this. */}
-              {isAdmin && (
-                <Button
-                  onClick={() => setIsUpdateModalOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  Update Valuation
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+
+      <main>
+        <PageHeader
+          title="Investments"
+          subtitle="Track and monitor hard dollar investment allocations and performance"
+          actions={
+            /* Financial writes are admin-only (RBAC design, 2026-07-14);
+               server-side the company_detail financial-column trigger enforces this. */
+            isAdmin ? (
+              <Button onClick={() => setIsUpdateModalOpen(true)} className="flex items-center gap-2 rounded bg-[#171d70] text-white hover:bg-[#10154f]">
+                <TrendingUp className="h-4 w-4" />
+                Update Valuation
+              </Button>
+            ) : undefined
+          }
+        />
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
@@ -339,7 +310,7 @@ export default function Investments() {
               className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 h-40"
               style={{ 
                 background: kpi.gradient,
-                boxShadow: "var(--shadow-kpi)"
+                boxShadow: "var(--shadow-card)"
               }}
             >
               <CardContent className="p-6 h-full flex flex-col justify-end text-center">
@@ -414,7 +385,7 @@ export default function Investments() {
         refetch={refetch}
         selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice}
       />
-    </div>
+    </PageContainer>
   );
 }
 

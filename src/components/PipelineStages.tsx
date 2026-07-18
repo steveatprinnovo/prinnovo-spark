@@ -16,17 +16,17 @@ export function PipelineStages({ companies, filters, onFilterChange, selectedVen
   const dealCounts = useDealStageCounts(dealsOffice ?? selectedVentureOffice);
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => value !== "");
-  
+
   // Calculate counts from data
-  const implementationCount = companies.filter(company => 
+  const implementationCount = companies.filter(company =>
     company["Pipeline Stage"] === "Implementation" || company["Pipeline Stage"] === "IT Implementation"
   ).length;
-  
-  const pilotCount = companies.filter(company => 
+
+  const pilotCount = companies.filter(company =>
     company["Pipeline Stage"] === "Pilot"
   ).length;
-  
-  const portfolioCount = companies.filter(company => 
+
+  const portfolioCount = companies.filter(company =>
     company["Pipeline Stage"] === "Portfolio Company" || company["Pipeline Stage"] === "Validated Company"
   ).length;
 
@@ -42,7 +42,7 @@ export function PipelineStages({ companies, filters, onFilterChange, selectedVen
     if (["IT Implementation", "Pilot", "Validated Company"].includes(stageName)) {
       const newFilters = { ...filters };
       const dbValue = stageMapping[stageName];
-      
+
       // If already filtering by this stage, clear the filter
       if (newFilters.pipelineStage === dbValue) {
         newFilters.pipelineStage = "";
@@ -63,49 +63,56 @@ export function PipelineStages({ companies, filters, onFilterChange, selectedVen
   ];
 
   return (
-    <div className="bg-card rounded-lg p-6 border">
-      <h3 className="text-lg font-semibold mb-6 text-center">Pipeline Overview</h3>
-      
-      <div className="flex items-center justify-center gap-4 overflow-x-auto pt-4">
-        {stages.map((stage, index) => (
-          <div key={stage.name} className="flex items-center gap-4">
-            {/* Stage Circle */}
-            <div className="flex flex-col items-center gap-2 min-w-[120px] pt-2">
-              <div 
-                className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 ${
-                  stage.name === "Validated Company" 
-                    ? "bg-green-500/10 border-2 border-green-500" 
-                    : "bg-primary/10 border-2 border-primary"
-                } ${
-                  stage.isClickable 
-                    ? "cursor-pointer hover:scale-105 hover:shadow-md" 
-                    : ""
-                } ${
-                  (stage.name === "IT Implementation" && filters.pipelineStage === "Implementation") ||
-                  (stage.name === "Validated Company" && filters.pipelineStage === "Portfolio Company") ||
-                  (stage.name === "Pilot" && filters.pipelineStage === "Pilot")
-                    ? stage.name === "Validated Company"
-                      ? "ring-2 ring-offset-2 ring-green-500"
-                      : "ring-2 ring-offset-2 ring-primary"
-                    : ""
-                }`}
-                onClick={() => handleStageClick(stage.name)}
-              >
-                <span className={`text-xl font-bold ${
-                  stage.name === "Validated Company" ? "text-green-600" : "text-primary"
-                }`}>{stage.count}</span>
+    <div className="rounded-lg border border-[#e2e3ec] bg-white px-6 pb-7 pt-6">
+      <span className="accent-rule mx-auto mb-3" />
+      <h3 className="mb-6 text-center text-lg font-bold text-[#171d70]">Pipeline Overview</h3>
+
+      <div className="flex items-start justify-center gap-3.5 overflow-x-auto">
+        {stages.map((stage, index) => {
+          const isValidated = stage.name === "Validated Company";
+          const isActive =
+            (stage.name === "IT Implementation" && filters.pipelineStage === "Implementation") ||
+            (stage.name === "Validated Company" && filters.pipelineStage === "Portfolio Company") ||
+            (stage.name === "Pilot" && filters.pipelineStage === "Pilot");
+
+          return (
+            <div key={stage.name} className="flex items-start gap-3.5">
+              {/* Stage Circle */}
+              <div className="flex min-w-[108px] flex-col items-center gap-[9px]">
+                <div
+                  className={`flex h-[62px] w-[62px] items-center justify-center rounded-full border-2 transition-all duration-200 ${
+                    isValidated
+                      ? "border-[#2e7d5b] bg-[#e9f4ef]"
+                      : "border-[#0299aa] bg-[#e6f5f7]"
+                  } ${
+                    stage.isClickable
+                      ? "cursor-pointer hover:scale-105 hover:shadow-md"
+                      : ""
+                  } ${
+                    isActive
+                      ? isValidated
+                        ? "ring-2 ring-[#2e7d5b] ring-offset-2"
+                        : "ring-2 ring-[#0299aa] ring-offset-2"
+                      : ""
+                  }`}
+                  onClick={() => handleStageClick(stage.name)}
+                >
+                  <span className={`text-[19px] font-bold ${
+                    isValidated ? "text-[#2e7d5b]" : "text-[#0299aa]"
+                  }`}>{stage.count}</span>
+                </div>
+                <span className="text-center text-[12.5px] leading-[1.25] text-[#5c6178]">
+                  {stage.name}
+                </span>
               </div>
-              <span className="text-sm text-muted-foreground text-center leading-tight">
-                {stage.name}
-              </span>
+
+              {/* Arrow (except for last item) */}
+              {index < stages.length - 1 && (
+                <ChevronRight className="mt-[22px] h-[18px] w-[18px] flex-shrink-0 text-[#b9bbd4]" strokeWidth={1.5} />
+              )}
             </div>
-            
-            {/* Arrow (except for last item) */}
-            {index < stages.length - 1 && (
-              <ChevronRight className="w-6 h-6 text-muted-foreground flex-shrink-0 -mt-4" />
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

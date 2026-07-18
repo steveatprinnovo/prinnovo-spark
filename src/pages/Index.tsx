@@ -1,13 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardHeader } from "@/components/DashboardHeader";
 import { KPICards } from "@/components/KPICards";
 import { FilterBar, FilterState } from "@/components/FilterBar";
 import { CompanyGrid } from "@/components/CompanyGrid";
 import { CompanyModal } from "@/components/CompanyModal";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
-import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
-import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
+import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";
@@ -15,7 +13,6 @@ import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { lazy, Suspense } from "react";
 const CountryMap = lazy(() => import("@/components/CountryMap").then(m => ({ default: m.CountryMap })));
 import { PipelineStages } from "@/components/PipelineStages";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { PREVIEW } from "@/preview/previewMode";
@@ -25,9 +22,8 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, ventureOffice, loading: authzLoading } = useUserAuth();
-  const { selectedVentureOffice, showSelector, selectVentureOffice, changeVentureOffice } = useAdminVentureOffice();
+  const { selectedVentureOffice, showSelector, selectVentureOffice } = useAdminVentureOffice();
   const { companies, loading } = useCompanies();
-  const { details: ventureOfficeDetails } = useVentureOfficeDetails(isAdmin ? selectedVentureOffice : ventureOffice || "");
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     ipaYear: "",
@@ -38,7 +34,7 @@ const Index = () => {
   });
 
   // Get unique venture offices
-  const ventureOffices = useMemo(() => 
+  const ventureOffices = useMemo(() =>
     Array.from(new Set(companies.map(c => c.venture_office).filter(Boolean))) as string[],
     [companies]
   );
@@ -64,33 +60,6 @@ const Index = () => {
       return true;
     });
   }, [companies, isAdmin, ventureOffice, selectedVentureOffice]);
-
-  // Get the most recent updated date from companies or venture office
-  const lastUpdated = useMemo(() => {
-    const dates: string[] = [];
-    
-    // Add company updated_at dates
-    ventureOfficeFilteredCompanies.forEach(c => {
-      if ((c as any).updated_at) {
-        dates.push((c as any).updated_at);
-      }
-    });
-    
-    // Add venture office updated_at
-    if (ventureOfficeDetails?.updated_at) {
-      dates.push(ventureOfficeDetails.updated_at);
-    }
-    
-    if (dates.length === 0) return null;
-    return dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
-  }, [ventureOfficeFilteredCompanies, ventureOfficeDetails]);
-
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  };
 
   const filteredCompanies = useMemo(() => {
     return ventureOfficeFilteredCompanies.filter(company => {
@@ -126,9 +95,8 @@ const Index = () => {
   // Show loading while checking authentication or loading data
   if (authLoading || authzLoading || loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        <div className="container mx-auto p-6 space-y-6">
+      <PageContainer>
+        <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-3">
             {[...Array(3)].map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -141,7 +109,7 @@ const Index = () => {
             ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -151,81 +119,60 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
+    <PageContainer>
       {/* Venture Office Selector Modal for Admins */}
       {isAdmin && <VentureOfficeSelector isOpen={showSelector} ventureOffices={ventureOffices} onSelect={selectVentureOffice} />}
-      
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Page Header */}
-        <div className="flex justify-between items-start mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Portfolio Dashboard</h1>
-          
-          <div className="flex flex-col items-end gap-3">
-            {/* Admin Venture Office Selector */}
-            {isAdmin && (
-              <div>
-                <VentureOfficeDropdown
-                  value={selectedVentureOffice}
-                  onChange={changeVentureOffice}
-                  ventureOffices={ventureOffices}
-                  companyCounts={Object.fromEntries(ventureOffices.map(o => [o, companies.filter(c => c.venture_office === o).length]))}
-                  totalCount={companies.length}
-                />
-              </div>
-            )}
-            {lastUpdated && (
-              <div className="text-sm text-muted-foreground italic">
-                Current as of {formatDate(lastUpdated)}
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Top Section: KPIs and Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
-          {/* Left: KPI Cards - Smaller and vertically distributed */}
-          <div className="w-auto">
-            <KPICards selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} />
-          </div>
-          
-          {/* Right: Interactive Map - Expanded 10% to the left */}
-          <div className="-ml-[calc(10%-40px)]">{/* Narrowed by 40px total from the left */}
-            <Suspense fallback={<div className="h-[500px] rounded-lg border bg-muted/30 animate-pulse" />}>
-            <CountryMap 
+
+      {/* Page Header */}
+      <PageHeader
+        title="Portfolio Dashboard"
+        subtitle="Companies, pipeline, and portfolio performance at a glance."
+      />
+
+      {/* Top Section: KPIs and Map */}
+      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[300px_1fr]">
+        {/* Left: 3 stacked flat KPI cards */}
+        <KPICards selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} />
+
+        {/* Right: Interactive Map */}
+        <div className="min-w-0">
+          <Suspense fallback={<div className="h-[500px] animate-pulse rounded-lg border border-[#e2e3ec] bg-[#f3f4f8]" />}>
+            <CountryMap
               companies={ventureOfficeFilteredCompanies}
               onCountryClick={handleCountryClick}
               selectedCountry={filters.countryOfOrigin}
               selectedVentureOffice={isAdmin ? selectedVentureOffice : ventureOffice || "all"}
             />
-            </Suspense>
-          </div>
+          </Suspense>
         </div>
-        
-        {/* Separator */}
-        <Separator className="my-6" />
-        
-        {/* Pipeline Stages */}
-        <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} dealsOffice={isAdmin ? selectedVentureOffice : ventureOffice} />
-        
-        {/* Filters */}
+      </div>
+
+      {/* Hairline divider */}
+      <div className="my-8 h-px bg-[#e2e3ec]" />
+
+      {/* Pipeline Stages */}
+      <PipelineStages companies={filteredCompanies} filters={filters} onFilterChange={setFilters} selectedVentureOffice={isAdmin ? selectedVentureOffice : undefined} dealsOffice={isAdmin ? selectedVentureOffice : ventureOffice} />
+
+      {/* Filters */}
+      <div className="mt-6">
         <FilterBar onFiltersChange={setFilters} filters={filters} companies={ventureOfficeFilteredCompanies} />
-        
-        {/* Company Grid */}
-        <CompanyGrid 
+      </div>
+
+      {/* Company Grid */}
+      <div className="mt-5">
+        <CompanyGrid
           companies={filteredCompanies}
           onCompanyClick={setSelectedCompany}
         />
-        
-        {/* Company Detail Modal */}
-        <CompanyModal
-          company={selectedCompany}
-          isOpen={!!selectedCompany}
-          onClose={() => setSelectedCompany(null)}
-        />
       </div>
-    </div>
+
+      {/* Company Detail Modal */}
+      <CompanyModal
+        company={selectedCompany}
+        isOpen={!!selectedCompany}
+        onClose={() => setSelectedCompany(null)}
+      />
+    </PageContainer>
   );
 };
 

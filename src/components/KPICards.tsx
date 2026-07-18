@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Building2, DollarSign, TrendingUp } from "lucide-react";
 import { useVentureOfficeDetails } from "@/hooks/useVentureOfficeDetails";
 
@@ -15,55 +14,67 @@ export function KPICards({ selectedVentureOffice }: KPICardsProps) {
       value: details?.["Companies Evaluated"]?.toString() || "0",
       icon: Building2,
       description: "Companies evaluated to date",
-      gradient: "var(--gradient-primary)"
+      background: "#171d70",
+      shadow: "0 4px 16px rgba(23,29,112,.14)",
+      iconBg: "rgba(255,255,255,.12)",
+      iconColor: "text-[#80ccd5]",
+      labelOpacity: "text-white/70",
+      descOpacity: "text-white/55"
     },
     {
       label: "Direct Cash Investment",
       value: "$4,087,500",
       icon: DollarSign,
       description: "Non-IPA cash purchases of company equity",
-      gradient: "var(--gradient-accent)"
+      background: "#0299aa",
+      shadow: "0 4px 16px rgba(2,153,170,.18)",
+      iconBg: "rgba(255,255,255,.14)",
+      iconColor: "text-white",
+      labelOpacity: "text-white/80",
+      descOpacity: "text-white/65"
     },
     {
       label: "Portfolio Value",
       value: "$17,985,975",
       icon: TrendingUp,
       description: "Total portfolio investment value",
-      gradient: "var(--gradient-primary)"
+      background: "#0b0e3a",
+      shadow: "0 4px 16px rgba(11,14,58,.2)",
+      iconBg: "rgba(255,255,255,.1)",
+      iconColor: "text-[#80ccd5]",
+      labelOpacity: "text-white/70",
+      descOpacity: "text-white/55"
     }
   ];
+
   return (
-    <div className="flex flex-col justify-between h-[500px] max-w-xs gap-4 mr-10">{/* Added total 40px margin-right for spacing */}
+    <div className="flex h-full min-h-[420px] flex-col gap-4">
       {kpiData.map((kpi, index) => {
         const Icon = kpi.icon;
         return (
-          <Card 
-            key={index} 
-            className="relative overflow-hidden transition-all duration-300 hover:shadow-lg border-0 flex-1"
-            style={{ 
-              background: kpi.gradient,
-              boxShadow: "var(--shadow-kpi)"
-            }}
+          <div
+            key={index}
+            className="flex flex-1 items-center justify-between gap-3.5 rounded-lg p-[22px] text-white"
+            style={{ background: kpi.background, boxShadow: kpi.shadow }}
           >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-white/90">
-                    {kpi.label}
-                  </p>
-                  <p className="text-3xl font-bold text-white">
-                    {kpi.value}
-                  </p>
-                  <p className="text-xs text-white/80">
-                    {kpi.description}
-                  </p>
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="min-w-0">
+              <p className={`m-0 text-[11.5px] font-semibold uppercase tracking-[0.14em] ${kpi.labelOpacity}`}>
+                {kpi.label}
+              </p>
+              <p className="mb-1 mt-1.5 text-[30px] font-bold leading-none text-white">
+                {kpi.value}
+              </p>
+              <p className={`m-0 text-xs ${kpi.descOpacity}`}>
+                {kpi.description}
+              </p>
+            </div>
+            <div
+              className="flex h-11 w-11 flex-none items-center justify-center rounded-lg"
+              style={{ background: kpi.iconBg }}
+            >
+              <Icon className={`h-5 w-5 ${kpi.iconColor}`} strokeWidth={1.5} />
+            </div>
+          </div>
         );
       })}
     </div>
