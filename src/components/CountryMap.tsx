@@ -254,7 +254,12 @@ export const CountryMap: React.FC<CountryMapProps> = ({
 
   return (
     <div className="relative w-full h-[500px] rounded-lg overflow-hidden border">{/* Expanded height by 30% */}
-      <div ref={mapContainer} className="absolute inset-0" />
+      {/* Inline positioning: mapbox-gl.css ships in this lazy chunk and its
+          `.mapboxgl-map { position: relative }` loads after the Tailwind
+          utilities, overriding `.absolute` and collapsing the container to
+          0 height (the "white map" bug). Inline styles cannot be overridden
+          by a stylesheet. */}
+      <div ref={mapContainer} style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }} />
       <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg shadow-sm">
         <h3 className="font-semibold text-sm mb-1">Portfolio Company Presence</h3>
         <p className="text-xs text-muted-foreground">
