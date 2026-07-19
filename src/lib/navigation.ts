@@ -1,4 +1,4 @@
-import { Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Layers, Kanban, BarChart3, Calculator, LucideIcon } from "lucide-react";
+import { Home, ClipboardList, DollarSign, TrendingUp, Target, Settings, Layers, Kanban, BarChart3, Calculator, Bot, LucideIcon } from "lucide-react";
 import { AppRole } from "@/hooks/useUserAuth";
 
 export interface NavChild {
@@ -37,6 +37,17 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   { path: "/costs", icon: Calculator, label: "Cost Projections", roles: ["admin", "vo_leader"] },
+  {
+    path: "/intelligence/agent", icon: Bot, label: "Agent", roles: ["admin", "vo_leader"],
+    children: [
+      { path: "/intelligence/agent/baa-review", label: "BAA Review" },
+      { path: "/intelligence/agent/expense-report", label: "Expense Report" },
+      { path: "/intelligence/agent/financial-pro-forma", label: "Financial Pro-Forma" },
+      { path: "/intelligence/agent/ipa-review", label: "IPA Review" },
+      { path: "/intelligence/agent/legal-tracker", label: "Legal Tracker" },
+      { path: "/intelligence/agent/msa-comparison", label: "MSA Comparison" },
+    ],
+  },
   { path: "/reporting", icon: BarChart3, label: "Reporting", roles: ["admin", "user", "vo_leader", "technical"] },
   { path: "/settings", icon: Settings, label: "Settings", roles: ["admin", "user", "vo_leader"] },
 ];
@@ -49,6 +60,7 @@ export const NAV_SECTIONS: NavSection[] = [
   { label: null, items: [byPath.get("/")!] },
   { label: "Portfolio", items: [byPath.get("/projections")!, byPath.get("/investments")!, byPath.get("/focus-areas")!, byPath.get("/dealflow")!] },
   { label: "Operations", items: [byPath.get("/implementations")!, byPath.get("/taskboard")!, byPath.get("/costs")!] },
+  { label: "Intelligence", items: [byPath.get("/intelligence/agent")!] },
   { label: "Reports", items: [byPath.get("/reporting")!] },
 ];
 

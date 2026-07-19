@@ -72,7 +72,8 @@ export function AppSidebar() {
   const isActive = (path: string) =>
     path === "/dealflow" ? location.pathname.startsWith("/dealflow")
       : path === "/taskboard" ? location.pathname.startsWith("/taskboard")
-        : location.pathname === path;
+        : path === "/intelligence/agent" ? location.pathname.startsWith("/intelligence/agent")
+          : location.pathname === path;
 
   const displayName: string = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || "";
   const initials = displayName
