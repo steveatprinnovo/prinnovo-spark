@@ -1,75 +1,191 @@
+import { useMemo } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { ArrowDown, CornerDownRight } from "lucide-react";
 import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { PLUGIN_LATEST, skillBySlug, type FlowNode } from "@/lib/agentSkills";
 
-/** Vertical logic-path infographic for a skill (Intelligence · Agent).
- *  Node kinds: step (navy), decision (teal, with branch chips), gate
- *  (teal-tint outline quality gate with loop note), optional (dashed),
- *  deliver (green). */
-function FlowDiagram({ flow }: { flow: FlowNode[] }) {
+/**
+ * Spatial (serpentine) logic-path infographic for a skill — Intelligence ·
+ * Agent. Nodes flow left-to-right, wrap down, and return right-to-left,
+ * matching the approved preview diagram rather than a plain vertical stack.
+ * Node kinds: step (navy), decision (teal + branch chips), gate (teal-tint
+ * outline with a dashed revision-loop arc), optional (dashed), deliver
+ * (green). Rendered as one responsive SVG; text lives in foreignObject so
+ * it wraps naturally.
+ */
+
+const CANVAS_W = 960;
+const COLS = 3;
+const BOX_W = 272;
+const COL_X = [8, 332, 656]; // 3 columns, 52px gutters, 8px margins
+const ROW_GAP = 58;
+
+function nodeHeight(n: FlowNode): number {
+  switch (n.kind) {
+    case "decision": {
+      const chipRows = Math.ceil(n.branches.length / 2);
+      return 58 + 6 + chipRows * 42;
+    }
+    case "gate": return n.loopNote ? 96 : 72;
+    case "optional": return 58;
+    default: return 64; // step, deliver
+  }
+}
+
+interface Placed {
+  node: FlowNode;
+  x: number;
+  y: number;
+  h: number;
+  numbered?: number;
+}
+
+function layout(flow: FlowNode[]): { cells: Placed[]; height: number } {
+  const cells: Placed[] = [];
+  let y = 4;
+  let num = 0;
+  for (let i = 0; i < flow.length; i += COLS) {
+    const row = flow.slice(i, i + COLS);
+    const rowH = Math.max(...row.map(nodeHeight));
+    const rowIdx = Math.floor(i / COLS);
+    row.forEach((node, j) => {
+      const col = rowIdx % 2 === 0 ? j : COLS - 1 - j;
+      const numbered = node.kind === "step" || node.kind === "decision" || node.kind === "gate" ? ++num : undefined;
+      cells.push({ node, x: COL_X[col], y, h: nodeHeight(node), numbered });
+    });
+    y += rowH + ROW_GAP;
+  }
+  return { cells, height: y - ROW_GAP + 8 };
+}
+
+function Connector({ a, b }: { a: Placed; b: Placed }) {
+  if (a.y === b.y) {
+    const leftToRight = a.x < b.x;
+    const x1 = leftToRight ? a.x + BOX_W : a.x;
+    const x2 = leftToRight ? b.x : b.x + BOX_W;
+    return <line x1={x1} y1={a.y + a.h / 2} x2={x2} y2={b.y + b.h / 2} stroke="#8b8fa3" strokeWidth="1.5" markerEnd="url(#flow-arrow)" />;
+  }
+  // row wrap: down from bottom-center of a to top-center of b (same column)
+  return <line x1={a.x + BOX_W / 2} y1={a.y + a.h} x2={b.x + BOX_W / 2} y2={b.y} stroke="#8b8fa3" strokeWidth="1.5" markerEnd="url(#flow-arrow)" />;
+}
+
+function LoopArc({ from, to, note }: { from: Placed; to: Placed; note: string }) {
+  // dashed revision-loop from the gate back to the previous node, arcing
+  // above (or below when boxes sit on different rows) the main path
+  const x1 = from.x + BOX_W / 2;
+  const x2 = to.x + BOX_W / 2;
+  const midX = (x1 + x2) / 2;
+  const lift = 34;
+  const roomAbove = Math.min(from.y, to.y) > lift + 12;
+  if (roomAbove) {
+    const topY = Math.min(from.y, to.y) - lift;
+    const d = `M ${x1} ${from.y} C ${x1} ${topY}, ${x2} ${topY}, ${x2} ${to.y}`;
+    return (
+      <g>
+        <path d={d} fill="none" stroke="#b3413f" strokeWidth="1.3" strokeDasharray="5 4" markerEnd="url(#flow-arrow-red)" />
+        <text x={midX} y={topY + 10} textAnchor="middle" fontSize="10.5" fontStyle="italic" fill="#b3413f">{note}</text>
+      </g>
+    );
+  }
+  const y1 = from.y + from.h;
+  const y2 = to.y + to.h;
+  const dipY = Math.max(y1, y2) + 30;
+  const d = `M ${x1} ${y1} C ${x1} ${dipY}, ${x2} ${dipY}, ${x2} ${y2}`;
   return (
-    <div className="mx-auto flex max-w-[620px] flex-col items-stretch">
-      {flow.map((node, i) => (
-        <div key={i} className="flex flex-col items-center">
-          {i > 0 && (
-            <div className="flex flex-col items-center py-1.5 text-[#8b8fa3]">
-              <ArrowDown className="h-4 w-4" strokeWidth={1.5} />
-            </div>
-          )}
+    <g>
+      <path d={d} fill="none" stroke="#b3413f" strokeWidth="1.3" strokeDasharray="5 4" markerEnd="url(#flow-arrow-red)" />
+      <text x={midX} y={dipY + 4} textAnchor="middle" fontSize="10.5" fontStyle="italic" fill="#b3413f">{note}</text>
+    </g>
+  );
+}
 
-          {node.kind === "step" && (
-            <div className="w-full rounded-lg bg-[#171d70] px-6 py-4 text-center">
-              <div className="text-[13.5px] font-semibold text-white">{i + 1} · {node.title}</div>
-              {node.sub && <div className="mt-1 text-[11.5px] text-[#b3e0e6]">{node.sub}</div>}
-            </div>
-          )}
+function NodeBox({ cell, showInlineLoop }: { cell: Placed; showInlineLoop: boolean }) {
+  const { node, x, y, h, numbered } = cell;
+  const title = numbered ? `${numbered} · ${node.title}` : node.title;
 
-          {node.kind === "decision" && (
-            <div className="w-full">
-              <div className="rounded-lg bg-[#0299aa] px-6 py-4 text-center">
-                <div className="text-[13.5px] font-semibold text-white">{i + 1} · {node.title}</div>
-                {node.sub && <div className="mt-1 text-[11.5px] text-[#e6f5f7]">{node.sub}</div>}
-              </div>
-              <div className={`mt-2.5 grid gap-2 ${node.branches.length === 4 ? "grid-cols-2 lg:grid-cols-4" : node.branches.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
-                {node.branches.map((b, j) => (
-                  <div key={j} className="rounded-md bg-[#e8e9f1] px-3 py-2.5 text-center">
-                    <div className="text-[11.5px] font-semibold text-[#5a5f9c]">{b.label}</div>
-                    {b.sub && <div className="mt-0.5 text-[10.5px] text-[#8b8fa3]">{b.sub}</div>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {node.kind === "gate" && (
-            <div className="w-full rounded-lg border-2 border-[#0299aa] bg-[#e6f5f7] px-6 py-4 text-center">
-              <div className="text-[13.5px] font-semibold text-[#171d70]">{i + 1} · {node.title}</div>
-              {node.sub && <div className="mt-1 text-[11.5px] text-[#5c6178]">{node.sub}</div>}
-              {node.loopNote && (
-                <div className="mt-2 inline-flex items-center gap-1.5 text-[10.5px] italic text-[#b3413f]">
-                  <CornerDownRight className="h-3 w-3" strokeWidth={1.5} /> {node.loopNote}
+  if (node.kind === "decision") {
+    const chipRows = Math.ceil(node.branches.length / 2);
+    const chipW = (BOX_W - 6) / 2;
+    return (
+      <g>
+        <rect x={x} y={y} width={BOX_W} height={52} rx={8} fill="#0299aa" />
+        <foreignObject x={x} y={y} width={BOX_W} height={52}>
+          <div className="flex h-full flex-col items-center justify-center px-3 text-center">
+            <div className="text-[12.5px] font-semibold leading-tight text-white">{title}</div>
+            {node.sub && <div className="mt-0.5 text-[10px] leading-tight text-[#e6f5f7]">{node.sub}</div>}
+          </div>
+        </foreignObject>
+        {node.branches.map((b, j) => {
+          const row = Math.floor(j / 2);
+          const colInRow = j % 2;
+          const isLastOdd = node.branches.length % 2 === 1 && j === node.branches.length - 1;
+          const bw = isLastOdd ? BOX_W : chipW;
+          const bx = isLastOdd ? x : x + colInRow * (chipW + 6);
+          const by = y + 58 + row * 42;
+          return (
+            <g key={j}>
+              <rect x={bx} y={by} width={bw} height={38} rx={6} fill="#e8e9f1" />
+              <foreignObject x={bx} y={by} width={bw} height={38}>
+                <div className="flex h-full flex-col items-center justify-center px-2 text-center">
+                  <div className="text-[10.5px] font-semibold leading-tight text-[#5a5f9c]">{b.label}</div>
+                  {b.sub && <div className="text-[9px] leading-tight text-[#8b8fa3]">{b.sub}</div>}
                 </div>
-              )}
-            </div>
-          )}
+              </foreignObject>
+            </g>
+          );
+        })}
+      </g>
+    );
+  }
 
-          {node.kind === "optional" && (
-            <div className="w-full rounded-lg border-[1.5px] border-dashed border-[#b9bbd4] bg-white px-6 py-3.5 text-center">
-              <div className="text-[12.5px] font-semibold text-[#5a5f9c]">{node.title}</div>
-              {node.sub && <div className="mt-0.5 text-[10.5px] text-[#8b8fa3]">{node.sub}</div>}
-            </div>
-          )}
+  const fill = node.kind === "step" ? "#171d70" : node.kind === "deliver" ? "#2e7d5b" : node.kind === "gate" ? "#e6f5f7" : "#ffffff";
+  const titleColor = node.kind === "gate" ? "#171d70" : node.kind === "optional" ? "#5a5f9c" : "#ffffff";
+  const subColor = node.kind === "step" ? "#b3e0e6" : node.kind === "deliver" ? "#d9f0e5" : node.kind === "gate" ? "#5c6178" : "#8b8fa3";
 
-          {node.kind === "deliver" && (
-            <div className="w-full rounded-lg bg-[#2e7d5b] px-6 py-4 text-center">
-              <div className="text-[13.5px] font-semibold text-white">{node.title}</div>
-              {node.sub && <div className="mt-1 text-[11.5px] text-[#d9f0e5]">{node.sub}</div>}
-            </div>
+  return (
+    <g>
+      <rect
+        x={x} y={y} width={BOX_W} height={h} rx={8} fill={fill}
+        stroke={node.kind === "gate" ? "#0299aa" : node.kind === "optional" ? "#b9bbd4" : "none"}
+        strokeWidth={node.kind === "gate" ? 2 : node.kind === "optional" ? 1.5 : 0}
+        strokeDasharray={node.kind === "optional" ? "5 4" : undefined}
+      />
+      <foreignObject x={x} y={y} width={BOX_W} height={h}>
+        <div className="flex h-full flex-col items-center justify-center px-3 text-center">
+          <div className="text-[12.5px] font-semibold leading-tight" style={{ color: titleColor }}>{title}</div>
+          {node.sub && <div className="mt-1 text-[10px] leading-tight" style={{ color: subColor }}>{node.sub}</div>}
+          {node.kind === "gate" && node.loopNote && showInlineLoop && (
+            <div className="mt-1.5 text-[9.5px] italic leading-tight text-[#b3413f]">↺ {node.loopNote}</div>
           )}
         </div>
-      ))}
-    </div>
+      </foreignObject>
+    </g>
+  );
+}
+
+export function FlowDiagram({ flow }: { flow: FlowNode[] }) {
+  const { cells, height } = useMemo(() => layout(flow), [flow]);
+  return (
+    <svg viewBox={`0 0 ${CANVAS_W} ${height}`} className="block h-auto w-full" role="img" aria-label="Skill logic path diagram">
+      <defs>
+        <marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#8b8fa3" />
+        </marker>
+        <marker id="flow-arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#b3413f" />
+        </marker>
+      </defs>
+      {cells.slice(1).map((cell, i) => <Connector key={`c${i}`} a={cells[i]} b={cell} />)}
+      {cells.map((cell, i) => {
+        const arcable = cell.node.kind === "gate" && !!cell.node.loopNote && i > 0 && cells[i - 1].y === cell.y;
+        return arcable
+          ? <LoopArc key={`l${i}`} from={cell} to={cells[i - 1]} note={(cell.node as { loopNote: string }).loopNote} />
+          : null;
+      })}
+      {cells.map((cell, i) => {
+        const hasArc = cell.node.kind === "gate" && !!cell.node.loopNote && i > 0 && cells[i - 1].y === cell.y;
+        return <NodeBox key={`n${i}`} cell={cell} showInlineLoop={!hasArc} />;
+      })}
+    </svg>
   );
 }
 
