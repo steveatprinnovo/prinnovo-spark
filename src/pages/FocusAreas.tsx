@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserAuth } from "@/hooks/useUserAuth";
+import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useAllVentureOfficeLogos } from "@/hooks/useVentureOfficeLogo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +38,8 @@ const FocusAreas = () => {
   usePageTitle("Focus Areas");
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useUserAuth();
+  const { selectedVentureOffice } = useAdminVentureOffice();
   const { logos: ventureOfficeLogos } = useAllVentureOfficeLogos();
   const [focusAreas, setFocusAreas] = useState<FocusArea[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,13 +96,19 @@ const FocusAreas = () => {
     }
   }, [user]);
 
-  // Filter focus areas based on search query
+  // Office filter (shared admin selection from the page-header dropdown),
+  // then search. Non-admin behavior is unchanged (all offices).
+  const officeFilteredAreas = useMemo(() => {
+    if (!isAdmin || selectedVentureOffice === "all") return focusAreas;
+    return focusAreas.filter(area => area.venture_office === selectedVentureOffice);
+  }, [focusAreas, isAdmin, selectedVentureOffice]);
+
   const filteredFocusAreas = useMemo(() => {
-    if (!searchQuery.trim()) return focusAreas;
+    if (!searchQuery.trim()) return officeFilteredAreas;
 
     const query = searchQuery.toLowerCase().trim();
     
-    return focusAreas.filter(area => {
+    return officeFilteredAreas.filter(area => {
       // Check if focus area name matches
       if (area.focus_area_name.toLowerCase().includes(query)) return true;
       
@@ -110,7 +120,7 @@ const FocusAreas = () => {
       
       return false;
     });
-  }, [focusAreas, searchQuery]);
+  }, [officeFilteredAreas, searchQuery]);
 
   // Group focus areas by venture office
   const groupedByVentureOffice = useMemo((): VentureOfficeGroup[] => {
@@ -168,7 +178,6 @@ const FocusAreas = () => {
         <PageHeader
           title="Focus Areas"
           subtitle="Strategic focus areas across all venture offices"
-          officeSelector={false}
           actions={<div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

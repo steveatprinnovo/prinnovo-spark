@@ -4,12 +4,23 @@ import { useAdminVentureOffice } from "@/hooks/useAdminVentureOffice";
 import { useAllVentureOffices } from "@/hooks/useAllVentureOffices";
 import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 
+interface OfficeOverride {
+  /** Render the dropdown regardless of role (e.g. Taskboard, where
+   *  technical users and VO leaders may filter offices). */
+  show: boolean;
+  value: string;
+  onChange: (office: string) => void;
+}
+
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   /** Show the venture-office dropdown (admins only; other roles see their
    *  office in the eyebrow). Defaults to true. */
   officeSelector?: boolean;
+  /** Page-controlled office filter replacing the shared admin selection
+   *  in the standard top-right slot. */
+  office?: OfficeOverride;
   /** Extra controls rendered on the right, above the office selector. */
   actions?: ReactNode;
 }
@@ -17,7 +28,7 @@ interface PageHeaderProps {
 /** Standard page header (UX redesign 2026-07-18): teal office eyebrow,
  *  navy H1, subtitle, and the venture-office selector at the right with a
  *  "Current as of" line beneath. */
-export function PageHeader({ title, subtitle, officeSelector = true, actions }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, officeSelector = true, office, actions }: PageHeaderProps) {
   const { isAdmin, ventureOffice } = useUserAuth();
   const { selectedVentureOffice, changeVentureOffice } = useAdminVentureOffice();
   const { ventureOffices } = useAllVentureOffices();
@@ -35,14 +46,26 @@ export function PageHeader({ title, subtitle, officeSelector = true, actions }: 
       </div>
       <div className="flex flex-col items-end gap-2">
         {actions}
-        {officeSelector && isAdmin && (
-          <div className="min-w-[300px]">
-            <VentureOfficeDropdown
-              value={selectedVentureOffice}
-              onChange={changeVentureOffice}
-              ventureOffices={ventureOffices}
-            />
-          </div>
+        {office ? (
+          office.show && (
+            <div className="min-w-[300px]">
+              <VentureOfficeDropdown
+                value={office.value}
+                onChange={office.onChange}
+                ventureOffices={ventureOffices}
+              />
+            </div>
+          )
+        ) : (
+          officeSelector && isAdmin && (
+            <div className="min-w-[300px]">
+              <VentureOfficeDropdown
+                value={selectedVentureOffice}
+                onChange={changeVentureOffice}
+                ventureOffices={ventureOffices}
+              />
+            </div>
+          )
         )}
         <div className="text-xs italic text-[#8b8fa3]">Current as of {asOf}</div>
       </div>

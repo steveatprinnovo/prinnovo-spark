@@ -288,23 +288,14 @@ export default function Taskboard() {
         <PageHeader
           title="IT Taskboard"
           subtitle={`${open.length} open card${open.length === 1 ? "" : "s"}${canEdit ? "" : " · view only"}`}
-          officeSelector={false}
-          actions={<div className="flex items-center gap-2">
-            {showOfficeFilter && (
-              <Select value={officeFilter} onValueChange={setOfficeFilter}>
-                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All offices</SelectItem>
-                  {VENTURE_OFFICES.map(o => <SelectItem key={o.code} value={o.name}><OfficeTag office={o.name} /></SelectItem>)}
-                </SelectContent>
-              </Select>
-            )}
+          office={{ show: showOfficeFilter, value: officeFilter, onChange: setOfficeFilter }}
+          actions={
             <Link to="/taskboard/archive">
               <Button variant="outline" size="sm" className="gap-2">
                 <Archive className="h-4 w-4" /> Archive {archived.length > 0 && <Badge variant="secondary">{archived.length}</Badge>}
               </Button>
             </Link>
-          </div>}
+          }
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
