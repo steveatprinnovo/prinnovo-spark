@@ -1,1 +1,0 @@
-import{r}from"./vendor-react-D5ApwbWg.js";function s(o){return r.useMemo(()=>{const t=new Map;o.forEach(a=>{const e=a["Company Name"],f=a.venture_office;e&&f&&(t.has(e)||t.set(e,new Set),t.get(e).add(f))});const n=new Set;return t.forEach((a,e)=>{a.size>1&&n.add(e)}),n},[o])}export{s as u};
