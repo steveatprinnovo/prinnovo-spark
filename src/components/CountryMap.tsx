@@ -60,11 +60,33 @@ export const CountryMap: React.FC<CountryMapProps> = ({
     fetchMapboxToken();
   }, []);
 
+  // Latest-value refs so map event handlers and the style.load callback
+  // never capture stale props — and, critically, so the map is created
+  // exactly ONCE per token. Recreating the WebGL map on every parent
+  // re-render (the old deps included an array and a callback with fresh
+  // identities each render) leaks GL contexts until the browser refuses
+  // to paint — the "white map" failure (fixed 2026-07-19).
+  const countriesRef = useRef<string[]>(countriesWithCompanies);
+  const selectedCountryRef = useRef<string | undefined>(selectedCountry);
+  const onCountryClickRef = useRef(onCountryClick);
+  useEffect(() => {
+    countriesRef.current = countriesWithCompanies;
+    selectedCountryRef.current = selectedCountry;
+    onCountryClickRef.current = onCountryClick;
+  });
+
+  const highlightPaint = (selected: string | undefined) => ([
+    'case',
+    ['==', ['get', 'name_en'], selected || ''],
+    '#2563eb',
+    '#059669',
+  ] as unknown as mapboxgl.Expression);
+
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken) return;
 
     mapboxgl.accessToken = mapboxToken;
-    
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/outdoors-v12',
@@ -73,21 +95,21 @@ export const CountryMap: React.FC<CountryMapProps> = ({
       projection: 'globe',
     });
 
+    map.current.on('error', (e) => {
+      console.error('Mapbox error:', e?.error?.message ?? e);
+    });
+
     map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
+      new mapboxgl.NavigationControl({ visualizePitch: true }),
       'top-right'
     );
 
     map.current.on('style.load', () => {
-      // Add a data source for countries
       map.current?.addSource('countries', {
         type: 'vector',
         url: 'mapbox://mapbox.country-boundaries-v1'
       });
 
-      // Add layer for all countries (base layer)
       map.current?.addLayer({
         id: 'countries-base',
         type: 'fill',
@@ -99,25 +121,18 @@ export const CountryMap: React.FC<CountryMapProps> = ({
         }
       });
 
-      // Add layer for countries with companies (highlighted)
       map.current?.addLayer({
         id: 'countries-highlighted',
         type: 'fill',
         source: 'countries',
         'source-layer': 'country_boundaries',
-        filter: ['in', 'name_en', ...countriesWithCompanies],
+        filter: ['in', 'name_en', ...countriesRef.current],
         paint: {
-          'fill-color': [
-            'case',
-            ['==', ['get', 'name_en'], selectedCountry || ''],
-            '#2563eb', // Selected country color (blue)
-            '#059669'  // Default highlighted color (green)
-          ],
+          'fill-color': highlightPaint(selectedCountryRef.current),
           'fill-opacity': 0.7
         }
       });
 
-      // Add border layer
       map.current?.addLayer({
         id: 'countries-border',
         type: 'line',
@@ -129,17 +144,15 @@ export const CountryMap: React.FC<CountryMapProps> = ({
         }
       });
 
-      // Add click event
       map.current?.on('click', 'countries-highlighted', (e) => {
         if (e.features && e.features[0] && e.features[0].properties) {
           const countryName = e.features[0].properties.name_en;
-          if (countriesWithCompanies.includes(countryName)) {
-            onCountryClick(countryName);
+          if (countriesRef.current.includes(countryName)) {
+            onCountryClickRef.current(countryName);
           }
         }
       });
 
-      // Change cursor on hover
       map.current?.on('mouseenter', 'countries-highlighted', () => {
         if (map.current) {
           map.current.getCanvas().style.cursor = 'pointer';
@@ -152,13 +165,36 @@ export const CountryMap: React.FC<CountryMapProps> = ({
         }
       });
 
-      // Markers will be added in separate useEffect based on selectedVentureOffice
+      // Guard against a zero-size container at construction (lazy mount
+      // inside the new app shell): re-measure once the style is in.
+      map.current?.resize();
     });
 
+    // Keep the canvas sized to its container (sidebar collapse changes
+    // the main column width without a window resize event).
+    const ro = new ResizeObserver(() => map.current?.resize());
+    ro.observe(mapContainer.current);
+
     return () => {
+      ro.disconnect();
       map.current?.remove();
+      map.current = null;
     };
-  }, [mapboxToken, countriesWithCompanies, selectedCountry, onCountryClick]);
+  }, [mapboxToken]);
+
+  // Update highlight filter + selected-country paint in place — no map
+  // teardown needed when data or selection changes.
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    const apply = () => {
+      if (!m.getLayer('countries-highlighted')) return;
+      m.setFilter('countries-highlighted', ['in', 'name_en', ...countriesWithCompanies]);
+      m.setPaintProperty('countries-highlighted', 'fill-color', highlightPaint(selectedCountry));
+    };
+    if (m.isStyleLoaded()) apply();
+    else m.once('idle', apply);
+  }, [countriesWithCompanies, selectedCountry]);
 
   // Update markers based on selected venture office
   useEffect(() => {
