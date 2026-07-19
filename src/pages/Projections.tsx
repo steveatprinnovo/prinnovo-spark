@@ -111,8 +111,8 @@ const CompanyRow = ({
 
   return (
     <TableRow>
-      <TableCell className="flex items-center gap-3 text-left cell-1 transition-colors">
-        <div className="w-8 h-8 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
+      <TableCell className="flex items-center gap-2 text-left cell-1 px-2 py-2.5 transition-colors">
+        <div className="w-6 h-6 rounded-md overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -123,7 +123,7 @@ const CompanyRow = ({
             <DollarSign className="w-4 h-4 text-muted-foreground" />
           )}
         </div>
-        <span className="font-medium text-sm truncate text-[#171d70]">{company["Company Name"]}</span>
+        <span className="font-medium text-[12.5px] truncate text-[#171d70]">{company["Company Name"]}</span>
         {ventureOfficeLogo && (
           <TooltipProvider>
             <Tooltip>
@@ -141,7 +141,7 @@ const CompanyRow = ({
           </TooltipProvider>
         )}
       </TableCell>
-      <TableCell className="cell-2 transition-colors text-center text-sm text-[#232842]">
+      <TableCell className="cell-2 transition-colors text-center text-[12.5px] px-2 py-2.5 text-[#232842]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -153,7 +153,7 @@ const CompanyRow = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="cell-3 transition-colors text-center text-sm text-[#232842]">
+      <TableCell className="cell-3 transition-colors text-center text-[12.5px] px-2 py-2.5 text-[#232842]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -165,7 +165,7 @@ const CompanyRow = ({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="cell-4 transition-colors text-center text-sm text-[#232842]">
+      <TableCell className="cell-4 transition-colors text-center text-[12.5px] px-2 py-2.5 text-[#232842]">
         {(company["Invested Amount"] || 0) === 0
           ? "N/A"
           : showTargetCashReturnAsPercent
@@ -175,16 +175,16 @@ const CompanyRow = ({
             : formatCurrency(targetCashReturn)
         }
       </TableCell>
-      <TableCell className="cell-5 transition-colors text-center text-sm text-[#232842]">
+      <TableCell className="cell-5 transition-colors text-center text-[12.5px] px-2 py-2.5 text-[#232842]">
         {showEquityValueAsPercent && targetIpaReturn > 0
           ? formatPercentage((equityValue / targetIpaReturn) * 100)
           : formatCurrency(equityValue)
         }
       </TableCell>
-      <TableCell className="cell-6 transition-colors text-center text-sm text-[#232842]">
+      <TableCell className="cell-6 transition-colors text-center text-[12.5px] px-2 py-2.5 text-[#232842]">
         {dataMonetizationForecast === 0 ? "N/A" : formatCurrency(dataMonetizationDollars)}
       </TableCell>
-      <TableCell className="cell-7 transition-colors text-center text-sm text-[#232842]">
+      <TableCell className="cell-7 transition-colors text-center text-[12.5px] px-2 py-2.5 text-[#232842]">
         {dataMonetizationForecast === 0
           ? "N/A"
           : showDataMonetizationAsPercent
@@ -194,7 +194,7 @@ const CompanyRow = ({
             : formatCurrency(dataMonetizationForecast)
         }
       </TableCell>
-      <TableCell className="cell-8 transition-colors text-center text-sm font-semibold text-[#171d70]">{formatCurrency(totalEnterpriseValue)}</TableCell>
+      <TableCell className="cell-8 transition-colors text-center text-[12.5px] px-2 py-2.5 font-semibold text-[#171d70]">{formatCurrency(totalEnterpriseValue)}</TableCell>
     </TableRow>
   );
 };
@@ -382,7 +382,7 @@ const Projections = () => {
       onClick={() => handleSort(field)}
     >
       <div className="flex flex-col items-center gap-1">
-        <span className="table-header-label leading-tight">{children}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8b8fa3] leading-tight">{children}</span>
         {sortField === field && (
           sortDirection === "asc" ?
             <ChevronUp className="h-3 w-3" /> :
@@ -472,7 +472,7 @@ const Projections = () => {
           <span className="accent-rule mb-2.5" />
           <div className="text-base font-bold text-[#171d70]">Revenue Capture by Company</div>
         </div>
-        <div className="projections-table-wrapper relative overflow-x-auto overflow-y-auto h-[calc(100vh-330px)]">
+        <div className="projections-table-wrapper relative overflow-x-hidden overflow-y-auto h-[calc(100vh-330px)]">
           <style>{`
             /* Ensure sticky headers work: neutralize inner shadcn Table wrapper overflow */
             .projections-table-wrapper > div { overflow: visible !important; }
@@ -520,19 +520,19 @@ const Projections = () => {
             .table-container .column-8:hover,
             .table-container:has(.column-8:hover) .cell-8 { background-color: #e6f5f7 !important; }
           `}</style>
-          <Table className="min-w-full table-fixed table-container border-separate border-spacing-0">
+          <Table className="w-full table-fixed table-container border-separate border-spacing-0">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[200px] column-1 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[15%] column-1 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="company">Company</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[150px] column-2 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[11.5%] column-2 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="targetIpaReturn">Target IPA Return</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[120px] column-3 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[9.5%] column-3 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="cashInvested">Cash Invested</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-6 w-[180px] column-4 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[13.5%] column-4 hover:bg-[#e6f5f7] transition-colors">
                   <div className="space-y-2">
                     <SortButton field="targetCashReturn">Target Cash Investment Return</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -560,7 +560,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-6 w-[160px] column-5 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[12.5%] column-5 hover:bg-[#e6f5f7] transition-colors">
                   <div className="space-y-2">
                     <SortButton field="equityValue">Equity Value Captured</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -588,10 +588,10 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[160px] column-6 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[12%] column-6 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="dataMonetizationDollars">Short Term Revenue Dollars Earned</SortButton>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-6 w-[170px] column-7 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[13%] column-7 hover:bg-[#e6f5f7] transition-colors">
                   <div className="space-y-2">
                     <SortButton field="dataMonetizationForecast">Short Term Revenue Forecast</SortButton>
                     <div className="flex items-center justify-center gap-1">
@@ -619,7 +619,7 @@ const Projections = () => {
                     </div>
                   </div>
                 </TableHead>
-                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center py-4 w-[180px] column-8 hover:bg-[#e6f5f7] transition-colors">
+                <TableHead className="sticky top-0 z-20 bg-[#f7f8fb] border-b border-[#e2e3ec] text-center px-1 py-3 w-[13%] column-8 hover:bg-[#e6f5f7] transition-colors">
                   <SortButton field="totalEnterpriseValue">Total Enterprise Value Captured</SortButton>
                 </TableHead>
               </TableRow>
@@ -640,10 +640,10 @@ const Projections = () => {
 
               {/* Portfolio Totals Row */}
               <TableRow className="bg-[#f3f4f8] font-bold text-[#171d70]">
-                <TableCell className="text-left cell-1 transition-colors">Portfolio Total</TableCell>
-                <TableCell className="text-center cell-2 transition-colors">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
-                <TableCell className="text-center cell-3 transition-colors">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
-                <TableCell className="text-center cell-4 transition-colors">
+                <TableCell className="text-left cell-1 px-2 py-2.5 text-[12.5px] transition-colors">Portfolio Total</TableCell>
+                <TableCell className="text-center cell-2 px-2 py-2.5 text-[12.5px] transition-colors">{formatCurrency(portfolioTotals.targetIpaReturn)}</TableCell>
+                <TableCell className="text-center cell-3 px-2 py-2.5 text-[12.5px] transition-colors">{formatCurrency(portfolioTotals.cashInvested)}</TableCell>
+                <TableCell className="text-center cell-4 px-2 py-2.5 text-[12.5px] transition-colors">
                   {portfolioTotals.cashInvested === 0
                     ? "N/A"
                     : showTargetCashReturnAsPercent
@@ -653,16 +653,16 @@ const Projections = () => {
                       : formatCurrency(portfolioTotals.targetCashReturn)
                   }
                 </TableCell>
-                <TableCell className="text-center cell-5 transition-colors">
+                <TableCell className="text-center cell-5 px-2 py-2.5 text-[12.5px] transition-colors">
                   {showEquityValueAsPercent && portfolioTotals.targetIpaReturn > 0
                     ? formatPercentage((portfolioTotals.equityValue / portfolioTotals.targetIpaReturn) * 100)
                     : formatCurrency(portfolioTotals.equityValue)
                   }
                 </TableCell>
-                <TableCell className="text-center cell-6 transition-colors">
+                <TableCell className="text-center cell-6 px-2 py-2.5 text-[12.5px] transition-colors">
                   {portfolioTotals.dataMonetizationForecast === 0 ? "N/A" : formatCurrency(portfolioTotals.dataMonetizationDollars)}
                 </TableCell>
-                <TableCell className="text-center cell-7 transition-colors">
+                <TableCell className="text-center cell-7 px-2 py-2.5 text-[12.5px] transition-colors">
                   {portfolioTotals.dataMonetizationForecast === 0
                     ? "N/A"
                     : showDataMonetizationAsPercent
@@ -672,7 +672,7 @@ const Projections = () => {
                       : formatCurrency(portfolioTotals.dataMonetizationForecast)
                   }
                 </TableCell>
-                <TableCell className="text-center cell-8 transition-colors">{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
+                <TableCell className="text-center cell-8 px-2 py-2.5 text-[12.5px] transition-colors">{formatCurrency(portfolioTotals.totalEnterpriseValue)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
