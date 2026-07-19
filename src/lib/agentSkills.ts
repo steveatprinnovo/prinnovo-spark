@@ -120,7 +120,7 @@ export const AGENT_SKILLS: AgentSkill[] = [
         { label: "Material", sub: "needs pushback" },
         { label: "Minor", sub: "acceptable with note" },
       ] },
-      { kind: "gate", title: "Holistic cross-clause review", sub: "second pass detects coordinated multi-clause patterns", loopNote: "patterns become package pushback recommendations" },
+      { kind: "gate", title: "Holistic cross-clause review", sub: "second pass detects coordinated multi-clause patterns", loopNote: "coordinated patterns \u2192 package pushbacks" },
       { kind: "step", title: "Generate the review document", sub: "redline suggestions, rationale, and severity per clause" },
       { kind: "deliver", title: "Word review delivered", sub: "executive sign-off ready" },
     ],
@@ -206,7 +206,7 @@ export const AGENT_SKILLS: AgentSkill[] = [
     ],
     flow: [
       { kind: "step", title: "Extract all three documents", sub: "template · negotiated draft · final execution copy" },
-      { kind: "gate", title: "Automated word-level classification", sub: "bundled Python script compares every paragraph; entity swaps (name substitutions) filtered out", loopNote: "mechanical substitutions never flagged as substantive" },
+      { kind: "gate", title: "Automated word-level classification", sub: "bundled Python script compares every paragraph; entity swaps (name substitutions) filtered out", loopNote: "name swaps filtered, never flagged" },
       { kind: "decision", title: "Classify each paragraph", branches: [
         { label: "Blue — unchanged", sub: "matches template" },
         { label: "Yellow — negotiated", sub: "changed in draft" },
@@ -242,7 +242,7 @@ export const AGENT_SKILLS: AgentSkill[] = [
       { kind: "step", title: "Parse Fox Rothschild invoices", sub: "line items with attorney, hours, matter" },
       { kind: "step", title: "Parse Tisinger Vance history bill", sub: "entries costed via attorney rate tables" },
       { kind: "step", title: "Attribute companies & categorize", sub: "portfolio company + Contract vs. Regulatory" },
-      { kind: "gate", title: "Exceptions routing", sub: "unattributable line items surfaced, never guessed", loopNote: "reviewer resolves exceptions; tracker stays trustworthy" },
+      { kind: "gate", title: "Exceptions routing", sub: "unattributable line items surfaced, never guessed", loopNote: "reviewer resolves exceptions" },
       { kind: "step", title: "Build the four sheets", sub: "Raw Data · By Attorney · By Company · Exceptions" },
       { kind: "deliver", title: "Legal tracker delivered", sub: "firm-by-firm, company-by-company visibility" },
     ],

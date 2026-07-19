@@ -68,32 +68,42 @@ function Connector({ a, b }: { a: Placed; b: Placed }) {
   return <line x1={a.x + BOX_W / 2} y1={a.y + a.h} x2={b.x + BOX_W / 2} y2={b.y} stroke="#8b8fa3" strokeWidth="1.5" markerEnd="url(#flow-arrow)" />;
 }
 
+/** Dashed revision-loop from a gate back to the previous node.
+ *  Design rules (2026-07-19 label-overlap fix):
+ *  - endpoints are offset 68px off the box centerlines so the loop's
+ *    arrowhead never stacks on a main-flow arrowhead;
+ *  - the label sits INSIDE the arc's bow (between the curve apex and the
+ *    box edge), never on the curve, with a white halo for legibility;
+ *  - the arc bows above the row when there is headroom, below it when the
+ *    pair sits on the top row. */
 function LoopArc({ from, to, note }: { from: Placed; to: Placed; note: string }) {
-  // dashed revision-loop from the gate back to the previous node, arcing
-  // above (or below when boxes sit on different rows) the main path
-  const x1 = from.x + BOX_W / 2;
-  const x2 = to.x + BOX_W / 2;
+  const dir = to.x > from.x ? 1 : -1;
+  const x1 = from.x + BOX_W / 2 + dir * 68;
+  const x2 = to.x + BOX_W / 2 - dir * 68;
   const midX = (x1 + x2) / 2;
-  const lift = 34;
-  const roomAbove = Math.min(from.y, to.y) > lift + 12;
+  const lift = 48;
+  const halo = { paintOrder: "stroke" as const, stroke: "#ffffff", strokeWidth: 3.5, strokeLinejoin: "round" as const };
+  const roomAbove = Math.min(from.y, to.y) > lift + 6;
   if (roomAbove) {
-    const topY = Math.min(from.y, to.y) - lift;
-    const d = `M ${x1} ${from.y} C ${x1} ${topY}, ${x2} ${topY}, ${x2} ${to.y}`;
+    const boxTop = Math.min(from.y, to.y);
+    const ctrlY = boxTop - lift; // curve apex ≈ boxTop - 36
+    const d = `M ${x1} ${from.y} C ${x1} ${ctrlY}, ${x2} ${ctrlY}, ${x2} ${to.y}`;
     return (
       <g>
         <path d={d} fill="none" stroke="#b3413f" strokeWidth="1.3" strokeDasharray="5 4" markerEnd="url(#flow-arrow-red)" />
-        <text x={midX} y={topY + 10} textAnchor="middle" fontSize="10.5" fontStyle="italic" fill="#b3413f">{note}</text>
+        <text x={midX} y={boxTop - 12} textAnchor="middle" fontSize="10.5" fontStyle="italic" fill="#b3413f" style={halo}>{note}</text>
       </g>
     );
   }
   const y1 = from.y + from.h;
   const y2 = to.y + to.h;
-  const dipY = Math.max(y1, y2) + 30;
-  const d = `M ${x1} ${y1} C ${x1} ${dipY}, ${x2} ${dipY}, ${x2} ${y2}`;
+  const boxBottom = Math.max(y1, y2);
+  const ctrlY = boxBottom + 40; // curve nadir ≈ boxBottom + 30
+  const d = `M ${x1} ${y1} C ${x1} ${ctrlY}, ${x2} ${ctrlY}, ${x2} ${y2}`;
   return (
     <g>
       <path d={d} fill="none" stroke="#b3413f" strokeWidth="1.3" strokeDasharray="5 4" markerEnd="url(#flow-arrow-red)" />
-      <text x={midX} y={dipY + 4} textAnchor="middle" fontSize="10.5" fontStyle="italic" fill="#b3413f">{note}</text>
+      <text x={midX} y={boxBottom + 16} textAnchor="middle" fontSize="10.5" fontStyle="italic" fill="#b3413f" style={halo}>{note}</text>
     </g>
   );
 }
