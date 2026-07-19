@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
-import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserAuth } from "@/hooks/useUserAuth";

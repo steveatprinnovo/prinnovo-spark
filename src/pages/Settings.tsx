@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
-import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useDuplicatedCompanyNames } from "@/hooks/useDuplicatedCompanies";
 import { useAuth } from "@/hooks/useAuth";

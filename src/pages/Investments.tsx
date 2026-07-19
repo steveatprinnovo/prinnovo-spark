@@ -1,6 +1,5 @@
 import { PageHeader, PageContainer } from "@/components/layout/PageHeader";
 import { VentureOfficeSelector } from "@/components/VentureOfficeSelector";
-import { VentureOfficeDropdown } from "@/components/VentureOfficeDropdown";
 import { useCompanies, Company } from "@/hooks/useCompanies";
 import { useCompanyLogo } from "@/hooks/useCompanyLogo";
 import { useAuth } from "@/hooks/useAuth";

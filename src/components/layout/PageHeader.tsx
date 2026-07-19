@@ -45,7 +45,8 @@ export function PageHeader({ title, subtitle, officeSelector = true, office, act
         {subtitle && <div className="mt-1.5 text-sm text-[#5c6178]">{subtitle}</div>}
       </div>
       <div className="flex flex-col items-end gap-2">
-        {actions}
+        {/* Office selector is ALWAYS the topmost control in the right-hand
+            stack (Steve, 2026-07-19); page-specific actions sit beneath it. */}
         {office ? (
           office.show && (
             <div className="min-w-[300px]">
@@ -67,6 +68,7 @@ export function PageHeader({ title, subtitle, officeSelector = true, office, act
             </div>
           )
         )}
+        {actions}
         <div className="text-xs italic text-[#8b8fa3]">Current as of {asOf}</div>
       </div>
     </div>
