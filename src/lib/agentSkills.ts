@@ -2,16 +2,16 @@
  * Intelligence · Agent — skill catalog and plugin release data.
  * Content cataloged 2026-07-18 by diffing every packaged version of the
  * healthliant-ventures-os plugin in the Agent archive. Flow definitions
- * mirror each skill's SKILL.md workflow (v0.8.0).
+ * mirror each skill's SKILL.md workflow (v0.8.1).
  */
 
 export const PLUGIN_LATEST = {
   name: "Healthliant Ventures OS",
-  version: "0.8.0",
-  file: "healthliant-ventures-os-0.8.0.plugin",
-  storagePath: "healthliant-ventures-os-0.8.0.plugin",
+  version: "0.8.1",
+  file: "healthliant-ventures-os-0.8.1.plugin",
+  storagePath: "healthliant-ventures-os-0.8.1.plugin",
   sizeLabel: "76 KB",
-  releasedLabel: "Jul 18, 2026",
+  releasedLabel: "Jul 19, 2026",
 };
 
 export interface Release {
@@ -23,7 +23,15 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
-    version: "0.8.0", date: "Jul 18, 2026", tag: "Latest",
+    version: "0.8.1", date: "Jul 19, 2026", tag: "Latest",
+    changes: [
+      { area: "IPA Review", text: "PDF-aware paragraph segmentation — when the final IPA is a PDF, provisions are segmented on structural markers (article headings, decimal sections, sub-letters) with page-number/Bates artifacts dropped and line-break hyphenation repaired, keeping the verbatim text character-exact." },
+      { area: "IPA Review", text: "Classification hardening — leading numbers and cross-references stripped so renumbering alone never registers as change; definition pointer-stubs classified Blue; RED triggers evaluated first; plus a mandatory false-Yellow audit that reclassifies renumbering-only differences before the document is built." },
+      { area: "IPA Review", text: "Execution-copy fidelity — the reproduced Full Contract Text now matches the signed agreement's layout (serif typeface, justified text, hanging-indent numbering, source underlining); color shading is the only added element, while the review apparatus stays in house style." },
+    ],
+  },
+  {
+    version: "0.8.0", date: "Jul 18, 2026",
     changes: [
       { area: "BAA Review", text: "Mandatory secondary holistic review detects coordinated multi-clause redline patterns (e.g. notice-and-cure dilution spread across breach, termination, and audit clauses) and generates package pushback recommendations." },
       { area: "Expense Report", text: "Foreign-currency handling upgraded — card-statement posted USD preferred; auto-converted market rates and voucher estimates flagged red-italic for reviewer confirmation. Multi-page receipt trimming rules added (e.g. Uber page 1 only)." },
@@ -196,25 +204,27 @@ export const AGENT_SKILLS: AgentSkill[] = [
     output: ".docx companion review",
     summary: [
       "Runs the final pre-signature review of Innovation Participation Agreements by comparing three versions of the document — the standard template, the negotiated draft, and the final execution copy — and identifying every deviation between them.",
-      "Change color-coding is produced by a mandatory automated word-level comparison script rather than manual judgment: entity-swap detection separates mechanical name substitutions from substantive edits, so unchanged language is never misclassified. The result is a professional Word companion review that classifies each deviation by severity for executive sign-off.",
+      "Change color-coding is produced by a mandatory automated word-level comparison script rather than manual judgment. PDF execution copies are segmented into logical provisions on structural markers (with page artifacts dropped and hyphenation repaired), entity swaps and renumbering are filtered so mechanical substitutions never register as change, and a mandatory false-Yellow audit reclassifies renumbering-only differences before the document is built.",
+      "The deliverable is a professional Word companion review whose Full Contract Text mirrors the executed agreement's own layout — serif typeface, justified text, hanging-indent numbering, and source underlining — with color shading as the only added element, so it reads side-by-side with the signed copy.",
     ],
     facts: [
       { label: "Primary input", value: "Template + draft + final IPA versions" },
       { label: "Deliverable", value: "Word companion review document" },
       { label: "Classification", value: "Automated word-level (Blue / Yellow / Red)" },
-      { label: "Quality gate", value: "Entity-swap detection (no false positives)" },
+      { label: "Quality gates", value: "Entity-swap + renumber filtering · false-Yellow audit" },
     ],
     flow: [
-      { kind: "step", title: "Extract all three documents", sub: "template · negotiated draft · final execution copy" },
-      { kind: "gate", title: "Automated word-level classification", sub: "bundled Python script compares every paragraph; entity swaps (name substitutions) filtered out", loopNote: "name swaps filtered, never flagged" },
-      { kind: "decision", title: "Classify each paragraph", branches: [
+      { kind: "step", title: "Extract all three documents", sub: "template · draft · final; PDFs segmented on structural markers, artifacts dropped, hyphenation repaired" },
+      { kind: "gate", title: "Automated word-level classification", sub: "bundled Python script compares every paragraph; entity swaps and renumbering stripped before diffing", loopNote: "name swaps & renumbering never flagged" },
+      { kind: "decision", title: "Classify each paragraph", sub: "RED triggers evaluated first; pointer-stubs default Blue", branches: [
         { label: "Blue — unchanged", sub: "matches template" },
         { label: "Yellow — negotiated", sub: "changed in draft" },
         { label: "Red — late change", sub: "changed after draft" },
       ] },
+      { kind: "gate", title: "False-Yellow audit", sub: "every Yellow re-checked for a real substantive diff", loopNote: "renumbering-only diffs reclassified Blue" },
       { kind: "step", title: "Classify deviation severity", sub: "business impact of every substantive change" },
-      { kind: "step", title: "Generate companion review", sub: "full contract text color-coded with findings" },
-      { kind: "deliver", title: "Pre-signature review delivered", sub: "executive sign-off ready" },
+      { kind: "step", title: "Generate companion review", sub: "contract text mirrors the execution copy: serif, justified, source underlining — shading is the only addition" },
+      { kind: "deliver", title: "Pre-signature review delivered", sub: "reads side-by-side with the signed agreement" },
     ],
   },
   {
