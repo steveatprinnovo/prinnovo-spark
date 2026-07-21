@@ -2,16 +2,16 @@
  * Intelligence · Agent — skill catalog and plugin release data.
  * Content cataloged 2026-07-18 by diffing every packaged version of the
  * healthliant-ventures-os plugin in the Agent archive. Flow definitions
- * mirror each skill's SKILL.md workflow (v0.8.1).
+ * mirror each skill's SKILL.md workflow (v0.8.2).
  */
 
 export const PLUGIN_LATEST = {
   name: "Healthliant Ventures OS",
-  version: "0.8.1",
-  file: "healthliant-ventures-os-0.8.1.plugin",
-  storagePath: "healthliant-ventures-os-0.8.1.plugin",
-  sizeLabel: "76 KB",
-  releasedLabel: "Jul 19, 2026",
+  version: "0.8.2",
+  file: "healthliant-ventures-os-0.8.2.plugin",
+  storagePath: "healthliant-ventures-os-0.8.2.plugin",
+  sizeLabel: "79 KB",
+  releasedLabel: "Jul 20, 2026",
 };
 
 export interface Release {
@@ -23,7 +23,17 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
-    version: "0.8.1", date: "Jul 19, 2026", tag: "Latest",
+    version: "0.8.2", date: "Jul 20, 2026", tag: "Latest",
+    changes: [
+      { area: "Legal Tracker", text: "New-timekeeper handling — unknown attorneys get a dedicated column inside their firm group, and their rate is solved from invoice totals and verified against every invoice they appear on (e.g. N. MCDUFF resolved to $405/hr across the June 2026 invoices) before being trusted." },
+      { area: "Legal Tracker", text: "New Trend sheet with a cumulative-spend line chart, one line per calendar year, so year-over-year pace is comparable at a glance." },
+      { area: "Legal Tracker", text: "By Company sheet hardening — rows sorted by Combined Total descending, firm-coded header colors (FR blue, TV orange, Combined Total green), a light-green emphasis band on the Combined Total column, and confirmed-zero months distinguished from missing invoices via cell comments instead of silent $0 backfill." },
+      { area: "Legal Tracker", text: "Update reliability — sheets are rebuilt cleanly rather than spliced with openpyxl inserts (which corrupt formulas and strand old fills under wrong headers); fills/borders stripped before reformatting; recalculation forced on open; lock-file-aware saving offers a dated copy when the workbook is open." },
+      { area: "Financial Pro-Forma", text: "Trigger description consolidated (no functional change)." },
+    ],
+  },
+  {
+    version: "0.8.1", date: "Jul 19, 2026",
     changes: [
       { area: "IPA Review", text: "PDF-aware paragraph segmentation — when the final IPA is a PDF, provisions are segmented on structural markers (article headings, decimal sections, sub-letters) with page-number/Bates artifacts dropped and line-break hyphenation repaired, keeping the verbatim text character-exact." },
       { area: "IPA Review", text: "Classification hardening — leading numbers and cross-references stripped so renumbering alone never registers as change; definition pointer-stubs classified Blue; RED triggers evaluated first; plus a mandatory false-Yellow audit that reclassifies renumbering-only differences before the document is built." },
@@ -232,16 +242,16 @@ export const AGENT_SKILLS: AgentSkill[] = [
     name: "Legal Tracker",
     tagline: "Law-firm invoice parsing (Fox Rothschild, Tisinger Vance) into a multi-tab expense workbook attributed by company and matter type.",
     command: "/legal-tracker",
-    output: ".xlsx workbook (4 tabs)",
+    output: ".xlsx workbook (5 tabs incl. Trend)",
     summary: [
-      "Builds or updates the Healthliant Ventures legal expense tracker from law-firm invoice PDFs. Fox Rothschild invoices and the Tisinger Vance history bill are parsed line by line, each entry attributed to a portfolio company, categorized as Contract or Regulatory work, and costed using the attorney rate tables.",
-      "The output is a multi-sheet Excel workbook — Raw Data, By Attorney, By Company, and Exceptions — where anything that cannot be confidently attributed lands on the Exceptions tab for human review instead of being silently guessed.",
+      "Builds or updates the Healthliant Ventures legal expense tracker from law-firm invoice PDFs. Fox Rothschild invoices and the Tisinger Vance history bill are parsed line by line, each entry attributed to a portfolio company, categorized as Contract or Regulatory work, and costed using the attorney rate tables. When an invoice introduces an unknown timekeeper, their rate is solved from the invoice totals and verified against every invoice they appear on before it is trusted.",
+      "The output is a multi-sheet Excel workbook — Raw Data, By Attorney, By Company, Exceptions, and a Trend sheet charting cumulative spend by year. The By Company sheet sorts by Combined Total with firm-coded headers, confirmed-zero months are distinguished from missing invoices via cell comments, updates rebuild sheets cleanly rather than splicing (protecting formulas and formatting), and anything that cannot be confidently attributed lands on the Exceptions tab for human review instead of being silently guessed.",
     ],
     facts: [
       { label: "Primary input", value: "FR invoice PDFs · TV history bill" },
-      { label: "Deliverable", value: "4-tab Excel tracker" },
+      { label: "Deliverable", value: "5-tab Excel tracker + trend chart" },
       { label: "Modes", value: "Build from scratch · update existing" },
-      { label: "Quality gate", value: "Exceptions tab (no silent guesses)" },
+      { label: "Quality gates", value: "Exceptions tab · new-timekeeper rate verification" },
     ],
     flow: [
       { kind: "decision", title: "Select operating mode", branches: [
@@ -251,10 +261,11 @@ export const AGENT_SKILLS: AgentSkill[] = [
       { kind: "step", title: "Inventory the inputs", sub: "invoices matched to months and firms" },
       { kind: "step", title: "Parse Fox Rothschild invoices", sub: "line items with attorney, hours, matter" },
       { kind: "step", title: "Parse Tisinger Vance history bill", sub: "entries costed via attorney rate tables" },
-      { kind: "step", title: "Attribute companies & categorize", sub: "portfolio company + Contract vs. Regulatory" },
+      { kind: "gate", title: "Resolve new timekeepers", sub: "unknown attorney's rate solved from invoice totals; own column added in the firm group", loopNote: "rate must reproduce every invoice total" },
+      { kind: "step", title: "Attribute companies & categorize", sub: "portfolio company + Contract vs. Regulatory; zero months vs. missing invoices annotated" },
       { kind: "gate", title: "Exceptions routing", sub: "unattributable line items surfaced, never guessed", loopNote: "reviewer resolves exceptions" },
-      { kind: "step", title: "Build the four sheets", sub: "Raw Data · By Attorney · By Company · Exceptions" },
-      { kind: "deliver", title: "Legal tracker delivered", sub: "firm-by-firm, company-by-company visibility" },
+      { kind: "step", title: "Build the five sheets", sub: "Raw Data · By Attorney · By Company (sorted, firm-coded) · Exceptions · Trend" },
+      { kind: "deliver", title: "Legal tracker delivered", sub: "company-level exposure + year-over-year spend pace" },
     ],
   },
   {
