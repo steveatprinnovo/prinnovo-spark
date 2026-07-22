@@ -217,6 +217,16 @@ export default function Reporting() {
   // ── Export ──
   const chartAreaRef = useRef<HTMLDivElement>(null);
   const canExportCsv = role === "admin" || role === "vo_leader";
+
+  // Role-aware NL examples: the placeholder should showcase data the caller
+  // can actually query (technical = taskboard only; base users have no cost
+  // metrics), reinforcing that access differs by role (Steve, 2026-07-21).
+  const nlPlaceholder =
+    role === "technical"
+      ? 'e.g. "Average taskboard cycle time by assignee" or "Card count by intake quarter"'
+      : role === "user"
+        ? 'e.g. "Average days from term sheet to IPA by office" or "Deal count by stage"'
+        : 'e.g. "Average days from term sheet to IPA by office" or "Sum of legal costs by office for 2024"';
   const exportBase = mode === "metric" && selectedMetric ? selectedMetric.label : "custom-report";
 
   const exportLegend = (): LegendEntry[] => {
@@ -276,7 +286,7 @@ export default function Reporting() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary shrink-0" />
               <Input
-                placeholder='e.g. "Average days from term sheet to IPA by office" or "Sum of legal costs by office for 2024"'
+                placeholder={nlPlaceholder}
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && runNL()}
