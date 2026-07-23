@@ -340,6 +340,45 @@ export type Database = {
         }
         Relationships: []
       }
+      technical_activity_audit: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          internal_notes: string | null
+          item: string
+          portfolio_company: string | null
+          updated_at: string
+          updated_by: string | null
+          venture_office: string
+          week_of: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          internal_notes?: string | null
+          item: string
+          portfolio_company?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          venture_office: string
+          week_of: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          internal_notes?: string | null
+          item?: string
+          portfolio_company?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          venture_office?: string
+          week_of?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

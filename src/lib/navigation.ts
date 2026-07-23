@@ -4,6 +4,8 @@ import { AppRole } from "@/hooks/useUserAuth";
 export interface NavChild {
   path: string;
   label: string;
+  /** When set, the child is visible only to these roles (parent roles apply otherwise). */
+  roles?: AppRole[];
 }
 
 export interface NavItem {
@@ -30,10 +32,12 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/dealflow", icon: Layers, label: "Dealflow CRM", roles: ["admin", "user", "vo_leader"] },
   { path: "/implementations", icon: ClipboardList, label: "Implementations", roles: ["admin", "user", "vo_leader", "technical"] },
   {
-    path: "/taskboard", icon: Kanban, label: "IT Taskboard", roles: ["admin", "user", "vo_leader", "technical"],
+    path: "/taskboard", icon: Kanban, label: "Technical Services", roles: ["admin", "user", "vo_leader", "technical"],
     children: [
       { path: "/taskboard", label: "Board" },
       { path: "/taskboard/archive", label: "Archive" },
+      // Value-story audit for health systems: no base-user access (2026-07-21)
+      { path: "/taskboard/audit", label: "Activity Audit", roles: ["admin", "technical", "vo_leader"] },
     ],
   },
   { path: "/costs", icon: Calculator, label: "Cost Projections", roles: ["admin", "vo_leader"] },

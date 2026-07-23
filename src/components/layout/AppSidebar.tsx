@@ -116,7 +116,7 @@ export function AppSidebar() {
                   </Link>
                   {showChildren && (
                     <div className="my-0.5 ml-[18px] flex flex-col border-l-[1.5px] border-[#e2e3ec]">
-                      {item.children!.map(ch => {
+                      {item.children!.filter(ch => !ch.roles || PREVIEW || (role !== null && ch.roles.includes(role))).map(ch => {
                         const childActive = location.pathname === ch.path;
                         return (
                           <Link

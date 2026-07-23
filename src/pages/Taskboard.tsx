@@ -286,7 +286,7 @@ export default function Taskboard() {
     <PageContainer>
       <div className="space-y-6">
         <PageHeader
-          title="IT Taskboard"
+          title="Technical Services"
           subtitle={`${open.length} open card${open.length === 1 ? "" : "s"}${canEdit ? "" : " · view only"}`}
           office={{ show: showOfficeFilter, value: officeFilter, onChange: setOfficeFilter }}
           actions={
