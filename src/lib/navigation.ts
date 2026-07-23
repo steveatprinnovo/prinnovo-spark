@@ -34,8 +34,8 @@ export const NAV_ITEMS: NavItem[] = [
   {
     path: "/taskboard", icon: Kanban, label: "Technical Services", roles: ["admin", "user", "vo_leader", "technical"],
     children: [
-      { path: "/taskboard", label: "Board" },
-      { path: "/taskboard/archive", label: "Archive" },
+      { path: "/taskboard", label: "Kanban Board" },
+      { path: "/taskboard/archive", label: "Task Archive" },
       // Value-story audit for health systems: no base-user access (2026-07-21)
       { path: "/taskboard/audit", label: "Activity Audit", roles: ["admin", "technical", "vo_leader"] },
     ],

@@ -239,7 +239,7 @@ export default function Taskboard() {
           <Link to="/taskboard" className="inline-flex items-center gap-2 text-sm text-[#5c6178] hover:text-[#171d70] transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to board
           </Link>
-          <h1 className="m-0 text-[32px] font-bold leading-[1.1] text-[#171d70]">Archive</h1>
+          <h1 className="m-0 text-[32px] font-bold leading-[1.1] text-[#171d70]">Task Archive</h1>
           <Card>
             <CardContent className="pt-6">
               <Table>
